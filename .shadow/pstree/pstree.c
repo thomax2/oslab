@@ -63,6 +63,7 @@ void print_sonTree(psTNode parentNode, psTNode levelTree)
 			print_sonTree(sonNode,levelTree);
 			printf("\n");
 		}
+		sonNode = sonNode->level_node;
 	}
 	return;
 }
