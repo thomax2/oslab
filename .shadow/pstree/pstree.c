@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 			assert(0);
 		}
 
-		int get_num = sscanf(fp, "%d (%49[^)]) %d", &proc_pid, proc_name, &proc_parent);
+		int get_num = fscanf(fp, "%d (%49[^)]) %d", &proc_pid, proc_name, &proc_parent);
 
 		if(get_num == 3)
 		{
