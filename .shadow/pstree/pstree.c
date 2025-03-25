@@ -52,7 +52,7 @@ int find_level(int parent_pid, psTNode levelTree)
 
 void print_sonTree(psTNode parentNode, psTNode levelTree)
 {
-	printf("%s\t",parentNode->name);
+	printf("%s    ",parentNode->name);
 	int pPid = parentNode->pid;
 	int level = parentNode->level + 1;
 	psTNode sonNode = levelTree[level].level_node;
