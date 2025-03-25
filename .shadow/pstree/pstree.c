@@ -47,7 +47,7 @@ int find_level(int parent_pid, psTNode levelTree)
 		}
 	}
 	assert(0);
-	return NULL;
+	return 0;
 }
 
 void print_sonTree(psTNode parentNode, psTNode levelTree)
