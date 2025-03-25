@@ -49,6 +49,7 @@ int main(int argc, char *argv[])
 
 		int proc_pid;
 		char proc_name[50];
+		char tmp_char;
 		int proc_parent;
 
 		strcpy(pidStatFile, basedir);
@@ -62,7 +63,7 @@ int main(int argc, char *argv[])
 			assert(0);
 		}
 
-		int get_num = fscanf(fp, "%d (%49[^)]) %c %d", &proc_pid, proc_name, NULL, &proc_parent);
+		int get_num = fscanf(fp, "%d (%49[^)]) %c %d", &proc_pid, proc_name, &tmp_char, &proc_parent);
 
 		// if(get_num == 3)
 		// {
