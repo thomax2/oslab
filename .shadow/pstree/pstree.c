@@ -58,7 +58,7 @@ void print_sonTree(psTNode parentNode, psTNode levelTree)
 	psTNode sonNode = levelTree[level].level_node;
 	while (sonNode != NULL)
 	{
-		if(sonNode->parent_pid = pPid)
+		if(sonNode->parent_pid == pPid)
 		{
 			print_sonTree(sonNode,levelTree);
 			printf("\n");
