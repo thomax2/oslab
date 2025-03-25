@@ -55,8 +55,15 @@ void print_sonTree(psTNode parentNode, psTNode levelTree, int foreSpace)
 	for (int i = 0; i < foreSpace; i++)
 		printf(" ");
 	
-	printf("%s    ",parentNode->name);
-	foreSpace = foreSpace + strlen(parentNode->name) + 4;
+	printf("%s(%d)    ",parentNode->name,parentNode->pid);
+	int pidLen=0;
+	for ( int i = 1; i <= parentNode->pid; i *= 10)
+	{
+		pidLen++;
+	}
+	pidLen = pidLen + 2;
+
+	foreSpace = foreSpace + strlen(parentNode->name) + 4 + pidLen;
 	bool first = true;
 	int pPid = parentNode->pid;
 	int level = parentNode->level + 1;
