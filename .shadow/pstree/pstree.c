@@ -50,9 +50,14 @@ int find_level(int parent_pid, psTNode levelTree)
 	return 0;
 }
 
-void print_sonTree(psTNode parentNode, psTNode levelTree)
+void print_sonTree(psTNode parentNode, psTNode levelTree, int foreSpace)
 {
+	for (int i = 0; i < foreSpace; i++)
+		printf(" ");
+	
 	printf("%s    ",parentNode->name);
+	foreSpace = strlen(parentNode->name) + 4;
+
 	int pPid = parentNode->pid;
 	int level = parentNode->level + 1;
 	psTNode sonNode = levelTree[level].level_node;
@@ -60,7 +65,7 @@ void print_sonTree(psTNode parentNode, psTNode levelTree)
 	{
 		if(sonNode->parent_pid == pPid)
 		{
-			print_sonTree(sonNode,levelTree);
+			print_sonTree(sonNode,levelTree,foreSpace);
 			printf("\n");
 		}
 		sonNode = sonNode->level_node;
@@ -169,7 +174,7 @@ int main(int argc, char *argv[])
 		// printf("%s\t%ld\n", dirinfo->d_name, telldir(dir));
 	}
 
-	print_sonTree(levelTree[0].level_node, levelTree);
+	print_sonTree(levelTree[0].level_node, levelTree, 0);
 
 	free_levelTree(levelTree);
 	closedir(dir);
