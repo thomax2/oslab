@@ -64,10 +64,10 @@ int main(int argc, char *argv[])
 
 		int get_num = fscanf(fp, "%d (%49[^)]) %d", &proc_pid, proc_name, &proc_parent);
 
-		if(get_num == 3)
-		{
+		// if(get_num == 3)
+		// {
 			printf("%d\t%s\t%d\n",proc_pid,proc_name, proc_parent);
-		}
+		// }
 
 		// seekdir(dir, offset);
 		// printf("%s\t%ld\n", dirinfo->d_name, telldir(dir));
