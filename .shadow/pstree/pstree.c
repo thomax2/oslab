@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
 		psTNode node = (psTNode)malloc(sizeof(struct TNode));
 		if(get_num == 4)
 		{
-			printf("%d\t%s\t%d\n",proc_pid,proc_name, proc_parent);
+			// printf("%d\t%s\t%d\n",proc_pid,proc_name, proc_parent);
 			node->is_printf = false;
 			strcpy(node->name,proc_name);
 			node->pid = proc_pid;
