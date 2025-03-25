@@ -153,7 +153,6 @@ int main(int argc, char *argv[])
 	{
 		if (dirinfo->d_name[0] < '0' || dirinfo->d_name[0] > '9')
 			continue;
-		// long int offset = telldir(dir);
 
 		char pidStatFile[30];
 		FILE *fp;
@@ -184,7 +183,6 @@ int main(int argc, char *argv[])
 		psTNode node = (psTNode)malloc(sizeof(struct TNode));
 		if(get_num == 4)
 		{
-			// printf("%d\t%s\t%d\n",proc_pid,proc_name, proc_parent);
 			node->is_printf = false;
 			strcpy(node->name,proc_name);
 			node->pid = proc_pid;
@@ -192,9 +190,6 @@ int main(int argc, char *argv[])
 			node->level = find_level(proc_parent,levelTree);
 			node_insert(node, &levelTree[node->level]);
 		}
-
-		// seekdir(dir, offset);
-		// printf("%s\t%ld\n", dirinfo->d_name, telldir(dir));
 	}
 
 	print_sonTree(levelTree[0].level_node, levelTree, 0);
