@@ -36,8 +36,8 @@ int main(int argc, char *argv[])
 
 	while ((dirinfo = readdir(dir)) != NULL)
 	{
-		if (dirinfo->d_name[0] < '0' || dirinfo->d_name[0] > '9')
-			continue;
+		// if (dirinfo->d_name[0] < '0' || dirinfo->d_name[0] > '9')
+		// 	continue;
 		
 		printf("%s\t%ld\n",dirinfo->d_name,telldir(dir));
 	}
