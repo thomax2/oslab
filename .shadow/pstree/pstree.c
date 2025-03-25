@@ -50,8 +50,10 @@ int find_level(int parent_pid, psTNode levelTree)
 	return 0;
 }
 
-void print_sonTree(psTNode parentNode, psTNode levelTree, int foreSpace)
+int print_sonTree(psTNode parentNode, psTNode levelTree, int foreSpace)
 {
+	int ret = 1;
+	int is_end;
 	for (int i = 0; i < foreSpace; i++)
 		printf(" ");
 	
@@ -73,18 +75,20 @@ void print_sonTree(psTNode parentNode, psTNode levelTree, int foreSpace)
 	{
 		if(sonNode->parent_pid == pPid)
 		{
+			ret = 0;
 			if (first)
 			{
-				print_sonTree(sonNode,levelTree,0);
+				is_end = print_sonTree(sonNode,levelTree,0);
 				first = false;
 			}
 			else
-				print_sonTree(sonNode,levelTree,foreSpace);
-			printf("\n");
+				is_end = print_sonTree(sonNode,levelTree,foreSpace);
+			if( is_end )
+				printf("\n");
 		}
 		sonNode = sonNode->level_node;
 	}
-	return;
+	return ret;
 }
 
 void free_levelTree(psTNode levelTree)
