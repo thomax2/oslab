@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 	// }
 	// assert(!argv[argc]);
 	DIR *dir;
-	dir = opendir('/proc');
+	dir = opendir("/proc");
 	if (dir == NULL)
 	{
 		assert(0);
