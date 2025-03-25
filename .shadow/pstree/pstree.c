@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 #define NAMELEN 32
-#define MAXLEVEL 6
+#define MAXLEVEL 10
 
 typedef struct TNode *psTNode;
 struct TNode
