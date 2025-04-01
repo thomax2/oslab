@@ -66,14 +66,14 @@ static char *__ptoa(void *p, char *buff)
 {
     static const char sym[] = "0123456789abcdef";
 
-    word_t num = (word_t)p;
+    uintptr_t num = (uintptr_t)p;
 
     buff[0] = '0';
     buff++;
     buff[0] = 'x';
     buff++;
-    word_t i = 1;
-    while ((word_t)(num / (i * 16)) != 0)
+    uintptr_t i = 1;
+    while ((uintptr_t)(num / (i * 16)) != 0)
         i *= 16;
 
     int j = 0;
