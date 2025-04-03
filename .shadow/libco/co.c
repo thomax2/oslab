@@ -330,8 +330,8 @@ void co_yield() {
             // "jmp *%2;"
             "0:\n\t"
             : "=m"(oldCurrentCo->context.rsp)
-            : "b"(currentCo->stackBase)
-            //   "d"((void *)coroutine_wrapper)
+            : "b"(currentCo->stackBase),
+              "d"((void *)coroutine_wrapper)
             : "memory"
             #else
             "mov $0, %%eax;"
