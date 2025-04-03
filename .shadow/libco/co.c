@@ -135,7 +135,7 @@ void co_yield() {
     coNode *newCurrentCo = &coMain ;
     for (size_t i = 0; i < chooseNum; i++)
         newCurrentCo = newCurrentCo->next;
-    oldCurrentCo = &currentCo;
+    oldCurrentCo = currentCo;
     currentCo = newCurrentCo;
     
     if (currentCo->status == CO_RUNNING)
@@ -231,7 +231,7 @@ void co_yield() {
               "=m"(oldCurrentCo->context.r10), "=m"(oldCurrentCo->context.r11),
               "=m"(oldCurrentCo->context.r12), "=m"(oldCurrentCo->context.r13),
               "=m"(oldCurrentCo->context.r14), "=m"(oldCurrentCo->context.r15)
-            : "b"((uintptr_t)currentCo->stack+255)
+            : "b"((uintptr_t)currentCo->stack+255),
               "d"(coroutine_wrapper)
             : "memory"
         );
