@@ -61,7 +61,7 @@ typedef struct co {
     reg context;
     enum co_status status;
     uint8_t stack[DEFUALT_STACK_SIZE];
-    void *stackBase;
+    uintptr_t stackBase;
     unsigned int pid;
     struct co *next;
 }coNode;
