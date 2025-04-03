@@ -69,6 +69,7 @@ coNode coMain = {
     .name = "main",
     .pid = 0,
     .next = NULL,
+    .status = CO_RUNNING
 };
 
 coNode *currentCo = &coMain;
