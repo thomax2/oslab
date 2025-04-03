@@ -98,10 +98,10 @@ void remove_co(coNode *co)
 }
 
 void coroutine_wrapper() {
-    printf("wrap\n");
     currentCo->status = CO_RUNNING;
     currentCo->func(currentCo->arg);
     currentCo->status = CO_DEAD;
+    return;
 }
 
 struct co *co_start(const char *name, void (*func)(void *), void *arg) {
@@ -311,6 +311,10 @@ void co_yield() {
             :
             #endif
         );
+        printf("oldCurrentCo = %p\n", oldCurrentCo);
+        printf("currentCo->stackBase = %p\n", currentCo->stackBase);
+        printf("coroutine_wrapper = %p\n", coroutine_wrapper);
+
         asm volatile(
             #if __x86_64__
             "mov $0, %%rax;"
