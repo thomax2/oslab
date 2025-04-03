@@ -310,8 +310,8 @@ void co_yield() {
             :
             #endif
         );
-        printf("%p\n",currentCo->stackBase);
-        printf("%p\n",currentCo->stack);
+        printf("%p\n",(void*)currentCo->stackBase);
+        printf("%p\n",(void *)currentCo->stack);
         asm volatile(
             #if __x86_64__
             "mov $0, %%rax;"
