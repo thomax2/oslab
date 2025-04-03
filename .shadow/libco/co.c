@@ -234,6 +234,7 @@ void co_yield() {
             :
             :
         );
+
         asm volatile(
             "leaq 0f(%%rip), %%rax;"
             "push %%rax;"
@@ -243,7 +244,7 @@ void co_yield() {
             "jmp *%2"
             "0:\n\t"
             : "=m"(oldCurrentCo->context.rsp)
-            : "b"((uintptr_t)currentCo->stack+255),
+            : "b"((uintptr_t)currentCo->stack),
               "d"(coroutine_wrapper)
             : "memory"
         );
