@@ -325,7 +325,7 @@ void co_yield() {
             "cmp $0, %%rax;"
             "jne 0f;"
             "push %%rdi;"
-            "mov %%rsp, %0;"
+            // "mov %%rsp, %0;"
 
             "movq %1, %%rsp;"
             "jmp *%2;"
