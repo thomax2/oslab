@@ -143,6 +143,7 @@ void co_yield() {
     if (currentCo->status == CO_RUNNING)
     {
         asm volatile(
+#if __x86_64__
             "mov %%rax, %0;"
             "mov %%rbx, %1;"
             "mov %%rcx, %2;"
@@ -168,8 +169,12 @@ void co_yield() {
               "=m"(oldCurrentCo->context.r14), "=m"(oldCurrentCo->context.r15)
             :
             :
+            #else
+
+            #endif
         );
         asm volatile(
+            #if __x86_64__
             "leaq 0f(%%rip), %%rax;"
             "push %%rax;"
             "mov %%rsp, %0;"
@@ -203,11 +208,15 @@ void co_yield() {
               "m"(currentCo->context.r12), "m"(currentCo->context.r13),
               "m"(currentCo->context.r14), "m"(currentCo->context.r15)
             : "memory"
+            #else
+
+            #endif
         );
     }
     else if (currentCo->status == CO_NEW)
     {
         asm volatile(
+            #if __x86_64__
             "mov %%rax, %0;"
             "mov %%rbx, %1;"
             "mov %%rcx, %2;"
@@ -233,9 +242,13 @@ void co_yield() {
               "=m"(oldCurrentCo->context.r14), "=m"(oldCurrentCo->context.r15)
             :
             :
+            #else
+
+            #endif
         );
 
         asm volatile(
+            #if __x86_64__
             "leaq 0f(%%rip), %%rax;"
             "push %%rax;"
             "mov %%rsp, %0;"
@@ -247,6 +260,9 @@ void co_yield() {
             : "b"((uintptr_t)currentCo->stack),
               "d"(coroutine_wrapper)
             : "memory"
+            #else
+
+            #endif
         );
     }
 
