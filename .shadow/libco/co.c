@@ -61,7 +61,7 @@ typedef struct co {
     reg context;
     enum co_status status;
     uint8_t stack[DEFUALT_STACK_SIZE];
-    uintptr_t stackBase;
+    void *stackBase;
     unsigned int pid;
     struct co *next;
 }coNode;
@@ -111,7 +111,7 @@ struct co *co_start(const char *name, void (*func)(void *), void *arg) {
     coNew->arg = arg;
     coNew->next = NULL;
     coNew->status = CO_NEW;
-    coNew->stackBase = ((uintptr_t)coNew->stack + DEFUALT_STACK_SIZE - 1) & (~(0xF));
+    coNew->stackBase = (void *)(((uintptr_t)coNew->stack + DEFUALT_STACK_SIZE - 1) & (~(0xF)));
     // coNew->stackBase = coNew->stack + DEFUALT_STACK_SIZE -8;
     insert_co(coNew);
     return coNew;
