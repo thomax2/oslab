@@ -150,7 +150,7 @@ void co_yield() {
     for (size_t i = 0; i < chooseNum; i++)
         newCurrentCo = newCurrentCo->next;
     oldCurrentCo = currentCo;
-    currentCo = newCurrentCo;
+    currentCo = &coMain;
     
     if (currentCo->status != CO_NEW)
     {
