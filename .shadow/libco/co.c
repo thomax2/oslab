@@ -98,6 +98,7 @@ void remove_co(coNode *co)
 }
 
 void coroutine_wrapper() {
+    printf("wrap\n");
     currentCo->status = CO_RUNNING;
     currentCo->func(currentCo->arg);
     currentCo->status = CO_DEAD;
@@ -310,8 +311,6 @@ void co_yield() {
             :
             #endif
         );
-        printf("%p\n",(void*)currentCo->stackBase);
-        printf("%p\n",(void *)currentCo->stack);
         asm volatile(
             #if __x86_64__
             "mov $0, %%rax;"
