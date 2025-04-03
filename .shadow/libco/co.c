@@ -198,11 +198,14 @@ void co_yield() {
         );
         asm volatile(
             #if __x86_64__
-            "leaq 0f(%%rip), %%rax;"
-            "push %%rax;"
+            "mov $0, %%rax;"
+            "leaq (%%rip), %%rdi;"
+            "cmp $0, %%rax;"
+            "jne  0f;"
+            "push %%rdi;"
             "mov %%rsp, %0;"
 
-            "mov %1, %%rax;"
+            "mov $1, %%rax;"
             "mov %2, %%rbx;"
             "mov %3, %%rcx;"
             "mov %4, %%rdx;"
@@ -218,8 +221,8 @@ void co_yield() {
             "mov %15, %%r14;"
             "mov %16, %%r15;"
             "mov %8, %%rsp;"
-            "pop %%rax;"
-            "jmp *%%rax;"
+            "pop %%rdi;"
+            "jmp *%%rdi;"
             "0:\n\t"
             : "=m"(oldCurrentCo->context.rsp)
             : "m"(currentCo->context.rax), "m"(currentCo->context.rbx),
@@ -232,11 +235,13 @@ void co_yield() {
               "m"(currentCo->context.r14), "m"(currentCo->context.r15)
             : "memory"
             #else
-            "leaq 0f(%%eip), %%eax;"
-            "push %%eax;"
+            "mov $0, %%eax;"
+            "call 1f;"
+            "1: cmp $0, %%eax;"
+            "jne 0f;"
             "mov %%esp, %0;"
 
-            "mov %1, %%eax;"
+            "mov $1, %%eax;"
             "mov %2, %%ebx;"
             "mov %3, %%ecx;"
             "mov %4, %%edx;"
@@ -244,8 +249,8 @@ void co_yield() {
             "mov %6, %%edi;"
             "mov %7, %%ebp;"
             "mov %8, %%esp;"
-            "pop %%eax;"
-            "jmp *%%eax;"
+            "pop %%edi;"
+            "jmp *%%edi;"
             "0:\n\t"
             : "=m"(oldCurrentCo->context.esp)
             : "m"(currentCo->context.eax), "m"(currentCo->context.ebx),
@@ -304,8 +309,11 @@ void co_yield() {
 
         asm volatile(
             #if __x86_64__
-            "leaq 0f(%%rip), %%rax;"
-            "push %%rax;"
+            "mov $0, %%rax;"
+            "leaq (%%rip), %%rdi;"
+            "cmp $0, %%rax;"
+            "jne 0f;"
+            "push %%rdi;"
             "mov %%rsp, %0;"
 
             "mov %1, %%rsp;"
@@ -316,8 +324,10 @@ void co_yield() {
               "d"(coroutine_wrapper)
             : "memory"
             #else
-            "leaq 0f(%%eip), %%eax;"
-            "push %%eax;"
+            "mov $0, %%eax;"
+            "call 1f;"
+            "1: cmp $0, %%eax;"
+            "jne 0f;"
             "mov %%esp, %0;"
 
             "mov %1, %%esp;"
