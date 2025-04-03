@@ -158,29 +158,6 @@ void co_yield() {
             "mov %%r13, %13;"
             "mov %%r14, %14;"
             "mov %%r15, %15;"
-            "leaq 0f(%%rip), %%rax;"
-            "push %%rax;"
-            "mov %%rsp, %7;"
-
-            "mov %16, %%rax;"
-            "mov %17, %%rbx;"
-            "mov %18, %%rcx;"
-            "mov %19, %%rdx;"
-            "mov %20, %%rsi;"
-            "mov %21, %%rdi;"
-            "mov %22, %%rbp;"
-            "mov %24, %%r8;"
-            "mov %25, %%r9;"
-            "mov %26, %%r10;"
-            "mov %27, %%r11;"
-            "mov %28, %%r12;"
-            "mov %29, %%r13;"
-            "mov %30, %%r14;"
-            "mov %31, %%r15;"
-            "mov %23, %%rsp;"
-            "pop %%rax;"
-            "jmp *%%rax;"
-            "0:\n\t"
             : "=m"(oldCurrentCo->context.rax), "=m"(oldCurrentCo->context.rbx),
               "=m"(oldCurrentCo->context.rcx), "=m"(oldCurrentCo->context.rdx),
               "=m"(oldCurrentCo->context.rsi), "=m"(oldCurrentCo->context.rdi),
@@ -189,6 +166,34 @@ void co_yield() {
               "=m"(oldCurrentCo->context.r10), "=m"(oldCurrentCo->context.r11),
               "=m"(oldCurrentCo->context.r12), "=m"(oldCurrentCo->context.r13),
               "=m"(oldCurrentCo->context.r14), "=m"(oldCurrentCo->context.r15)
+            :
+            :
+        );
+        asm volatile(
+            "leaq 0f(%%rip), %%rax;"
+            "push %%rax;"
+            "mov %%rsp, %0;"
+
+            "mov %1, %%rax;"
+            "mov %2, %%rbx;"
+            "mov %3, %%rcx;"
+            "mov %4, %%rdx;"
+            "mov %5, %%rsi;"
+            "mov %6, %%rdi;"
+            "mov %7, %%rbp;"
+            "mov %9, %%r8;"
+            "mov %10, %%r9;"
+            "mov %11, %%r10;"
+            "mov %12, %%r11;"
+            "mov %13, %%r12;"
+            "mov %14, %%r13;"
+            "mov %15, %%r14;"
+            "mov %16, %%r15;"
+            "mov %8, %%rsp;"
+            "pop %%rax;"
+            "jmp *%%rax;"
+            "0:\n\t"
+            : "=m"(oldCurrentCo->context.rsp)
             : "m"(currentCo->context.rax), "m"(currentCo->context.rbx),
               "m"(currentCo->context.rcx), "m"(currentCo->context.rdx),
               "m"(currentCo->context.rsi), "m"(currentCo->context.rdi),
@@ -218,13 +223,6 @@ void co_yield() {
             "mov %%r13, %13;"
             "mov %%r14, %14;"
             "mov %%r15, %15;"
-            "leaq 0f(%%rip), %%rax;"
-            "push %%rax;"
-            "mov %%rsp, %7;"
-
-            "mov %16, %%rsp"
-            "jmp *%17"
-            "0:\n\t"
             : "=m"(oldCurrentCo->context.rax), "=m"(oldCurrentCo->context.rbx),
               "=m"(oldCurrentCo->context.rcx), "=m"(oldCurrentCo->context.rdx),
               "=m"(oldCurrentCo->context.rsi), "=m"(oldCurrentCo->context.rdi),
@@ -233,6 +231,18 @@ void co_yield() {
               "=m"(oldCurrentCo->context.r10), "=m"(oldCurrentCo->context.r11),
               "=m"(oldCurrentCo->context.r12), "=m"(oldCurrentCo->context.r13),
               "=m"(oldCurrentCo->context.r14), "=m"(oldCurrentCo->context.r15)
+            :
+            :
+        );
+        asm volatile(
+            "leaq 0f(%%rip), %%rax;"
+            "push %%rax;"
+            "mov %%rsp, %0;"
+
+            "mov %1, %%rsp"
+            "jmp *%2"
+            "0:\n\t"
+            : "=m"(oldCurrentCo->context.rsp)
             : "b"((uintptr_t)currentCo->stack+255),
               "d"(coroutine_wrapper)
             : "memory"
