@@ -324,13 +324,13 @@ void co_yield() {
             "cmp $0, %%rax;"
             "jne 0f;"
             "push %%rdi;"
-            "mov %%rsp, %0;"
+            // "mov %%rsp, %0;"
 
             // "movq %1, %%rsp;"
-            "jmp *%1;"
+            "jmp *%2;"
             "0:\n\t"
             : "=m"(oldCurrentCo->context.rsp)
-            : 
+            : "b" (currentCo->stackBase),
               "d"((void *)coroutine_wrapper)
             : "memory"
             #else
