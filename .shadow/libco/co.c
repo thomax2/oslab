@@ -97,7 +97,7 @@ void remove_co(coNode *co)
     preCoNode->next = co->next;
 }
 
-void coroutine_wrapper() {
+void coroutine_wrapper(void) {
     printf("wrap\n");
     currentCo->status = CO_RUNNING;
     currentCo->func(currentCo->arg);
