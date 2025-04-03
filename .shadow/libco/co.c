@@ -111,7 +111,7 @@ struct co *co_start(const char *name, void (*func)(void *), void *arg) {
     coNew->arg = arg;
     coNew->next = NULL;
     coNew->status = CO_NEW;
-    coNew->stackBase = ((uintptr_t)coNew->stack + DEFUALT_STACK_SIZE - 1) & (~(0x7));
+    coNew->stackBase = ((uintptr_t)coNew->stack + DEFUALT_STACK_SIZE - 1) & (~(0x15));
     insert_co(coNew);
     return coNew;
 }
