@@ -311,9 +311,9 @@ void co_yield() {
             :
             #endif
         );
-        printf("oldCurrentCo = %p\n", oldCurrentCo);
-        printf("currentCo->stackBase = %p\n", currentCo->stackBase);
-        printf("coroutine_wrapper = %p\n", coroutine_wrapper);
+        printf("oldCurrentCo = %p\n", (void *)oldCurrentCo);
+        printf("currentCo->stackBase = %p\n", (void *)currentCo->stackBase);
+        printf("coroutine_wrapper = %p\n", (void *)coroutine_wrapper);
 
         asm volatile(
             #if __x86_64__
