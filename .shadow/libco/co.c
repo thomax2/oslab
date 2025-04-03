@@ -235,19 +235,19 @@ void co_yield() {
             :
         );
 
-        // asm volatile(
-        //     "leaq 0f(%%rip), %%rax;"
-        //     "push %%rax;"
-        //     "mov %%rsp, %0;"
+        asm volatile(
+            "leaq 0f(%%rip), %%rax;"
+            "push %%rax;"
+            "mov %%rsp, %0;"
 
-        //     "mov %1, %%rsp"
-        //     "jmp *%2"
-        //     "0:\n\t"
-        //     : "=m"(oldCurrentCo->context.rsp)
-        //     : "b"((uintptr_t)currentCo->stack),
-        //       "d"(coroutine_wrapper)
-        //     : "memory"
-        // );
+            "mov %1, %%rsp"
+            "jmp *%2"
+            "0:\n\t"
+            : "=m"(oldCurrentCo->context.rsp)
+            : "b"((uintptr_t)currentCo->stack),
+              "d"(coroutine_wrapper)
+            : "memory"
+        );
     }
 
     
