@@ -14,7 +14,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#define DEFUALT_STACK_SIZE 1024*32
+#define DEFUALT_STACK_SIZE 1024*8
 
 enum co_status {
     CO_NEW = 1, // 新创建，还未执行过
@@ -310,7 +310,8 @@ void co_yield() {
             :
             #endif
         );
-        printf("%s\n",currentCo->name);
+        printf("%p\n",currentCo->stackBase);
+        printf("%p\n",currentCo->stack);
         asm volatile(
             #if __x86_64__
             "mov $0, %%rax;"
