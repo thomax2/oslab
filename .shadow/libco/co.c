@@ -24,6 +24,7 @@ enum co_status {
 };
 
 typedef struct reg{
+#if __x86_64__
     uint64_t rax;
     uint64_t rbx;
     uint64_t rcx;
@@ -40,6 +41,24 @@ typedef struct reg{
     uint64_t r13;
     uint64_t r14;
     uint64_t r15;
+#else
+    uint64_t eax;
+    uint64_t ebx;
+    uint64_t ecx;
+    uint64_t edx;
+    uint64_t esi;
+    uint64_t edi;
+    uint64_t ebp;
+    uint64_t esp;
+    uint64_t r8d;
+    uint64_t r9d;
+    uint64_t r10d;
+    uint64_t r11d;
+    uint64_t r12d;
+    uint64_t r13d;
+    uint64_t r14d;
+    uint64_t r15d;
+#endif
 }reg;
 
 typedef struct co {
@@ -143,7 +162,7 @@ void co_yield() {
     if (currentCo->status == CO_RUNNING)
     {
         asm volatile(
-#if __x86_64__
+            #if __x86_64__
             "mov %%rax, %0;"
             "mov %%rbx, %1;"
             "mov %%rcx, %2;"
@@ -170,7 +189,31 @@ void co_yield() {
             :
             :
             #else
-
+            "mov %%eax, %0;"
+            "mov %%ebx, %1;"
+            "mov %%ecx, %2;"
+            "mov %%edx, %3;"
+            "mov %%esi, %4;"
+            "mov %%edi, %5;"
+            "mov %%ebp, %6;"
+            "mov %%r8d, %8;"
+            "mov %%r9d, %9;"
+            "mov %%r10d, %10;"
+            "mov %%r11d, %11;"
+            "mov %%r12d, %12;"
+            "mov %%r13d, %13;"
+            "mov %%r14d, %14;"
+            "mov %%r15d, %15;"
+            : "=m"(oldCurrentCo->context.eax), "=m"(oldCurrentCo->context.ebx),
+              "=m"(oldCurrentCo->context.ecx), "=m"(oldCurrentCo->context.edx),
+              "=m"(oldCurrentCo->context.esi), "=m"(oldCurrentCo->context.edi),
+              "=m"(oldCurrentCo->context.ebp), "=m"(oldCurrentCo->context.esp),
+              "=m"(oldCurrentCo->context.r8d), "=m"(oldCurrentCo->context.r9d),
+              "=m"(oldCurrentCo->context.r10d), "=m"(oldCurrentCo->context.r11d),
+              "=m"(oldCurrentCo->context.r12d), "=m"(oldCurrentCo->context.r13d),
+              "=m"(oldCurrentCo->context.r14d), "=m"(oldCurrentCo->context.r15d)
+            :
+            :
             #endif
         );
         asm volatile(
@@ -209,7 +252,39 @@ void co_yield() {
               "m"(currentCo->context.r14), "m"(currentCo->context.r15)
             : "memory"
             #else
+            "leaq 0f(%%eip), %%eax;"
+            "push %%eax;"
+            "mov %%esp, %0;"
 
+            "mov %1, %%eax;"
+            "mov %2, %%ebx;"
+            "mov %3, %%ecx;"
+            "mov %4, %%edx;"
+            "mov %5, %%esi;"
+            "mov %6, %%edi;"
+            "mov %7, %%ebp;"
+            "mov %9, %%r8d;"
+            "mov %10, %%r9d;"
+            "mov %11, %%r10d;"
+            "mov %12, %%r11d;"
+            "mov %13, %%r12d;"
+            "mov %14, %%r13d;"
+            "mov %15, %%r14d;"
+            "mov %16, %%r15d;"
+            "mov %8, %%esp;"
+            "pop %%eax;"
+            "jmp *%%eax;"
+            "0:\n\t"
+            : "=m"(oldCurrentCo->context.esp)
+            : "m"(currentCo->context.eax), "m"(currentCo->context.ebx),
+              "m"(currentCo->context.ecx), "m"(currentCo->context.edx),
+              "m"(currentCo->context.esi), "m"(currentCo->context.edi),
+              "m"(currentCo->context.ebp), "m"(currentCo->context.esp),
+              "m"(currentCo->context.r8d), "m"(currentCo->context.r9d),
+              "m"(currentCo->context.r10d), "m"(currentCo->context.r11d),
+              "m"(currentCo->context.r12d), "m"(currentCo->context.r13d),
+              "m"(currentCo->context.r14d), "m"(currentCo->context.r15d)
+            : "memory"
             #endif
         );
     }
@@ -243,7 +318,31 @@ void co_yield() {
             :
             :
             #else
-
+            "mov %%eax, %0;"
+            "mov %%ebx, %1;"
+            "mov %%ecx, %2;"
+            "mov %%edx, %3;"
+            "mov %%esi, %4;"
+            "mov %%edi, %5;"
+            "mov %%ebp, %6;"
+            "mov %%r8d, %8;"
+            "mov %%r9d, %9;"
+            "mov %%r10d, %10;"
+            "mov %%r11d, %11;"
+            "mov %%r12d, %12;"
+            "mov %%r13d, %13;"
+            "mov %%r14d, %14;"
+            "mov %%r15d, %15;"
+            : "=m"(oldCurrentCo->context.eax), "=m"(oldCurrentCo->context.ebx),
+              "=m"(oldCurrentCo->context.ecx), "=m"(oldCurrentCo->context.edx),
+              "=m"(oldCurrentCo->context.esi), "=m"(oldCurrentCo->context.edi),
+              "=m"(oldCurrentCo->context.ebp), "=m"(oldCurrentCo->context.esp),
+              "=m"(oldCurrentCo->context.r8d), "=m"(oldCurrentCo->context.r9d),
+              "=m"(oldCurrentCo->context.r10d), "=m"(oldCurrentCo->context.r11d),
+              "=m"(oldCurrentCo->context.r12d), "=m"(oldCurrentCo->context.r13d),
+              "=m"(oldCurrentCo->context.r14d), "=m"(oldCurrentCo->context.r15d)
+            :
+            :
             #endif
         );
 
@@ -261,7 +360,17 @@ void co_yield() {
               "d"(coroutine_wrapper)
             : "memory"
             #else
+            "leaq 0f(%%eip), %%eax;"
+            "push %%eax;"
+            "mov %%esp, %0;"
 
+            "mov %1, %%esp;"
+            "jmp *%2;"
+            "0:\n\t"
+            : "=m"(oldCurrentCo->context.esp)
+            : "b"((uintptr_t)currentCo->stack),
+              "d"(coroutine_wrapper)
+            : "memory"
             #endif
         );
     }
