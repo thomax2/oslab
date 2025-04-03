@@ -240,8 +240,8 @@ void co_yield() {
             "push %%rax;"
             "mov %%rsp, %0;"
 
-            "mov %1, %%rsp"
-            "jmp *%2"
+            "mov %1, %%rsp;"
+            "jmp *%2;"
             "0:\n\t"
             : "=m"(oldCurrentCo->context.rsp)
             : "b"((uintptr_t)currentCo->stack),
