@@ -270,6 +270,7 @@ void co_yield() {
     }
     else
     {
+        printf("oldCurrentCo = %p\n", (void *)oldCurrentCo);
         asm volatile(
             #if __x86_64__
             "mov %%rax, %0;"
@@ -279,7 +280,6 @@ void co_yield() {
             "mov %%rsi, %4;"
             "mov %%rdi, %5;"
             "mov %%rbp, %6;"
-            "mov %%rsp, %7;"
             "mov %%r8, %8;"
             "mov %%r9, %9;"
             "mov %%r10, %10;"
