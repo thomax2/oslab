@@ -279,6 +279,7 @@ void co_yield() {
             "mov %%rsi, %4;"
             "mov %%rdi, %5;"
             "mov %%rbp, %6;"
+            "mov %%rsp, %7;"
             "mov %%r8, %8;"
             "mov %%r9, %9;"
             "mov %%r10, %10;"
@@ -324,7 +325,7 @@ void co_yield() {
             "cmp $0, %%rax;"
             "jne 0f;"
             "push %%rdi;"
-            // "mov %%rsp, %0;"
+            "mov %%rsp, %0;"
 
             "movq %1, %%rsp;"
             "jmp *%2;"
