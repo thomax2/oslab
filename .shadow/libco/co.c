@@ -1,0 +1,243 @@
+/*
+1. malloc & free complete but free too difficult
+2. co_start
+3. main initial co 
+4. yield = save context + change context + 
+*/
+#include "co.h"
+#include <am.h>
+#include <klib.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <setjmp.h>
+
+#define DEFUALT_STACK_SIZE 256
+
+enum co_status {
+    CO_NEW = 1, // 新创建，还未执行过
+    CO_RUNNING, // 已经执行过
+    CO_WAITING, // 在 co_wait 上等待
+    CO_DEAD,    // 已经结束，但还未释放资源
+};
+
+typedef struct reg{
+    uint64_t rax;
+    uint64_t rbx;
+    uint64_t rcx;
+    uint64_t rdx;
+    uint64_t rsi;
+    uint64_t rdi;
+    uint64_t rbp;
+    uint64_t rsp;
+    uint64_t r8;
+    uint64_t r9;
+    uint64_t r10;
+    uint64_t r11;
+    uint64_t r12;
+    uint64_t r13;
+    uint64_t r14;
+    uint64_t r15;
+}reg;
+
+typedef struct co {
+    char name[20];
+    void (*func)(void*);
+    void *arg;
+    
+    reg context;
+    enum co_status status;
+    uint8_t stack[DEFUALT_STACK_SIZE];
+    unsigned int pid;
+    struct co *next;
+}coNode;
+
+coNode coMain = {
+    .name = "main",
+    .pid = 0,
+    .next = NULL,
+};
+
+coNode *currentCo = &coMain;
+
+void insert_co(coNode *coNew)
+{
+    coNode *listEnd= &coMain;
+    while (listEnd->next != NULL)
+        listEnd = listEnd->next;
+    listEnd->next = coNew;
+    coNew->pid = listEnd->pid + 1;
+    return;
+}
+
+void remove_co(coNode *co)
+{
+    coNode *preCoNode = &coMain;
+    while (preCoNode->next != NULL)
+    {
+        if (preCoNode->next == co)
+            break;
+        preCoNode = preCoNode->next;
+    }
+    preCoNode->next = co->next;
+}
+
+void coroutine_wrapper() {
+    currentCo->status = CO_RUNNING;
+    currentCo->func(currentCo->arg);
+    currentCo->status = CO_DEAD;
+}
+
+struct co *co_start(const char *name, void (*func)(void *), void *arg) {
+    coNode *coNew = (coNode *)malloc(sizeof(coNode));
+    strcpy(coNew->name,name);
+    coNew->func = func;
+    coNew->arg = arg;
+    coNew->next = NULL;
+    coNew->status = CO_NEW;
+    insert_co(coNew);
+    return coNew;
+}
+
+void co_wait(struct co *co) {
+    currentCo->status = CO_WAITING;
+    while (1)
+    {
+        if(co->status!=CO_DEAD)
+            co_yield();
+        else
+            break;
+    }
+    
+    remove_co(co);
+    free(co);
+    currentCo->status = CO_RUNNING;
+}
+
+int get_coNum(void)
+{
+    int num = 0;
+    coNode *list= &coMain;
+    while (list->next != NULL)
+    {
+        num++;
+        list = list->next;
+    }
+    return num;
+}
+coNode *oldCurrentCo;
+
+void co_yield() {
+    int flag = 0;
+    int coNum = get_coNum();
+
+    int chooseNum = 1 + rand()%(coNum); // [1,coNum]
+    coNode *newCurrentCo = &coMain ;
+    for (size_t i = 0; i < chooseNum; i++)
+        newCurrentCo = newCurrentCo->next;
+    oldCurrentCo = &currentCo;
+    currentCo = newCurrentCo;
+    
+    if (currentCo->status == CO_RUNNING)
+    {
+        asm volatile(
+            "mov %%rax, %0;"
+            "mov %%rbx, %1;"
+            "mov %%rcx, %2;"
+            "mov %%rdx, %3;"
+            "mov %%rsi, %4;"
+            "mov %%rdi, %5;"
+            "mov %%rbp, %6;"
+            "mov %%r8, %8;"
+            "mov %%r9, %9;"
+            "mov %%r10, %10;"
+            "mov %%r11, %11;"
+            "mov %%r12, %12;"
+            "mov %%r13, %13;"
+            "mov %%r14, %14;"
+            "mov %%r15, %15;"
+            "leaq 0f(%%rip), %%rax;"
+            "push %%rax;"
+            "mov %%rsp, %7;"
+
+            "mov %16, %%rax;"
+            "mov %17, %%rbx;"
+            "mov %18, %%rcx;"
+            "mov %19, %%rdx;"
+            "mov %20, %%rsi;"
+            "mov %21, %%rdi;"
+            "mov %22, %%rbp;"
+            "mov %24, %%r8;"
+            "mov %25, %%r9;"
+            "mov %26, %%r10;"
+            "mov %27, %%r11;"
+            "mov %28, %%r12;"
+            "mov %29, %%r13;"
+            "mov %30, %%r14;"
+            "mov %31, %%r15;"
+            "mov %23, %%rsp;"
+            "pop %%rax;"
+            "jmp *%%rax;"
+            "0:\n\t"
+            : "=m"(oldCurrentCo->context.rax), "=m"(oldCurrentCo->context.rbx),
+              "=m"(oldCurrentCo->context.rcx), "=m"(oldCurrentCo->context.rdx),
+              "=m"(oldCurrentCo->context.rsi), "=m"(oldCurrentCo->context.rdi),
+              "=m"(oldCurrentCo->context.rbp), "=m"(oldCurrentCo->context.rsp),
+              "=m"(oldCurrentCo->context.r8), "=m"(oldCurrentCo->context.r9),
+              "=m"(oldCurrentCo->context.r10), "=m"(oldCurrentCo->context.r11),
+              "=m"(oldCurrentCo->context.r12), "=m"(oldCurrentCo->context.r13),
+              "=m"(oldCurrentCo->context.r14), "=m"(oldCurrentCo->context.r15)
+            : "m"(currentCo->context.rax), "m"(currentCo->context.rbx),
+              "m"(currentCo->context.rcx), "m"(currentCo->context.rdx),
+              "m"(currentCo->context.rsi), "m"(currentCo->context.rdi),
+              "m"(currentCo->context.rbp), "m"(currentCo->context.rsp),
+              "m"(currentCo->context.r8), "m"(currentCo->context.r9),
+              "m"(currentCo->context.r10), "m"(currentCo->context.r11),
+              "m"(currentCo->context.r12), "m"(currentCo->context.r13),
+              "m"(currentCo->context.r14), "m"(currentCo->context.r15)
+            : "memory"
+        );
+    }
+    else if (currentCo->status == CO_NEW)
+    {
+        asm volatile(
+            "mov %%rax, %0;"
+            "mov %%rbx, %1;"
+            "mov %%rcx, %2;"
+            "mov %%rdx, %3;"
+            "mov %%rsi, %4;"
+            "mov %%rdi, %5;"
+            "mov %%rbp, %6;"
+            "mov %%r8, %8;"
+            "mov %%r9, %9;"
+            "mov %%r10, %10;"
+            "mov %%r11, %11;"
+            "mov %%r12, %12;"
+            "mov %%r13, %13;"
+            "mov %%r14, %14;"
+            "mov %%r15, %15;"
+            "leaq 0f(%%rip), %%rax;"
+            "push %%rax;"
+            "mov %%rsp, %7;"
+
+            "mov %16, %%rsp"
+            "jmp *%17"
+            "0:\n\t"
+            : "=m"(oldCurrentCo->context.rax), "=m"(oldCurrentCo->context.rbx),
+              "=m"(oldCurrentCo->context.rcx), "=m"(oldCurrentCo->context.rdx),
+              "=m"(oldCurrentCo->context.rsi), "=m"(oldCurrentCo->context.rdi),
+              "=m"(oldCurrentCo->context.rbp), "=m"(oldCurrentCo->context.rsp),
+              "=m"(oldCurrentCo->context.r8), "=m"(oldCurrentCo->context.r9),
+              "=m"(oldCurrentCo->context.r10), "=m"(oldCurrentCo->context.r11),
+              "=m"(oldCurrentCo->context.r12), "=m"(oldCurrentCo->context.r13),
+              "=m"(oldCurrentCo->context.r14), "=m"(oldCurrentCo->context.r15)
+            : "b"((uintptr_t)currentCo->stack+255)
+              "d"(coroutine_wrapper)
+            : "memory"
+        );
+    }
+
+    
+}
+
+
