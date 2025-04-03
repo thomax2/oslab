@@ -129,7 +129,7 @@ void co_wait(struct co *co) {
 
 int get_coNum(void)
 {
-    int num = 0;
+    int num = 1;
     coNode *list= &coMain;
     while (list->next != NULL)
     {
@@ -138,20 +138,21 @@ int get_coNum(void)
     }
     return num;
 }
+
 coNode *oldCurrentCo;
 
 void co_yield() {
     int flag = 0;
     int coNum = get_coNum();
 
-    int chooseNum = 1 + rand()%(coNum); // [1,coNum]
+    int chooseNum = rand()%(coNum); // [0,coNum-1]
     coNode *newCurrentCo = &coMain ;
     for (size_t i = 0; i < chooseNum; i++)
         newCurrentCo = newCurrentCo->next;
     oldCurrentCo = currentCo;
     currentCo = newCurrentCo;
     
-    if (currentCo->status == CO_RUNNING)
+    if (currentCo->status != CO_NEW)
     {
         asm volatile(
             #if __x86_64__
@@ -261,7 +262,7 @@ void co_yield() {
             #endif
         );
     }
-    else if (currentCo->status == CO_NEW)
+    else
     {
         asm volatile(
             #if __x86_64__
