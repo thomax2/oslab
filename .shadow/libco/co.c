@@ -99,8 +99,6 @@ void remove_co(coNode *co)
 
 void coroutine_wrapper(void) {
     currentCo->status = CO_RUNNING;
-    printf("wrap\n");
-
     currentCo->func(currentCo->arg);
     currentCo->status = CO_DEAD;
     return;
@@ -113,8 +111,8 @@ struct co *co_start(const char *name, void (*func)(void *), void *arg) {
     coNew->arg = arg;
     coNew->next = NULL;
     coNew->status = CO_NEW;
-    // coNew->stackBase = ((uintptr_t)coNew->stack + DEFUALT_STACK_SIZE - 1) & (~(0xF));
-    coNew->stackBase = coNew->stack + DEFUALT_STACK_SIZE -8;
+    coNew->stackBase = ((uintptr_t)coNew->stack + DEFUALT_STACK_SIZE - 1) & (~(0xF));
+    // coNew->stackBase = coNew->stack + DEFUALT_STACK_SIZE -8;
     insert_co(coNew);
     return coNew;
 }
@@ -271,7 +269,6 @@ void co_yield() {
     }
     else
     {
-        printf("oldCurrentCo = %p\n", (void *)oldCurrentCo);
         asm volatile(
             #if __x86_64__
             "mov %%rax, %0;"
