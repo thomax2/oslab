@@ -152,7 +152,7 @@ void co_yield() {
         newCurrentCo = newCurrentCo->next;
     oldCurrentCo = currentCo;
     currentCo = newCurrentCo;
-    printf("%d\n",currentCo->status);
+    printf("%s\n",currentCo->name);
     if (currentCo->status != CO_NEW)
     {
         asm volatile(
