@@ -5,7 +5,7 @@
 4. yield = save context + change context + 
 */
 #include "co.h"
-#include <am.h>
+// #include <am.h>
 #include <klib.h>
 #include <stdio.h>
 #include <stdlib.h>
