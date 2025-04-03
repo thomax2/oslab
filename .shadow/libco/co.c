@@ -150,13 +150,13 @@ int get_coNum(void)
 }
 
 coNode *oldCurrentCo;
-
+coNode *newCurrentCo;
 void co_yield() {
     int flag = 0;
     int coNum = get_coNum();
 
     int chooseNum = rand()%(coNum); // [0,coNum-1]
-    coNode *newCurrentCo = &coMain ;
+    newCurrentCo = &coMain ;
     for (size_t i = 0; i < chooseNum; i++)
         newCurrentCo = newCurrentCo->next;
     oldCurrentCo = currentCo;
