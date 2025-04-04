@@ -73,7 +73,7 @@ coNode coMain = {
     .status = CO_RUNNING
 };
 
-static coNode *currentCo = &coMain;
+coNode *currentCo = &coMain;
 
 void insert_co(coNode *coNew)
 {
