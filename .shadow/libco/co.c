@@ -338,8 +338,8 @@ void co_yield() {
             : 
             : "c"(oldCurrentCo->context.rsp),
               "b" (currentCo->stackBase),
-              "r"(coroutine_wrapper),
-              "a"(currentCo)
+              "a"(coroutine_wrapper),
+              "s"(currentCo)
             : "memory"
             #else
             "mov $0, %%eax;"
