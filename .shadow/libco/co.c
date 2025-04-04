@@ -105,7 +105,8 @@ void coroutine_wrapper(struct co** Co) {
     myCo->status = CO_RUNNING;
     // printf("%p\n",(void*)myCo);
     // printf("func = %p, arg = %p\n", (void *)currentCo->func, currentCo->arg);
-
+    printf("%p\n",myCo->func);
+    printf("%p\n",myCo->arg);
     myCo->func(myCo->arg);
     myCo->status = CO_DEAD;
     return;
