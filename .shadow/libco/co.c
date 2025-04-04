@@ -335,13 +335,15 @@ void co_yield() {
 
             "movq %1, %%rsp;"
             "movq %3, %%rdi;"
-            // "jmp *%2;"
+            "movq %4, %%rsi;"
+            "jmp *%2;"
             "0:\n\t"
             : 
             : "r"(oldCurrentCo->context.rsp),
               "r" (currentCo->stackBase),
               "r"(coroutine_wrapper),
-              "r"(&currentCo)
+              "r"(currentCo->func),
+              "r"(currentCo->arg)
             : "memory"
             #else
             "mov $0, %%eax;"
@@ -359,7 +361,6 @@ void co_yield() {
             : "memory"
             #endif
         );
-        printf("%p\n",currentCo->func);
     }
 
 }
