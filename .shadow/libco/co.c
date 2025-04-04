@@ -77,7 +77,7 @@ coNode coMain = {
     .next = NULL,
     .status = CO_RUNNING,
     .func = printf_test,
-    .arg = 1
+    .arg = &coMain
 };
 
 static coNode *currentCo = &coMain;
