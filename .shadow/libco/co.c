@@ -340,7 +340,7 @@ void co_yield() {
               "r" (currentCo->stackBase),
               "r"(coroutine_wrapper),
               "r"(currentCo)
-            : "rax", "rdi", "memory"
+            : "rax", "rsi", "memory"
             #else
             "mov $0, %%eax;"
             "call 1f;"
