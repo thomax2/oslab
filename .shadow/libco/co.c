@@ -14,7 +14,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#define DEFUALT_STACK_SIZE 1024*128
+#define DEFUALT_STACK_SIZE 1024*64
 
 enum co_status {
     CO_NEW = 1, // 新创建，还未执行过
