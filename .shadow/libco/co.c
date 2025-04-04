@@ -66,18 +66,11 @@ typedef struct co {
     struct co *next;
 }coNode;
 
-void printf_test(void* arg)
-{
-    printf("ggggggd\n");
-}
-
 coNode coMain = {
     .name = "main",
     .pid = 0,
     .next = NULL,
-    .status = CO_RUNNING,
-    .func = printf_test,
-    .arg = &coMain
+    .status = CO_RUNNING
 };
 
 static coNode *currentCo = &coMain;
