@@ -160,14 +160,13 @@ void co_yield() {
     int coNum = get_coNum();
 
     int chooseNum = rand()%(coNum); // [0,coNum-1]
+    printf("%d\t",chooseNum);
     coNode *newCurrentCo = &coMain ;
     for (size_t i = 0; i < chooseNum; i++)
         newCurrentCo = newCurrentCo->next;
     oldCurrentCo = currentCo;
     currentCo = newCurrentCo;
-    // printf("%s\n",currentCo->name);
-    // printf("%p\n",&coMain);
-    // printf("%p\n",currentCo);
+
     if (currentCo->status != CO_NEW)
     {
         asm volatile(
@@ -323,9 +322,6 @@ void co_yield() {
             :
             #endif
         );
-        // printf("oldCurrentCo = %p\n", (void *)oldCurrentCo);
-        // printf("currentCo->stackBase = %p\n", (void *)currentCo->stackBase);
-        // printf("coroutine_wrapper = %p\n", (void *)coroutine_wrapper);
 
         asm volatile(
             #if __x86_64__
