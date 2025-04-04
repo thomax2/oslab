@@ -333,7 +333,7 @@ void co_yield() {
             "mov %%rsp, %0;"
 
             "mov %1, %%rsp;"
-            "leaq %3, %%rdi;"
+            "mov %3, %%rdi;"
             "jmp *%2;"
             "0:\n\t"
             : 
