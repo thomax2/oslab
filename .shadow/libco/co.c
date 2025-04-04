@@ -97,16 +97,16 @@ void remove_co(coNode *co)
     preCoNode->next = co->next;
 }
 
-void coroutine_wrapper(struct co** Co) {
-    struct co* myCo = *Co;
+void coroutine_wrapper(void (*func)(void*),void *arg) {
+    // struct co* myCo = *Co;
     printf("wrap\n");
-    myCo->status = CO_RUNNING;
-    printf("%d\n",myCo->pid);
-    printf("%s\n",myCo->name);
-    printf("%p\n",myCo->func);
-    printf("%p\n",myCo->arg);
-    myCo->func(myCo->arg);
-    myCo->status = CO_DEAD;
+    currentCo->status = CO_RUNNING;
+    // printf("%d\n",myCo->pid);
+    // printf("%s\n",myCo->name);
+    // printf("%p\n",myCo->func);
+    // printf("%p\n",myCo->arg);
+    func(arg);
+    currentCo->status = CO_DEAD;
     return;
 }
 
