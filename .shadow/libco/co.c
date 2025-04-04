@@ -97,7 +97,7 @@ void remove_co(coNode *co)
     preCoNode->next = co->next;
 }
 
-void coroutine_wrapper(void) {
+void coroutine_wrapper(struct co* myCo) {
     printf("%p\n",(void*)currentCo);
     currentCo->status = CO_RUNNING;
     printf("wrap\n");
@@ -330,13 +330,15 @@ void co_yield() {
             "push %%rdi;"
             "mov %%rsp, (%%rcx);"
 
-            "movq %1, %%rsp;"
+            "mov %1, %%rsp;"
+            "mov %3, %%rdi;"
             "jmp *%2;"
             "0:\n\t"
             : 
             : "c"(&oldCurrentCo->context.rsp),
               "b" (currentCo->stackBase),
-              "d"((void *)coroutine_wrapper)
+              "s"(coroutine_wrapper),
+              "r"(currentCo)
             : "memory"
             #else
             "mov $0, %%eax;"
