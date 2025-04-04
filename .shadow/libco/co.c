@@ -97,16 +97,16 @@ void remove_co(coNode *co)
     preCoNode->next = co->next;
 }
 
-void coroutine_wrapper(void (*func)(void*),void *arg,enum co_status *status) {
+void coroutine_wrapper(void (*func)(void*),void *arg,coNode *coMy) {
     // struct co* myCo = *Co;
     printf("wrap\n");
-    *status = CO_RUNNING;
+    coMy->status = CO_RUNNING;
     // printf("%d\n",myCo->pid);
     // printf("%s\n",myCo->name);
     // printf("%p\n",myCo->func);
     // printf("%p\n",myCo->arg);
     func(arg);
-    *status = CO_DEAD;
+    coMy->status = CO_DEAD;
     return;
 }
 
@@ -345,7 +345,7 @@ void co_yield() {
               "r"(coroutine_wrapper),
               "r"(currentCo->func),
               "r"(currentCo->arg),
-              "m"(&currentCo->status)
+              "r"(currentCo)
             : "memory"
             #else
             "mov $0, %%eax;"
