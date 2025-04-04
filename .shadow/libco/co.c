@@ -100,12 +100,12 @@ void remove_co(coNode *co)
 
 void coroutine_wrapper(struct co *myCo) {
     printf("wrap\n");
-    myCo->status = CO_RUNNING;
+    currentCo->status = CO_RUNNING;
     // printf("%s\n",myCo->name);
     // printf("%p\n",myCo->func);
     // printf("%p\n",myCo->arg);
-    myCo->func(myCo->arg);
-    myCo->status = CO_DEAD;
+    currentCo->func(currentCo->arg);
+    currentCo->status = CO_DEAD;
     return;
 }
 
