@@ -54,7 +54,7 @@ typedef struct reg{
 }reg;
 
 typedef struct co {
-    char name[20];
+    const char *name;
     void (*func)(void*);
     void *arg;
     
@@ -112,10 +112,10 @@ void coroutine_wrapper(struct co** Co) {
 
 struct co *co_start(const char *name, void (*func)(void *), void *arg) {
     coNode *coNew = (coNode *)malloc(sizeof(coNode));
-    strcpy(coNew->name,name);
+    // strcpy(coNew->name,name);
+    coNew->name = name;
     coNew->func = func;
     // assert(coNew->func);
-    printf("%p\n",coNew->func);
     coNew->arg = arg;
     coNew->next = NULL;
     coNew->status = CO_NEW;
