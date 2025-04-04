@@ -99,7 +99,7 @@ void remove_co(coNode *co)
 }
 
 void coroutine_wrapper(struct co *myCo) {
-    printf("wrap\n");
+    // printf("wrap\n");
     myCo->status = CO_RUNNING;
 
     // printf("%s\n",myCo->name);
