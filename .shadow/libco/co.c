@@ -345,7 +345,7 @@ void co_yield() {
               "r"(coroutine_wrapper),
               "r"(currentCo->func),
               "r"(currentCo->arg),
-              "r"(&currentCo->status)
+              "m"(&currentCo->status)
             : "memory"
             #else
             "mov $0, %%eax;"
