@@ -97,24 +97,23 @@ void remove_co(coNode *co)
     preCoNode->next = co->next;
 }
 
-void coroutine_wrapper(void (*func)(void*),void *arg,coNode *coMy) {
-    // struct co* myCo = *Co;
+void coroutine_wrapper(struct co** Co) {
+    struct co* myCo = *Co;
     printf("wrap\n");
-    // coMy->status = CO_RUNNING;
-    // printf("%d\n",myCo->pid);
-    // printf("%s\n",myCo->name);
-    // printf("%p\n",myCo->func);
-    // printf("%p\n",myCo->arg);
-    printf("%p\n",func);
-    func(arg);
-    coMy->status = CO_DEAD;
+    myCo->status = CO_RUNNING;
+
+    printf("%s\n",myCo->name);
+    printf("%p\n",myCo->func);
+    printf("%p\n",myCo->arg);
+    myCo->func(myCo->arg);
+    myCo->status = CO_DEAD;
     return;
 }
 
 struct co *co_start(const char *name, void (*func)(void *), void *arg) {
     coNode *coNew = (coNode *)malloc(sizeof(coNode));
     // strcpy(coNew->name,name);
-    coNew->name = name;
+    coNew->name =
     coNew->func = func;
     // assert(coNew->func);
     coNew->arg = arg;
@@ -334,19 +333,15 @@ void co_yield() {
             "push %%rdi;"
             "mov %%rsp, %0;"
 
-            "movq %1, %%rsp;"
-            "movq %3, %%rdi;"
-            "movq %4, %%rsi;"
-            // "movq %5, %%rdx;"
+            "mov %1, %%rsp;"
+            "mov %3, %%rdi;"
             "jmp *%2;"
             "0:\n\t"
             : 
             : "r"(oldCurrentCo->context.rsp),
               "r" (currentCo->stackBase),
               "r"(coroutine_wrapper),
-              "r"(currentCo->func),
-              "r"(currentCo->arg)
-            //   "r"(currentCo)
+              "r"(&currentCo)
             : "memory"
             #else
             "mov $0, %%eax;"
