@@ -120,7 +120,7 @@ struct co *co_start(const char *name, void (*func)(void *), void *arg) {
     coNew->arg = arg;
     coNew->next = NULL;
     coNew->status = CO_NEW;
-    coNew->stackBase = (((uintptr_t)coNew->stack + DEFUALT_STACK_SIZE - 0x100) & (~(0xF)) )- 8;
+    coNew->stackBase = (((uintptr_t)coNew->stack + DEFUALT_STACK_SIZE - 1) & (~(0xF)) )- 8;
     // coNew->stackBase = coNew->stack + DEFUALT_STACK_SIZE -8;
     insert_co(coNew);
     return coNew;
@@ -334,11 +334,10 @@ void co_yield() {
             "cmp $0, %%rax;"
             "jne 0f;"
             "push %%rdi;"
-            "mov %1, %%rsp;"
-            "mov %3, %%rdi;"
 
             "mov %%rsp, %0;"
-
+            "mov %1, %%rsp;"
+            "mov %3, %%rdi;"
             "jmp *%2;"
             "0:\n\t"
             : 
