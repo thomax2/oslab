@@ -5,503 +5,284 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
-#if defined(CONFIG_ISA64)
-typedef uint64_t word_t;
-#else
-typedef uint32_t word_t;
-#endif
-
-int printf(const char *fmt, ...)
+void printint(int val)
 {
-
-    char buf[256];
-
-    va_list args;
-    va_start(args, fmt); // args point to the last know args in variable args
-    int num = vsprintf(buf, fmt, args);
-    va_end(args);
-
-    for (int i = 0; i < num; ++i)
-    {
-        putch(buf[i]);
-    }
-
-    return num;
+    if(val == 0)
+        return;
+    printint(val/10);
+    putch((val%10)+'0');
+    return;
 }
 
-static char *__itoa(int num, char *buff, int base)
+void printstr(char *val)
 {
-    static const char sym[] = "0123456789abcdef";
-    bool is_neg = false;
-
-    if (num == 0)
+    while(*val)
     {
-        strcpy(buff, "0");
-        return buff;
+        putch(*val);
+        val++;
     }
-    else if (num < 0)
-    {
-        is_neg = true;
-        strcpy(buff, "-");
-        buff++;
-        num = -num;
-    }
+    return;
+}
 
-    int i = 1;
-    while ((int)(num / (i * base)) != 0)
-        i *= base;
+static char *__itoa(int num, char *buff, uint16_t base)
+{
+  static const char sym[] = "0123456789abcdef";
 
-    int j = 0;
-    for (; i != 0; j++)
-    {
-        buff[j] = sym[num / i];
-        num = num % i;
-        i /= base;
-    }
-    buff[j] = '\0';
-    return is_neg ? (buff - 1) : buff;
+  char tmp[32];
+  bool is_neg = false;
+  if (num == 0)
+  {
+    strcpy(buff, "0");
+    return buff;
+  }
+  else if (num < 0)
+  {
+    is_neg = true;
+    strcpy(buff, "-");
+    buff++;
+    num = -num;
+  }
+
+  uint8_t i = 0;
+  while (num != 0)
+  {
+    tmp[i] = sym[num % base];
+    num /= base;
+    i++;
+  }
+
+  for (int j = i - 1; j >= 0; --j)
+    buff[i - 1 - j] = tmp[j];
+  buff[i] = '\0';
+
+  return is_neg ? (buff - 1) : buff;
 }
 
 static char *__ptoa(void *p, char *buff)
 {
-    static const char sym[] = "0123456789abcdef";
+  static const char sym[] = "0123456789abcdef";
 
-    uintptr_t num = (uintptr_t)p;
+  uint32_t num = (uint32_t)p;
+  char tmp[32];
 
+  if (num == 0)
+  {
     buff[0] = '0';
-    buff++;
-    buff[0] = 'x';
-    buff++;
-    uintptr_t i = 1;
-    while ((uintptr_t)(num / (i * 16)) != 0)
-        i *= 16;
+    buff[1] = '\0';
+    return (buff - 1);
+  }
 
-    int j = 0;
-    for (; i != 0; j++)
-    {
-        buff[j] = sym[num / i];
-        num = num % i;
-        i /= 16;
-    }
+  uint8_t i = 0;
+  while (num != 0)
+  {
+    tmp[i] = sym[num % 16];
+    num /= 16;
+    i++;
+  }
 
-    buff[j] = '\0';
-    return buff - 2;
+  for (int j = i - 1; j >= 0; --j)
+    buff[i - 1 - j] = tmp[j];
+  buff[i] = '\0';
+
+  return (buff - 1);
 }
 
-int vsprintf(char *out, const char *fmt, va_list ap)
+int sprintint(int val,char *out)
 {
-    char *p;
-    int pc = 0;
-    int fill_symp = 0; // 0 space, 1 0, 2 - left, 3 + sign
-                       // 4 #  special formal
-    int char_length = 0;
-    bool is_end = false;
+    int i;
+    if(val == 0)
+        return 0;
+    i = sprintint(val/10,out);
+    *(out+i) = (val%10) + '0';
+    return i+1;
+}
 
-    for (p = out; *fmt; fmt++)
+void sprintstr(char *val, char *out)
+{
+    strcpy(out,val);
+    return;
+}
+
+int printf(const char *fmt, ...) {
+    va_list ap;
+    va_start(ap,fmt);
+    while(*fmt)
     {
-        if (*fmt != '%')
+        if(*fmt != '%')
         {
-            *(p++) = *fmt;
-            continue;
+            putch(*fmt);
+            fmt++;
         }
-        is_end = false;
-        pc = 0;
-        fill_symp = 0;
-        char_length = 0;
-        while (!is_end)
+        else
         {
             fmt++;
-            switch (pc)
+            switch(*fmt)
             {
-            case 0:
-                switch (*fmt)
+                case 'c':
                 {
-                case '0':
-                    fill_symp = 1;
-                    break;
-                case '-':
-                    fill_symp = 2;
-                    break;
-                case '+':
-                    fill_symp = 3;
-                    break;
-                case '#':
-                    fill_symp = 4;
-                    break;
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                {
-                    char_length = *fmt - '0';
+                    char val = va_arg(ap,int);
+                    putch(val);
+                    fmt++;
                     break;
                 }
                 case 'd':
-                case 'i':
                 case 'x':
                 {
-                    char istr[20];
-                    int val = va_arg(ap, int);
-                    __itoa(val, istr, (*fmt == 'x') ? 16 : 10);
-                    strcpy(p, istr);
-                    p += strlen(istr);
-                    is_end = true;
-                    break;
-                }
-                case 'p':
-                {
-                    char istr[20];
-                    void *val = va_arg(ap, void *);
-                    __ptoa(val, istr);
-                    strcpy(p, istr);
-                    p += strlen(istr);
-                    is_end = true;
-                    break;
-                }
-                case 'c':
-                {
-                    int temp = va_arg(ap, int);
-                    char val = (char)temp;
-                    *(p++) = val;
-                    is_end = true;
+                    int val = va_arg(ap,int);
+                    char buff[32];
+                    __itoa(val,buff,(*fmt=='x')?16:10);
+                    for(int i=0;buff[i]!='\0';i++)
+                        putch(buff[i]);
+                    fmt++;
                     break;
                 }
                 case 's':
                 {
-                    const char *str = va_arg(ap, char *);
-                    strcpy(p, str);
-                    p += strlen(str);
-
-                    is_end = true;
-                    break;
-                }
-                default:
-                    break;
-                }
-                break;
-            case 1:
-                if (fill_symp)
-                {
-                    switch (*fmt)
-                    {
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
-                    case '8':
-                    case '9':
-                    {
-                        char_length = *fmt - '0';
-                        break;
-                    }
-                    case 'd':
-                    case 'i':
-                    case 'x':
-                    {
-                        char istr[20];
-                        int val = va_arg(ap, int);
-                        __itoa(val, istr, (*fmt == 'x') ? 16 : 10);
-                        if (fill_symp == 3)
-                        {
-                            if (val >= 0)
-                                *(p++) = '+';
-                            strcpy(p, istr);
-                            p += strlen(istr);
-                        }
-                        else if (fill_symp == 4 && *fmt == 'x')
-                        {
-                            *(p++) = '0';
-                            *(p++) = 'x';
-                            strcpy(p, istr);
-                            p += strlen(istr);
-                        }
-                        else
-                        {
-                            strcpy(p, istr);
-                            p += strlen(istr);
-                        }
-
-                        is_end = true;
-                        break;
-                    }
-                    case 'p':
-                    {
-                        char istr[20];
-                        void *val = va_arg(ap, void *);
-                        __ptoa(val, istr);
-                        strcpy(p, istr);
-                        p += strlen(istr);
-
-                        is_end = true;
-                        break;
-                    }
-                    case 's':
-                    {
-                        const char *str = va_arg(ap, char *);
-                        strcpy(p, str);
-                        p += strlen(str);
-
-                        is_end = true;
-                        break;
-                    }
-                    case 'c':
-                    {
-                        int temp = va_arg(ap, int);
-                        char val = (char)temp;
-
-                        *(p++) = val;
-
-                        is_end = true;
-                        break;
-                    }
-                    default:
-                        break;
-                    }
-                }
-                else if (char_length)
-                {
-                    switch (*fmt)
-                    {
-                    case '0':
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
-                    case '8':
-                    case '9':
-                    {
-                        char_length = char_length * 10 + *fmt - '0';
-                        break;
-                    }
-                    case 'd':
-                    case 'i':
-                    case 'x':
-                    {
-                        char istr[40];
-                        int val = va_arg(ap, int);
-                        __itoa(val, istr, (*fmt == 'x') ? 16 : 10);
-                        for (int j = 0; j < char_length - (int)strlen(istr); j++)
-                            *(p++) = ' ';
-                        strcpy(p, istr);
-                        p += strlen(istr);
-
-                        is_end = true;
-                        break;
-                    }
-                    case 'p':
-                    {
-                        char istr[20];
-                        void *val = va_arg(ap, void *);
-                        __ptoa(val, istr);
-                        for (int j = 0; j < char_length - (int)strlen(istr); j++)
-                            *(p++) = ' ';
-                        strcpy(p, istr);
-                        p += strlen(istr);
-
-                        is_end = true;
-                        break;
-                    }
-                    case 's':
-                    {
-                        const char *str = va_arg(ap, char *);
-
-                        for (int j = 0; j < char_length - (int)strlen(str); j++)
-                            *(p++) = ' ';
-
-                        strcpy(p, str);
-                        p += strlen(str);
-                        is_end = true;
-                        break;
-                    }
-                    case 'c':
-                    {
-                        int temp = va_arg(ap, int);
-                        char val = (char)temp;
-
-                        for (int j = 0; j < char_length - 1; j++)
-                            *(p++) = ' ';
-                        *(p++) = val;
-                        is_end = true;
-                        break;
-                    }
-                    default:
-                        break;
-                    }
-                }
-                break;
-            case 2:
-                switch (*fmt)
-                {
-                case 'd':
-                case 'i':
-                case 'x':
-                {
-                    char istr[40];
-                    int val = va_arg(ap, int);
-                    __itoa(val, istr, (*fmt == 'x') ? 16 : 10);
-                    if (fill_symp == 2)
-                    {
-                        strcpy(p, istr);
-                        p += strlen(istr);
-                        for (int j = 0; j < char_length - (int)strlen(istr); j++)
-                            *(p++) = ' ';
-                    }
-                    else if (fill_symp == 1)
-                    {
-                        for (int j = 0; j < char_length - (int)strlen(istr); j++)
-                            *(p++) = '0';
-                        strcpy(p, istr);
-                        p += strlen(istr);
-                    }
-                    else if (fill_symp == 3)
-                    {
-                        if (val >= 0)
-                        {
-                            for (int j = 0; j < char_length - (int)strlen(istr) - 1; j++)
-                                *(p++) = ' ';
-                            *(p++) = '+';
-                        }
-                        else
-                            for (int j = 0; j < char_length - (int)strlen(istr) - 1; j++)
-                                *(p++) = ' ';
-
-                        strcpy(p, istr);
-                        p += strlen(istr);
-                    }
-                    else if (fill_symp == 4 && *fmt == 'x')
-                    {
-                        for (int j = 0; j < char_length - (int)strlen(istr) - 2; j++)
-                            *(p++) = ' ';
-                        *(p++) = '0';
-                        *(p++) = 'x';
-                        strcpy(p, istr);
-                        p += strlen(istr);
-                    }
-                    else
-                    {
-                        for (int j = 0; j < char_length - (int)strlen(istr); j++)
-                            *(p++) = ' ';
-                        strcpy(p, istr);
-                        p += strlen(istr);
-                    }
-
-                    is_end = true;
+                    char *val = va_arg(ap,char *);
+                    printstr(val);
+                    fmt++;
                     break;
                 }
                 case 'p':
                 {
-                    char istr[20];
-                    void *val = va_arg(ap, void *);
-                    __ptoa(val, istr);
-                    if (fill_symp == 2)
-                    {
-                        strcpy(p, istr);
-                        p += strlen(istr);
-                        for (int j = 0; j < char_length - (int)strlen(istr); j++)
-                            *(p++) = ' ';
-                    }
-                    else
-                    {
-                        for (int j = 0; j < char_length - (int)strlen(istr); j++)
-                            *(p++) = ' ';
-                        strcpy(p, istr);
-                        p += strlen(istr);
-                    }
-
-                    is_end = true;
-                    break;
-                }
-                case 's':
-                {
-                    const char *str = va_arg(ap, char *);
-
-                    if (fill_symp == 2)
-                    {
-                        strcpy(p, str);
-                        p += strlen(str);
-                        for (int j = 0; j < char_length - (int)strlen(str); j++)
-                            *(p++) = ' ';
-                    }
-                    else
-                    {
-                        for (int j = 0; j < char_length - (int)strlen(str); j++)
-                            *(p++) = ' ';
-                        strcpy(p, str);
-                        p += strlen(str);
-                    }
-                    is_end = true;
-                    break;
-                }
-                case 'c':
-                {
-                    int temp = va_arg(ap, int);
-                    char val = (char)temp;
-
-                    if (fill_symp == 2)
-                    {
-                        *(p++) = val;
-                        for (int j = 0; j < char_length - 1; j++)
-                            *(p++) = ' ';
-                    }
-                    else if (fill_symp == 1)
-                    {
-                        for (int j = 0; j < char_length - 1; j++)
-                            *(p++) = '0';
-                        *(p++) = val;
-                    }
-                    else
-                    {
-                        for (int j = 0; j < char_length - 1; j++)
-                            *(p++) = ' ';
-                        *(p++) = val;
-                    }
-                    is_end = true;
+                    void *val = va_arg(ap,void *);
+                    char buff[32];
+                    __ptoa(val,buff);
+                    for(int i=0;buff[i]!='\0';i++)
+                        putch(buff[i]);
+                    fmt++;
                     break;
                 }
                 default:
-                    break;
+                {
+                    putch(*fmt);
+                    fmt++;
                 }
-                break;
-            default:
-                break;
             }
-            pc++;
         }
     }
-    *p = '\0';
-
-    return strlen(out);
-}
-
-int sprintf(char *out, const char *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    int num = vsprintf(out, fmt, ap);
     va_end(ap);
-  
-    return num;
+    return 0;
 }
 
-int snprintf(char *out, size_t n, const char *fmt, ...)
-{
-    panic("Not implemented");
+int vsprintf(char *out, const char *fmt, va_list ap) {
+  panic("Not implemented");
 }
 
-int vsnprintf(char *out, size_t n, const char *fmt, va_list ap)
-{
-    panic("Not implemented");
+int sprintf(char *out, const char *fmt, ...) {
+    int i=0;
+    va_list ap;
+    va_start(ap,fmt);
+    while(*fmt)
+    {
+        if(*fmt != '%')
+        {
+            *out++=*fmt;
+            fmt++;
+            i++;
+        }
+        else
+        {
+            fmt++;
+            switch(*fmt)
+            {
+                case 'c':
+                {
+                    char val = va_arg(ap,int);
+                    *out++=val;
+                    i++;
+                    fmt++;
+                    break;
+                }
+                case 'd':
+                {
+                    int val = va_arg(ap,int);
+                    int j = sprintint(val,out);
+                    out += j;
+                    i+=j;
+                    fmt++;
+                    break;
+                }
+                case 's':
+                {
+                    char *val = va_arg(ap,char*);
+                    sprintstr(val,out);
+                    out += strlen(val);
+                    i += strlen(val);
+                    fmt++;
+                    break;
+                }
+                default:
+                {
+                    *out++=*fmt++;
+                    i++;
+                }
+            }
+        }
+    }
+    *out='\0';
+    va_end(ap);
+    return i ;
+}
+
+int snprintf(char *out, size_t n, const char *fmt, ...) {
+    int i=0;
+    va_list ap;
+    va_start(ap,fmt);
+    while(*fmt && i!=n)
+    {
+        if(*fmt != '%')
+        {
+            *out++=*fmt;
+            fmt++;
+            i++;
+        }
+        else
+        {
+            fmt++;
+            switch(*fmt)
+            {
+                case 'c':
+                {
+                    char val = va_arg(ap,int);
+                    *out++=val;
+                    i++;
+                    fmt++;
+                    break;
+                }
+                case 'd':
+                {
+                    int val = va_arg(ap,int);
+                    int j = sprintint(val,out);
+                    out += j;
+                    i+=j;
+                    fmt++;
+                    break;
+                }
+                case 's':
+                {
+                    char *val = va_arg(ap,char*);
+                    sprintstr(val,out);
+                    out += strlen(val);
+                    i += strlen(val);
+                    fmt++;
+                    break;
+                }
+                default:
+                {
+                    *out++=*fmt++;
+                    i++;
+                }
+            }
+        }
+    }
+    *out='\0';
+    va_end(ap);
+    return i ;
+}
+
+int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
+  panic("Not implemented");
 }
 
 #endif
