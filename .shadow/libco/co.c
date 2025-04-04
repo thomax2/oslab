@@ -328,14 +328,14 @@ void co_yield() {
             "cmp $0, %%rax;"
             "jne 0f;"
             "push %%rdi;"
-            "mov %%rsp, (%%rcx);"
+            "mov %%rsp, %0;"
 
             "mov %1, %%rsp;"
             // "mov %3, %%rdi;"
             "jmp *%2;"
             "0:\n\t"
             : 
-            : "m"(&oldCurrentCo->context.rsp),
+            : "c"(oldCurrentCo->context.rsp),
               "m" (currentCo->stackBase),
               "m"(coroutine_wrapper)
             //   "r"(currentCo)
