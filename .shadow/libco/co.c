@@ -54,9 +54,10 @@ typedef struct reg{
 }reg;
 
 typedef struct co {
-    const char *name;
     void (*func)(void*);
     void *arg;
+
+    const char *name;
     
     reg context;
     enum co_status status;
@@ -101,9 +102,10 @@ void coroutine_wrapper(struct co** Co) {
     struct co* myCo = *Co;
     printf("wrap\n");
     myCo->status = CO_RUNNING;
-    printf("%p\n",myCo->arg);
 
     printf("%s\n",myCo->name);
+    printf("%p\n",myCo->arg);
+
     printf("%p\n",myCo->func);
     myCo->func(myCo->arg);
     myCo->status = CO_DEAD;
