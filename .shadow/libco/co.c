@@ -82,6 +82,7 @@ void insert_co(coNode *coNew)
         listEnd = listEnd->next;
     listEnd->next = coNew;
     coNew->pid = listEnd->pid + 1;
+    coNew->next = NULL;
     return;
 }
 
@@ -101,9 +102,9 @@ void coroutine_wrapper(struct co *myCo) {
     printf("wrap\n");
     myCo->status = CO_RUNNING;
 
-    printf("%s\n",myCo->name);
-    printf("%p\n",myCo->func);
-    printf("%p\n",myCo->arg);
+    // printf("%s\n",myCo->name);
+    // printf("%p\n",myCo->func);
+    // printf("%p\n",myCo->arg);
     myCo->func(myCo->arg);
     myCo->status = CO_DEAD;
     return;
