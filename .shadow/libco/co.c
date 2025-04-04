@@ -157,7 +157,7 @@ coNode *oldCurrentCo;
 void co_yield() {
     int flag = 0;
     int coNum = get_coNum();
-
+    printf("%d",coNum);
     int chooseNum = rand()%(coNum); // [0,coNum-1]
     coNode *newCurrentCo = &coMain ;
     for (size_t i = 0; i < chooseNum; i++)
