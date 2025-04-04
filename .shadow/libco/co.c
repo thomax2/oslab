@@ -103,7 +103,6 @@ void coroutine_wrapper(struct co** Co) {
     myCo->status = CO_RUNNING;
 
     printf("%s\n",myCo->name);
-    assert(myCo->func);
     printf("%p\n",myCo->func);
     printf("%p\n",myCo->arg);
     myCo->func(myCo->arg);
@@ -115,7 +114,8 @@ struct co *co_start(const char *name, void (*func)(void *), void *arg) {
     coNode *coNew = (coNode *)malloc(sizeof(coNode));
     strcpy(coNew->name,name);
     coNew->func = func;
-    assert(coNew->func);
+    // assert(coNew->func);
+    printf("p\n",coNew->func);
     coNew->arg = arg;
     coNew->next = NULL;
     coNew->status = CO_NEW;
