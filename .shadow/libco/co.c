@@ -336,7 +336,7 @@ void co_yield() {
             "jmp *%2;"
             "0:\n\t"
             : 
-            : "c"(oldCurrentCo->context.rsp),
+            : "r"(oldCurrentCo->context.rsp),
               "r" (currentCo->stackBase),
               "r"(coroutine_wrapper),
               "r"(currentCo)
