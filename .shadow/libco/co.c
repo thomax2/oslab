@@ -105,6 +105,7 @@ void coroutine_wrapper(void (*func)(void*),void *arg,coNode *coMy) {
     // printf("%s\n",myCo->name);
     // printf("%p\n",myCo->func);
     // printf("%p\n",myCo->arg);
+    printf("%p\n",func);
     func(arg);
     coMy->status = CO_DEAD;
     return;
