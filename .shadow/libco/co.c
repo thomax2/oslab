@@ -115,7 +115,7 @@ struct co *co_start(const char *name, void (*func)(void *), void *arg) {
     strcpy(coNew->name,name);
     coNew->func = func;
     // assert(coNew->func);
-    printf("p\n",coNew->func);
+    printf("%p\n",coNew->func);
     coNew->arg = arg;
     coNew->next = NULL;
     coNew->status = CO_NEW;
