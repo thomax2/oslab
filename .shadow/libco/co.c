@@ -164,6 +164,7 @@ void co_yield() {
     oldCurrentCo = currentCo;
     currentCo = newCurrentCo;
     printf("%s\n",currentCo->name);
+    printf("%d\n",currentCo->pid);
     printf("%p\n",&coMain);
     printf("%p\n",currentCo);
     if (currentCo->status != CO_NEW)
