@@ -101,7 +101,7 @@ void coroutine_wrapper(struct co** Co) {
     struct co* myCo = *Co;
     printf("wrap\n");
 
-    printf("%p\n",(void*)myCo);
+    printf("%s\n",myCo->name);
     myCo->status = CO_RUNNING;
     printf("%p\n",(void*)myCo);
     // printf("func = %p, arg = %p\n", (void *)currentCo->func, currentCo->arg);
