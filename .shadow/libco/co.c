@@ -114,6 +114,7 @@ struct co *co_start(const char *name, void (*func)(void *), void *arg) {
     coNode *coNew = (coNode *)malloc(sizeof(coNode));
     strcpy(coNew->name,name);
     coNew->func = func;
+    assert(coNew->func);
     coNew->arg = arg;
     coNew->next = NULL;
     coNew->status = CO_NEW;
