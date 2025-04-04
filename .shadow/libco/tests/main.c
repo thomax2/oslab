@@ -15,10 +15,11 @@ static int get_count() {
 }
 
 static void work_loop(void *arg) {
+    printf("%d\n",12);
+
     printf("work_loop\n");
     const char *s = (const char*)arg;
     printf("%s\n",s);
-    printf("%d\n",12);
     for (int i = 0; i < 100; ++i) {
         printf("%s%d  \n", s, get_count());
         add_count();
