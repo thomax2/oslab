@@ -157,7 +157,7 @@ coNode *oldCurrentCo;
 void co_yield() {
     int flag = 0;
     int coNum = get_coNum();
-    printf("%d",coNum);
+
     int chooseNum = rand()%(coNum); // [0,coNum-1]
     coNode *newCurrentCo = &coMain ;
     for (size_t i = 0; i < chooseNum; i++)
@@ -335,7 +335,7 @@ void co_yield() {
 
             "movq %1, %%rsp;"
             "movq %3, %%rdi;"
-            "jmp *%2;"
+            // "jmp *%2;"
             "0:\n\t"
             : 
             : "r"(oldCurrentCo->context.rsp),
@@ -359,6 +359,7 @@ void co_yield() {
             : "memory"
             #endif
         );
+        printf("%p\n",currentCo->func);
     }
 
 }
