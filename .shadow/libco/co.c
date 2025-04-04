@@ -337,9 +337,9 @@ void co_yield() {
             "0:\n\t"
             : 
             : "c"(oldCurrentCo->context.rsp),
-              "m" (currentCo->stackBase),
+              "b" (currentCo->stackBase),
               "a"(coroutine_wrapper),
-              "b"(currentCo)
+              "r"(currentCo)
             : "memory"
             #else
             "mov $0, %%eax;"
