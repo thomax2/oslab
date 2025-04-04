@@ -70,7 +70,8 @@ coNode coMain = {
     .name = "main",
     .pid = 0,
     .next = NULL,
-    .status = CO_RUNNING
+    .status = CO_RUNNING,
+    .func = coroutine_wrapper,
 };
 
 static coNode *currentCo = &coMain;
@@ -104,7 +105,7 @@ void coroutine_wrapper(struct co *myCo) {
     printf("%s\n",myCo->name);
     printf("%p\n",myCo->func);
     printf("%p\n",myCo->arg);
-    myCo->func(myCo->arg);
+    myCo->func(myCo);
     myCo->status = CO_DEAD;
     return;
 }
@@ -164,7 +165,6 @@ void co_yield() {
     oldCurrentCo = currentCo;
     currentCo = newCurrentCo;
     printf("%s\n",currentCo->name);
-    printf("%d\n",currentCo->pid);
     printf("%p\n",&coMain);
     printf("%p\n",currentCo);
     if (currentCo->status != CO_NEW)
@@ -344,7 +344,7 @@ void co_yield() {
             : "r"(oldCurrentCo->context.rsp),
               "r" (currentCo->stackBase),
               "r"(coroutine_wrapper),
-              "r"(newCurrentCo)
+              "r"(currentCo)
             : "memory"
             #else
             "mov $0, %%eax;"
