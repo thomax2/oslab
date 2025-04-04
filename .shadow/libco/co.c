@@ -97,8 +97,7 @@ void remove_co(coNode *co)
     preCoNode->next = co->next;
 }
 
-void coroutine_wrapper(struct co** Co) {
-    struct co* myCo = *Co;
+void coroutine_wrapper(struct co *myCo) {
     printf("wrap\n");
     myCo->status = CO_RUNNING;
 
@@ -113,7 +112,7 @@ void coroutine_wrapper(struct co** Co) {
 struct co *co_start(const char *name, void (*func)(void *), void *arg) {
     coNode *coNew = (coNode *)malloc(sizeof(coNode));
     // strcpy(coNew->name,name);
-    coNew->name =
+    coNew->name = name;
     coNew->func = func;
     // assert(coNew->func);
     coNew->arg = arg;
@@ -341,7 +340,7 @@ void co_yield() {
             : "r"(oldCurrentCo->context.rsp),
               "r" (currentCo->stackBase),
               "r"(coroutine_wrapper),
-              "r"(&currentCo)
+              "r"(currentCo)
             : "memory"
             #else
             "mov $0, %%eax;"
