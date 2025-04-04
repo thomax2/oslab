@@ -100,7 +100,7 @@ void remove_co(coNode *co)
 void coroutine_wrapper(void (*func)(void*),void *arg,coNode *coMy) {
     // struct co* myCo = *Co;
     printf("wrap\n");
-    coMy->status = CO_RUNNING;
+    // coMy->status = CO_RUNNING;
     // printf("%d\n",myCo->pid);
     // printf("%s\n",myCo->name);
     // printf("%p\n",myCo->func);
@@ -336,7 +336,7 @@ void co_yield() {
             "movq %1, %%rsp;"
             "movq %3, %%rdi;"
             "movq %4, %%rsi;"
-            "movq %5, %%rdx;"
+            // "movq %5, %%rdx;"
             "jmp *%2;"
             "0:\n\t"
             : 
