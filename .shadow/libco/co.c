@@ -344,8 +344,8 @@ void co_yield() {
               "r" (currentCo->stackBase),
               "r"(coroutine_wrapper),
               "r"(currentCo->func),
-              "r"(currentCo->arg),
-              "r"(currentCo)
+              "r"(currentCo->arg)
+            //   "r"(currentCo)
             : "memory"
             #else
             "mov $0, %%eax;"
