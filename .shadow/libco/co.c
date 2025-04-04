@@ -219,7 +219,6 @@ void co_yield() {
             "push %%rdi;"
             "mov %%rsp, %0;"
 
-            "mov $1, %%rax;"
             "mov %2, %%rbx;"
             "mov %3, %%rcx;"
             "mov %4, %%rdx;"
@@ -236,6 +235,7 @@ void co_yield() {
             "mov %16, %%r15;"
             "mov %8, %%rsp;"
             "pop %%rdi;"
+            "mov $1, %%rax;"
             "jmp *%%rdi;"
             "0:\n\t"
             : "=m"(oldCurrentCo->context.rsp)
