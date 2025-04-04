@@ -7,14 +7,7 @@
 #include "co.h"
 // #include <am.h>
 // #include <klib.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <setjmp.h>
-#include <time.h>
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
-#define DEFUALT_STACK_SIZE 1024*64
+
 
 
 
@@ -114,6 +107,9 @@ void co_yield() {
     coNode *newCurrentCo = &coMain ;
     for (size_t i = 0; i < chooseNum; i++)
         newCurrentCo = newCurrentCo->next;
+    
+    if(newCurrentCo == currentCo)
+        return;
     oldCurrentCo = currentCo;
     currentCo = newCurrentCo;
 
@@ -309,7 +305,7 @@ void co_yield() {
             #endif
         );
     }
-
+    return;
 }
 
 
