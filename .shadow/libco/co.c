@@ -103,6 +103,7 @@ void coroutine_wrapper(struct co** Co) {
     myCo->status = CO_RUNNING;
 
     printf("%s\n",myCo->name);
+    assert(myCo->func);
     printf("%p\n",myCo->func);
     printf("%p\n",myCo->arg);
     myCo->func(myCo->arg);
