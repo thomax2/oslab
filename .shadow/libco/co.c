@@ -321,7 +321,7 @@ void co_yield() {
         printf("oldCurrentCo = %p\n", (void *)oldCurrentCo);
         printf("currentCo->stackBase = %p\n", (void *)currentCo->stackBase);
         printf("coroutine_wrapper = %p\n", (void *)coroutine_wrapper);
-
+        printf("currentCO = %p\n",currentCo);
         asm volatile(
             #if __x86_64__
             "mov $0, %%rax;"
