@@ -65,16 +65,10 @@ typedef struct co {
     unsigned int pid;
     struct co *next;
 }coNode;
-void coroutine_wrapper(struct co *myCo) {
-    printf("wrap\n");
-    myCo->status = CO_RUNNING;
 
-    printf("%s\n",myCo->name);
-    printf("%p\n",myCo->func);
-    printf("%p\n",myCo->arg);
-    myCo->func(myCo);
-    myCo->status = CO_DEAD;
-    return;
+void printf_test(void* arg)
+{
+    printf("ggggggd\n");
 }
 
 coNode coMain = {
@@ -82,7 +76,8 @@ coNode coMain = {
     .pid = 0,
     .next = NULL,
     .status = CO_RUNNING,
-    .func = coroutine_wrapper,
+    .func = printf_test,
+    .arg = 1
 };
 
 static coNode *currentCo = &coMain;
@@ -109,6 +104,17 @@ void remove_co(coNode *co)
     preCoNode->next = co->next;
 }
 
+void coroutine_wrapper(struct co *myCo) {
+    printf("wrap\n");
+    myCo->status = CO_RUNNING;
+
+    printf("%s\n",myCo->name);
+    printf("%p\n",myCo->func);
+    printf("%p\n",myCo->arg);
+    myCo->func(myCo->arg);
+    myCo->status = CO_DEAD;
+    return;
+}
 
 struct co *co_start(const char *name, void (*func)(void *), void *arg) {
     coNode *coNew = (coNode *)malloc(sizeof(coNode));
