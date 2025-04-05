@@ -147,7 +147,7 @@ void co_yield() {
             :
             :
             #else
-            // "mov %%eax, %0;"
+            "mov %%eax, %0;"
             "mov %%ebx, %1;"
             "mov %%ecx, %2;"
             "mov %%edx, %3;"
@@ -207,7 +207,7 @@ void co_yield() {
             "jne 0f;"
             "mov %%esp, %0;"
 
-            // "mov %1, %%eax;"
+            "mov %1, %%eax;"
             "mov %2, %%ebx;"
             "mov %3, %%ecx;"
             "mov $1, %%esi;"
@@ -257,7 +257,7 @@ void co_yield() {
             :
             :
             #else
-            // "mov %%eax, %0;"
+            "mov %%eax, %0;"
             "mov %%ebx, %1;"
             "mov %%ecx, %2;"
             "mov %%edx, %3;"
