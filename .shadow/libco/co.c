@@ -101,7 +101,9 @@ void coroutine_wrapper() {
 
     currentCo->func(currentCo->arg);
     currentCo->status = CO_DEAD;
-    co_yield();
+    
+    while(1)
+        co_yield();
 }
 
 struct co *co_start(const char *name, void (*func)(void *), void *arg) {
