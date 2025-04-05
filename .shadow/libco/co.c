@@ -147,7 +147,7 @@ void co_yield() {
             :
             :
             #else
-            "mov %%eax, %0;"
+            // "mov %%eax, %0;"
             "mov %%ebx, %1;"
             "mov %%ecx, %2;"
             "mov %%edx, %3;"
@@ -201,20 +201,20 @@ void co_yield() {
               "m"(currentCo->context.r14), "m"(currentCo->context.r15)
             : "memory", "r9", "r8", "rcx", "rsi"
             #else
-            "mov $0, %%eax;"
+            "mov $0, %%edx;"
             "call 1f;"
-            "1: cmp $0, %%eax;"
+            "1: cmp $0, %%edx;"
             "jne 0f;"
             "mov %%esp, %0;"
 
-            "mov $1, %%eax;"
+            // "mov %1, %%eax;"
             "mov %2, %%ebx;"
             "mov %3, %%ecx;"
-            "mov %4, %%edx;"
             "mov %5, %%esi;"
             "mov %6, %%edi;"
             "mov %7, %%ebp;"
             "mov %8, %%esp;"
+            "mov $1, %%edx;"
             "pop %%edi;"
             "jmp *%%edi;"
             "0:\n\t"
@@ -257,7 +257,7 @@ void co_yield() {
             :
             :
             #else
-            "mov %%eax, %0;"
+            // "mov %%eax, %0;"
             "mov %%ebx, %1;"
             "mov %%ecx, %2;"
             "mov %%edx, %3;"
@@ -293,9 +293,9 @@ void co_yield() {
             //   "r"(currentCo)
             : "memory", "r9", "r8"
             #else
-            "mov $0, %%eax;"
+            "mov $0, %%edx;"
             "call 1f;"
-            "1: cmp $0, %%eax;"
+            "1: cmp $0, %%edx;"
             "jne 0f;"
             "mov %%esp, %0;"
 
