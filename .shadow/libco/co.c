@@ -303,9 +303,9 @@ void co_yield() {
             "jmp *%2;"
             "0:\n\t"
             : "=m"(oldCurrentCo->context.esp)
-            : "b"(currentCo->stackBase),
-              "d"(coroutine_wrapper)
-            : "memory", "edx"
+            : "r"(currentCo->stackBase),
+              "r"(coroutine_wrapper)
+            : "memory"
             #endif
         );
     }
