@@ -210,11 +210,11 @@ void co_yield() {
             // "mov %1, %%eax;"
             "mov %2, %%ebx;"
             "mov %3, %%ecx;"
-            "mov %5, %%esi;"
+            "mov $1, %%esi;"
             "mov %6, %%edi;"
             "mov %7, %%ebp;"
             "mov %8, %%esp;"
-            "mov $1, %%edx;"
+            "mov %4, %%edx;"
             "pop %%edi;"
             "jmp *%%edi;"
             "0:\n\t"
@@ -293,9 +293,9 @@ void co_yield() {
             //   "r"(currentCo)
             : "memory", "r9", "r8"
             #else
-            "mov $0, %%edx;"
+            "mov $0, %%esi;"
             "call 1f;"
-            "1: cmp $0, %%edx;"
+            "1: cmp $0, %%esi;"
             "jne 0f;"
             "mov %%esp, %0;"
 
