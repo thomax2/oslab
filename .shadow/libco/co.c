@@ -51,6 +51,7 @@ void coroutine_wrapper(struct co *myCo) {
     // printf("%p\n",myCo->arg);
     currentCo->func(currentCo->arg);
     currentCo->status = CO_DEAD;
+    co_yield();
     return;
 }
 
@@ -90,7 +91,8 @@ int get_coNum(void)
     coNode *list= &coMain;
     while (list->next != NULL)
     {
-        num++;
+        if(list->next->status != CO_DEAD)
+            num++;
         list = list->next;
     }
     return num;
