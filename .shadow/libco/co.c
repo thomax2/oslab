@@ -104,7 +104,7 @@ void co_yield() {
     int coNum = get_coNum();
 
     int chooseNum = rand()%(coNum); // [0,coNum-1]
-    printf("%d\t",chooseNum);
+    // printf("%d\t",chooseNum);
     newCurrentCo = &coMain ;
     for (size_t i = 0; i < chooseNum; i++)
         newCurrentCo = newCurrentCo->next;
@@ -120,15 +120,15 @@ void co_yield() {
             #if __x86_64__
             // "mov %%rax, %0;"
             "mov %%rbx, %1;"
-            "mov %%rcx, %2;"
-            "mov %%rdx, %3;"
-            "mov %%rsi, %4;"
-            "mov %%rdi, %5;"
+            // "mov %%rcx, %2;"
+            // "mov %%rdx, %3;"
+            // "mov %%rsi, %4;"
+            // "mov %%rdi, %5;"
             "mov %%rbp, %6;"
-            "mov %%r8, %8;"
-            "mov %%r9, %9;"
-            "mov %%r10, %10;"
-            "mov %%r11, %11;"
+            // "mov %%r8, %8;"
+            // "mov %%r9, %9;"
+            // "mov %%r10, %10;"
+            // "mov %%r11, %11;"
             "mov %%r12, %12;"
             "mov %%r13, %13;"
             "mov %%r14, %14;"
@@ -168,17 +168,17 @@ void co_yield() {
             "push %%r8;"
             "mov %%rsp, %0;"
 
-            "mov %1, %%rax;"
+            // "mov %1, %%rax;"
             "mov %2, %%rbx;"
-            "mov %3, %%rcx;"
-            "mov %4, %%rdx;"
+            // "mov %3, %%rcx;"
+            // "mov %4, %%rdx;"
             // "mov %5, %%rsi;"
-            "mov %6, %%rdi;"
+            // "mov %6, %%rdi;"
             "mov %7, %%rbp;"
-            "mov %9, %%r8;"
-            "mov $1, %%r9;"
-            "mov %11, %%r10;"
-            "mov %12, %%r11;"
+            // "mov %9, %%r8;"
+            // "mov $1, %%r9;"
+            // "mov %11, %%r10;"
+            // "mov %12, %%r11;"
             "mov %13, %%r12;"
             "mov %14, %%r13;"
             "mov %15, %%r14;"
@@ -228,17 +228,17 @@ void co_yield() {
     {
         asm volatile(
             #if __x86_64__
-            "mov %%rax, %0;"
+            // "mov %%rax, %0;"
             "mov %%rbx, %1;"
-            "mov %%rcx, %2;"
-            "mov %%rdx, %3;"
-            "mov %%rsi, %4;"
-            "mov %%rdi, %5;"
+            // "mov %%rcx, %2;"
+            // "mov %%rdx, %3;"
+            // "mov %%rsi, %4;"
+            // "mov %%rdi, %5;"
             "mov %%rbp, %6;"
-            "mov %%r8, %8;"
-            "mov %%r9, %9;"
-            "mov %%r10, %10;"
-            "mov %%r11, %11;"
+            // "mov %%r8, %8;"
+            // "mov %%r9, %9;"
+            // "mov %%r10, %10;"
+            // "mov %%r11, %11;"
             "mov %%r12, %12;"
             "mov %%r13, %13;"
             "mov %%r14, %14;"
