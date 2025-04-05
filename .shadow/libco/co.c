@@ -123,8 +123,6 @@ void co_yield() {
             #if __x86_64__
             "mov %%rbx, %1;"
             "mov %%rbp, %6;"
-            // "mov %%r8, %8;"
-            // "mov %%r9, %9;"
             "mov %%r12, %12;"
             "mov %%r13, %13;"
             "mov %%r14, %14;"
@@ -140,7 +138,7 @@ void co_yield() {
             :
             :
             #else
-            "mov %%eax, %0;"
+            // "mov %%eax, %0;"
             "mov %%ebx, %1;"
             "mov %%ecx, %2;"
             "mov %%edx, %3;"
@@ -166,7 +164,6 @@ void co_yield() {
 
             "mov %2, %%rbx;"
             "mov %7, %%rbp;"
-            // "mov %9, %%r8;"
             "mov $1, %%r9;"
             "mov %13, %%r12;"
             "mov %14, %%r13;"
@@ -193,7 +190,7 @@ void co_yield() {
             "jne 0f;"
             "mov %%esp, %0;"
 
-            "mov %1, %%eax;"
+            // "mov %1, %%eax;"
             "mov %2, %%ebx;"
             "mov %3, %%ecx;"
             "mov $1, %%esi;"
@@ -219,8 +216,6 @@ void co_yield() {
             #if __x86_64__
             "mov %%rbx, %1;"
             "mov %%rbp, %6;"
-            // "mov %%r8, %8;"
-            // "mov %%r9, %9;"
             "mov %%r12, %12;"
             "mov %%r13, %13;"
             "mov %%r14, %14;"
@@ -236,7 +231,7 @@ void co_yield() {
             :
             :
             #else
-            "mov %%eax, %0;"
+            // "mov %%eax, %0;"
             "mov %%ebx, %1;"
             "mov %%ecx, %2;"
             "mov %%edx, %3;"
