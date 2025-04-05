@@ -5,11 +5,65 @@
 4. yield = save context + change context + 
 */
 #include "co.h"
-// #include <am.h>
-// #include <klib.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <setjmp.h>
+#include <time.h>
+#include <assert.h>
+#include <stdio.h>
+#include <string.h>
 
+#define DEFUALT_STACK_SIZE 1024*32
 
+enum co_status {
+    CO_NEW = 1, // 新创建，还未执行过
+    CO_RUNNING, // 已经执行过
+    CO_WAITING, // 在 co_wait 上等待
+    CO_DEAD,    // 已经结束，但还未释放资源
+};
 
+typedef struct reg{
+#if __x86_64__
+    uint64_t rax;
+    uint64_t rbx;
+    uint64_t rcx;
+    uint64_t rdx;
+    uint64_t rsi;
+    uint64_t rdi;
+    uint64_t rbp;
+    uint64_t rsp;
+    uint64_t r8;
+    uint64_t r9;
+    uint64_t r10;
+    uint64_t r11;
+    uint64_t r12;
+    uint64_t r13;
+    uint64_t r14;
+    uint64_t r15;
+#else
+    uint64_t eax;
+    uint64_t ebx;
+    uint64_t ecx;
+    uint64_t edx;
+    uint64_t esi;
+    uint64_t edi;
+    uint64_t ebp;
+    uint64_t esp;
+#endif
+}reg;
+
+typedef struct co {
+    const char *name;
+    void (*func)(void*);
+    void *arg;
+    
+    reg context;
+    enum co_status status;
+    uint8_t stack[DEFUALT_STACK_SIZE];
+    uintptr_t stackBase;
+    unsigned int pid;
+    struct co *next;
+}coNode;
 
 coNode coMain = {
     .name = "main",
@@ -19,6 +73,8 @@ coNode coMain = {
 };
 
 coNode *currentCo = &coMain;
+coNode *oldCurrentCo;
+coNode *newCurrentCo;
 
 void insert_co(coNode *coNew)
 {
@@ -49,20 +105,16 @@ void coroutine_wrapper() {
     currentCo->func(currentCo->arg);
     currentCo->status = CO_DEAD;
     co_yield();
-    // return;
 }
 
 struct co *co_start(const char *name, void (*func)(void *), void *arg) {
     coNode *coNew = (coNode *)malloc(sizeof(coNode));
-    // strcpy(coNew->name,name);
     coNew->name = name;
     coNew->func = func;
-    // assert(coNew->func);
     coNew->arg = arg;
     coNew->next = NULL;
     coNew->status = CO_NEW;
     coNew->stackBase = (((uintptr_t)coNew->stack + DEFUALT_STACK_SIZE - 1) & (~(0xF)) )- 8;
-    // coNew->stackBase = coNew->stack + DEFUALT_STACK_SIZE -8;
     insert_co(coNew);
     return coNew;
 }
@@ -95,15 +147,11 @@ int get_coNum(void)
     return num;
 }
 
-coNode *oldCurrentCo;
-coNode *newCurrentCo;
-
 void co_yield() {
     int flag = 0;
     int coNum = get_coNum();
 
     int chooseNum = rand()%(coNum); // [0,coNum-1]
-    // printf("%d\t",chooseNum);
     newCurrentCo = &coMain ;
     for (size_t i = 0; i < chooseNum; i++)
     {
@@ -138,7 +186,6 @@ void co_yield() {
             :
             :
             #else
-            // "mov %%eax, %0;"
             "mov %%ebx, %1;"
             "mov %%ecx, %2;"
             "mov %%edx, %3;"
@@ -190,7 +237,6 @@ void co_yield() {
             "jne 0f;"
             "mov %%esp, %0;"
 
-            // "mov %1, %%eax;"
             "mov %2, %%ebx;"
             "mov %3, %%ecx;"
             "mov $1, %%esi;"
@@ -231,7 +277,6 @@ void co_yield() {
             :
             :
             #else
-            // "mov %%eax, %0;"
             "mov %%ebx, %1;"
             "mov %%ecx, %2;"
             "mov %%edx, %3;"
