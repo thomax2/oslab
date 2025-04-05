@@ -183,8 +183,8 @@ void co_yield() {
             "mov %15, %%r14;"
             "mov %16, %%r15;"
             "mov %8, %%rsp;"
-            "pop %%rdi;"
-            "jmp *%%rdi;"
+            "pop %%rcx;"
+            "jmp *%%rcx;"
             "0:\n\t"
             : "=m"(oldCurrentCo->context.rsp)
             : "m"(currentCo->context.rax), "m"(currentCo->context.rbx),
