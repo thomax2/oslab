@@ -44,15 +44,12 @@ void remove_co(coNode *co)
 }
 
 void coroutine_wrapper(struct co *myCo) {
-    // printf("wrap\n");
     currentCo->status = CO_RUNNING;
-    // printf("%s\n",myCo->name);
-    // printf("%p\n",myCo->func);
-    // printf("%p\n",myCo->arg);
+
     currentCo->func(currentCo->arg);
     currentCo->status = CO_DEAD;
     co_yield();
-    return;
+    // return;
 }
 
 struct co *co_start(const char *name, void (*func)(void *), void *arg) {
@@ -109,7 +106,11 @@ void co_yield() {
     // printf("%d\t",chooseNum);
     newCurrentCo = &coMain ;
     for (size_t i = 0; i < chooseNum; i++)
-        newCurrentCo = newCurrentCo->next;
+    {
+        newCurrentCo = newCurrentCo -> next;
+        while (newCurrentCo->status == CO_DEAD)
+            newCurrentCo = newCurrentCo -> next;
+    }
     
     if(newCurrentCo == currentCo)
         return;
