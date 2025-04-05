@@ -61,13 +61,11 @@ typedef struct co {
     enum co_status status;
     uint8_t stack[DEFUALT_STACK_SIZE];
     uintptr_t stackBase;
-    unsigned int pid;
     struct co *next;
 }coNode;
 
 coNode coMain = {
     .name = "main",
-    .pid = 0,
     .next = NULL,
     .status = CO_RUNNING
 };
@@ -82,7 +80,6 @@ void insert_co(coNode *coNew)
     while (listEnd->next != NULL)
         listEnd = listEnd->next;
     listEnd->next = coNew;
-    coNew->pid = listEnd->pid + 1;
     coNew->next = NULL;
     return;
 }
