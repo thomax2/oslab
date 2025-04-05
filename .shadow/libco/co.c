@@ -201,9 +201,9 @@ void co_yield() {
               "m"(currentCo->context.r14), "m"(currentCo->context.r15)
             : "memory", "r9", "r8", "rcx", "rsi"
             #else
-            "mov $0, %%edx;"
+            "mov $0, %%esi;"
             "call 1f;"
-            "1: cmp $0, %%edx;"
+            "1: cmp $0, %%esi;"
             "jne 0f;"
             "mov %%esp, %0;"
 
