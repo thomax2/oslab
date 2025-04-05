@@ -305,7 +305,7 @@ void co_yield() {
             : "=m"(oldCurrentCo->context.esp)
             : "b"(currentCo->stackBase),
               "d"(coroutine_wrapper)
-            : "memory"
+            : "memory", "edx"
             #endif
         );
     }
