@@ -104,7 +104,7 @@ void co_yield() {
     int coNum = get_coNum();
 
     int chooseNum = rand()%(coNum); // [0,coNum-1]
-    printf("%d\t",chooseNum);
+    // printf("%d\t",chooseNum);
     newCurrentCo = &coMain ;
     for (size_t i = 0; i < chooseNum; i++)
         newCurrentCo = newCurrentCo->next;
@@ -118,7 +118,7 @@ void co_yield() {
     {
         asm volatile(
             #if __x86_64__
-            "mov %%rax, %0;"
+            // "mov %%rax, %0;"
             "mov %%rbx, %1;"
             "mov %%rcx, %2;"
             "mov %%rdx, %3;"
