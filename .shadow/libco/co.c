@@ -161,10 +161,10 @@ void co_yield() {
         asm volatile(
             #if __x86_64__
             "mov $0, %%r9;"
-            "leaq (%%rip), %%rdi;"
+            "leaq (%%rip), %%r8;"
             "cmp $0, %%r9;"
             "jne  0f;"
-            "push %%rdi;"
+            "push %%r8;"
             "mov %%rsp, %0;"
 
             "mov $1, %%rax;"
@@ -272,10 +272,10 @@ void co_yield() {
         asm volatile(
             #if __x86_64__
             "mov $0, %%r9;"
-            "leaq (%%rip), %%rdi;"
+            "leaq (%%rip), %%r8;"
             "cmp $0, %%r9;"
             "jne 0f;"
-            "push %%rdi;"
+            "push %%r8;"
 
             "mov %%rsp, %0;"
             "mov %1, %%rsp;"
