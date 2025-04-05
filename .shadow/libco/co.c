@@ -97,6 +97,7 @@ int get_coNum(void)
 }
 
 coNode *oldCurrentCo;
+coNode *newCurrentCo;
 
 void co_yield() {
     int flag = 0;
@@ -104,7 +105,7 @@ void co_yield() {
 
     int chooseNum = rand()%(coNum); // [0,coNum-1]
     printf("%d\t",chooseNum);
-    coNode *newCurrentCo = &coMain ;
+    newCurrentCo = &coMain ;
     for (size_t i = 0; i < chooseNum; i++)
         newCurrentCo = newCurrentCo->next;
     
@@ -171,7 +172,7 @@ void co_yield() {
             "mov %2, %%rbx;"
             "mov %3, %%rcx;"
             "mov %4, %%rdx;"
-            "mov %5, %%rsi;"
+            // "mov %5, %%rsi;"
             "mov %6, %%rdi;"
             "mov %7, %%rbp;"
             "mov %9, %%r8;"
@@ -195,7 +196,7 @@ void co_yield() {
               "m"(currentCo->context.r10), "m"(currentCo->context.r11),
               "m"(currentCo->context.r12), "m"(currentCo->context.r13),
               "m"(currentCo->context.r14), "m"(currentCo->context.r15)
-            : "memory", "r9", "r8", "rcx"
+            : "memory", "r9", "r8", "rcx" "rsi"
             #else
             "mov $0, %%eax;"
             "call 1f;"
