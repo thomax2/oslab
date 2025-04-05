@@ -167,7 +167,7 @@ void co_yield() {
             "push %%r8;"
             "mov %%rsp, %0;"
 
-            "mov $1, %%rax;"
+            "mov %1, %%rax;"
             "mov %2, %%rbx;"
             "mov %3, %%rcx;"
             "mov %4, %%rdx;"
