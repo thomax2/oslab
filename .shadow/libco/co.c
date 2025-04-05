@@ -104,7 +104,7 @@ void co_yield() {
     int coNum = get_coNum();
 
     int chooseNum = rand()%(coNum); // [0,coNum-1]
-    // printf("%d\t",chooseNum);
+    printf("%d\t",chooseNum);
     newCurrentCo = &coMain ;
     for (size_t i = 0; i < chooseNum; i++)
         newCurrentCo = newCurrentCo->next;
