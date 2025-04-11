@@ -1,4 +1,5 @@
 #include <common.h>
+#include <threads.h>
 
 enum blockStatus {
     bnon = 1,
