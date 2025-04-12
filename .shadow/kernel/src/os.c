@@ -36,7 +36,7 @@ static void test0(void)
 	*add3_int=543210;
 	*(add3_int+(512-4)/4)=114514;
 	pmm->free(add2);
-    printf("add1:%d",*add1_int);
+    printf("add1:%d\n",*add1_int);
 	assert(*add1_int==9876);
 	assert(*(add1_int+(1020-4)/4)==114514);
 	assert(*add3_int==543210);
