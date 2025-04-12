@@ -98,7 +98,7 @@ static void *kalloc(size_t size) {
     // }
     // printf("******\n");
     assert(addr != 0);
-    
+    assert(pblock != pbend);
     if(addr - blockSize == (size_t)pblock)
     {
         if(addr + size < (size_t)pblock + pblock->size)
@@ -169,6 +169,8 @@ static void kfree(void *ptr) {
     // merge after block
     if(!(pafterBlock->size & blockAllocateBit))
     {
+        assert(pafterBlock != pbend);
+        assert(pblock != pbend);
         pblock->size += pafterBlock->size + blockSize;
         pblock->next = pafterBlock->next;
     }
