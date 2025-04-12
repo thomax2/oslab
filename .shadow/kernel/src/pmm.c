@@ -92,8 +92,9 @@ static void *kalloc(size_t size) {
     {
         printf("addr:%p\n",pblock);
         printf("size:%d\n",pblock->size);
+        printf("-----\n");
     }
-    
+    printf("******\n");
     assert(addr != 0);
     
     if(addr - blockSize == (size_t)pblock)
