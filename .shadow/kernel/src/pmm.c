@@ -28,8 +28,6 @@ static void kinit(void){
     // set two constant
     blockSize = sizeof(blockLink_t);
     blockAllocateBit = ((size_t) 1) << (sizeof(size_t)*8-1);
-    if(blockAllocateBit != 0)
-        printf("allocbit:%p\n",blockAllocateBit);
     // start align upward, end align downward
     heapStartAddr += byteAlignment - 1;
     heapStartAddr &= ~(byteAlignment - 1);
@@ -60,12 +58,12 @@ static void kinit(void){
 
 size_t addr_valid(blockLink_t *pblock, size_t size, size_t addrMod){
     size_t startAddr = (size_t)pblock + blockSize;
-    printf("starAddr %x\n", startAddr);
+    // printf("starAddr %x\n", startAddr);
     if(startAddr%addrMod == 0)
         return startAddr;
     startAddr += blockSize;
     size_t validAddr = startAddr;
-    printf("validAddr %x\n", validAddr);
+    // printf("validAddr %x\n", validAddr);
     validAddr += addrMod - (validAddr%addrMod);
     
     if (validAddr + size <= (size_t)pblock + pblock->size)
@@ -182,6 +180,7 @@ static void kfree(void *ptr) {
         assert(pafterBlock != pbend);
         assert(pblock != pbend);
         pblock->size += pafterBlock->size + blockSize;
+        pblock->size &= ~(blockAllocateBit);
         pblock->next = pafterBlock->next;
     }
     unlock(&linkLock);
