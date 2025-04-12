@@ -36,6 +36,8 @@ static void test0(void)
 	*add3_int=543210;
 	*(add3_int+(512-4)/4)=114514;
 	pmm->free(add2);
+    printf("cpu:%d\n",cpu_current());
+
     printf("add1:%d\n",*add1_int);
 	assert(*add1_int==9876);
 	assert(*(add1_int+(1020-4)/4)==114514);
@@ -58,7 +60,6 @@ static void os_run() {
     while (1)
     {
         test0();
-        printf("cpu:%d\n",cpu_current());
     }
 }
 
