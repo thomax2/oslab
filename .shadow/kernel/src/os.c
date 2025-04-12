@@ -14,6 +14,7 @@ static void test0(void)
 
 	int *add1_int=(int *)add1;
 	*add1_int=9876;
+    
 	*(add1_int+(1020-4)/4)=114514;
 	void *add2 = pmm->alloc(20);
 	if (add2 == NULL)
@@ -37,9 +38,9 @@ static void test0(void)
 	*(add3_int+(512-4)/4)=114514;
 	pmm->free(add2);
     printf("cpu:%d\n",cpu_current());
-
+    int t1 = *add1_int;
     // printf("add1:%d\n",*add1_int);
-	assert(*add1_int==9876);
+	assert(t1==9876);
 	assert(*(add1_int+(1020-4)/4)==114514);
 	assert(*add3_int==543210);
 	assert(*(add3_int+(512-4)/4)==114514);
