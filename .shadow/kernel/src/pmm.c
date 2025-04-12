@@ -199,7 +199,7 @@ static void pmm_init() {
     );
 
     kinit();
-
+    assert(pbend->size != 0);
 }
 
 MODULE_DEF(pmm) = {
