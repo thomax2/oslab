@@ -53,6 +53,8 @@ static void kinit(void){
     // set heapblock remain size
     freeBytesRemaining = bFirstBlock->size;
     maxFreeBytesRemaining = freeBytesRemaining;
+    assert(pbend->size != 0);
+
     return;
 }
 
