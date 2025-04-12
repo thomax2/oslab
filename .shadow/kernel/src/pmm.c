@@ -101,6 +101,7 @@ static void *kalloc(size_t size) {
     //     printf("-----\n");
     // }
     // printf("******\n");
+    printf("cpu:%d\n",cpu_current());
     assert(pblock != pbend);
     
     assert(addr != 0);
