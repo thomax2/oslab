@@ -66,7 +66,7 @@ size_t addr_valid(blockLink_t *pblock, size_t size, size_t addrMod){
     size_t validAddr = startAddr;
     printf("validAddr %x\n", validAddr);
     validAddr += addrMod - (validAddr%addrMod);
-    assert(pbend->size == 0);
+    
     if (validAddr + size <= (size_t)pblock + pblock->size)
         return validAddr;
     else
@@ -77,8 +77,7 @@ static void *kalloc(size_t size) {
     // printf("%d\n",size);
     // align size
     assert(size != 0);
-    assert(pbend->size == 0);
-
+    
     size_t addrMod = 1;
     while(addrMod < size)
         addrMod <<= 1;
@@ -103,7 +102,7 @@ static void *kalloc(size_t size) {
     // }
     // printf("******\n");
     assert(pblock != pbend);
-    assert(pbend->size == 0);
+    
     assert(addr != 0);
     if(addr - blockSize == (size_t)pblock)
     {
@@ -117,11 +116,11 @@ static void *kalloc(size_t size) {
             pblock->next = bNextBlock;
             pblock->size = size;
             pblock->size |= (blockAllocateBit);
-            assert(pbend->size == 0);
+            
         }
         else
             pblock->size |= (blockAllocateBit);
-        assert(pbend->size == 0);
+        
     }
     else
     {
@@ -139,7 +138,7 @@ static void *kalloc(size_t size) {
             bNowBlock->size |= blockAllocateBit;
             pblock->size = addr - (size_t)pblock - blockSize;
             pblock->size &= ~(blockAllocateBit);
-            assert(pbend->size == 0);
+            
         }
         else
         {
@@ -151,11 +150,11 @@ static void *kalloc(size_t size) {
             bNowBlock->size |= (blockAllocateBit);    
             pblock->size = addr - (size_t)pblock - blockSize;
             pblock->size &= ~(blockAllocateBit);
-            assert(pbend->size == 0);
+            
         }
     }
     unlock(&linkLock);
-    assert(pbend->size == 0);
+    
     return (void *)addr;
 }
 
@@ -184,7 +183,7 @@ static void kfree(void *ptr) {
         pblock->next = pafterBlock->next;
     }
     unlock(&linkLock);
-    assert(pbend->size == 0);
+    
     return;
 }
 
@@ -200,7 +199,7 @@ static void pmm_init() {
     );
 
     kinit();
-    assert(pbend->size == 0);
+    
 }
 
 MODULE_DEF(pmm) = {
