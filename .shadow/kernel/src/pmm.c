@@ -29,7 +29,7 @@ static void kinit(void){
     blockSize = sizeof(blockLink_t);
     blockAllocateBit = ((size_t) 1) << (sizeof(size_t)*8-1);
     if(blockAllocateBit != 0)
-        printf("allocbit:%d\n",blockAllocateBit);
+        printf("allocbit:%p\n",blockAllocateBit);
     // start align upward, end align downward
     heapStartAddr += byteAlignment - 1;
     heapStartAddr &= ~(byteAlignment - 1);
