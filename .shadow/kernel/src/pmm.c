@@ -102,23 +102,26 @@ static void *kalloc(size_t size) {
     assert(pblock != pbend);
     
     assert(addr != 0);
-    size_t trueSize = pblock->size & ~blockAllocateBit;
+    size_t trueSize = (pblock->size) & ~(blockAllocateBit);
     if(addr - blockSize == (size_t)pblock)
     {
         if(addr + size < (size_t)pblock + trueSize)
         {
             blockLink_t *bNextBlock = (void *)(addr + size);
             bNextBlock->next = pblock->next;
-            bNextBlock->size = trueSize - size - blockSize;
+            bNextBlock->size = (size_t)(bNextBlock->next) - (size_t)(bNextBlock) - blockSize;
             bNextBlock->size &= ~(blockAllocateBit);
 
             pblock->next = bNextBlock;
-            pblock->size = size;
+            pblock->size = (size_t)(bNextBlock) - (size_t)pblock - blockSize;
             pblock->size |= (blockAllocateBit);
             
         }
         else
+        {
+            pblock->size = (size_t)(pblock->next) - (size_t)pblock;
             pblock->size |= (blockAllocateBit);
+        }
         
     }
     else
@@ -131,11 +134,11 @@ static void *kalloc(size_t size) {
             bNowBlock->next = bNextBlock;
             pblock->next = bNowBlock;
     
-            bNextBlock->size = trueSize - (addr - (size_t)pblock) - size - blockSize;
+            bNextBlock->size = (size_t)(bNextBlock->next) - (size_t)(bNextBlock) - blockSize;
             bNextBlock->size &= ~(blockAllocateBit);
-            bNowBlock->size = size;
+            bNowBlock->size = (size_t)(bNextBlock) - addr;
             bNowBlock->size |= blockAllocateBit;
-            pblock->size = addr - (size_t)pblock - blockSize;
+            pblock->size = (size_t)bNowBlock - (size_t)pblock - blockSize;
             pblock->size &= ~(blockAllocateBit);
             
         }
@@ -145,9 +148,9 @@ static void *kalloc(size_t size) {
             bNowBlock->next = pblock->next;
             pblock->next = bNowBlock;
 
-            bNowBlock->size = trueSize - (addr - (size_t)pblock);
+            bNowBlock->size = (size_t)(bNowBlock->next) - addr;
             bNowBlock->size |= (blockAllocateBit);    
-            pblock->size = addr - (size_t)pblock - blockSize;
+            pblock->size = (size_t)bNowBlock - (size_t)pblock - blockSize;
             pblock->size &= ~(blockAllocateBit);
             
         }
@@ -165,21 +168,20 @@ static void kfree(void *ptr) {
     //find pre block
     for(ppreBlock = &bstart; ppreBlock->next != pblock; ppreBlock = ppreBlock->next);
     
-    size_t trueSize = pblock->size & ~blockAllocateBit;
+    // size_t trueSize = pblock->size & ~blockAllocateBit;
     // merge pre block
     if(!(ppreBlock->size & blockAllocateBit))
     {
-        ppreBlock->size += trueSize + blockSize;
+        ppreBlock->size = (size_t)(pblock->next) - (size_t)ppreBlock - blockSize;
         ppreBlock->next = pblock->next;
         pblock = ppreBlock;
+        pblock->size &= ~(blockAllocateBit);
     }
 
     // merge after block
     if(!(pafterBlock->size & blockAllocateBit))
     {
-        assert(pafterBlock != pbend);
-        assert(pblock != pbend);
-        pblock->size += pafterBlock->size + blockSize;
+        pblock->size = (size_t)(pafterBlock->next) - (size_t)pblock - blockSize;
         pblock->size &= ~(blockAllocateBit);
         pblock->next = pafterBlock->next;
     }
