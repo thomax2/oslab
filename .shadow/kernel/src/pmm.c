@@ -160,8 +160,8 @@ static void *kalloc(size_t size) {
 static void kfree(void *ptr) {
     blockLink_t *pblock = (void *)((size_t)ptr - blockSize);
     blockLink_t *ppreBlock;
-    blockLink_t *pafterBlock = pblock->next;
     lock(&linkLock);
+    blockLink_t *pafterBlock = pblock->next;
     //find pre block
     for(ppreBlock = &bstart; ppreBlock->next != pblock; ppreBlock = ppreBlock->next);
     
