@@ -49,11 +49,11 @@ static void kinit(void){
     blockLink_t *bFirstBlock = (void *)heapStartAddr;
     bFirstBlock->next = pbend;
     bFirstBlock->size = heapEndAddr - heapStartAddr - blockSize;
+    assert(pbend->size != 0);
 
     // set heapblock remain size
     freeBytesRemaining = bFirstBlock->size;
     maxFreeBytesRemaining = freeBytesRemaining;
-    assert(pbend->size != 0);
 
     return;
 }
