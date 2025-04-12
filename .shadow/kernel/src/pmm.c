@@ -99,26 +99,49 @@ static void *kalloc(size_t size) {
     
     if(addr - blockSize == (size_t)pblock)
     {
-        blockLink_t *bNextBlock = (void *)(addr + size);
-        bNextBlock->next = pblock->next;
-        bNextBlock->size = pblock->size - size - blockSize;
+        if(addr + size < (size_t)pblock + pblock->size)
+        {
+            blockLink_t *bNextBlock = (void *)(addr + size);
+            bNextBlock->next = pblock->next;
+            bNextBlock->size = pblock->size - size - blockSize;
+            bNextBlock->size &= ~(blockAllocateBit);
 
-        pblock->next = bNextBlock;
-        pblock->size = size;
-        pblock->size |= (blockAllocateBit);
+            pblock->next = bNextBlock;
+            pblock->size = size;
+            pblock->size |= (blockAllocateBit);
+    
+        }
+        else
+            pblock->size |= (blockAllocateBit);
     }
     else
     {
-        blockLink_t *bNextBlock = (void *)(addr + size);
-        blockLink_t *bNowBlock = (void *)(addr - blockSize);
-        bNextBlock->next = pblock->next;
-        bNowBlock->next = bNextBlock;
-        pblock->next = bNowBlock;
+        if(addr + size < (size_t)pblock + pblock->size)
+        {
+            blockLink_t *bNextBlock = (void *)(addr + size);
+            blockLink_t *bNowBlock = (void *)(addr - blockSize);
+            bNextBlock->next = pblock->next;
+            bNowBlock->next = bNextBlock;
+            pblock->next = bNowBlock;
+    
+            bNextBlock->size = pblock->size - (addr - (size_t)pblock) - size - blockSize;
+            bNextBlock->size &= ~(blockAllocateBit);
+            bNowBlock->size = size;
+            bNowBlock->size |= blockAllocateBit;
+            pblock->size = addr - (size_t)pblock - blockSize;
+            pblock->size &= ~(blockAllocateBit);    
+        }
+        else
+        {
+            blockLink_t *bNowBlock = (void *)(addr - blockSize);
+            bNowBlock->next = pblock->next;
+            pblock->next = bNowBlock;
 
-        bNextBlock->size = pblock->size - (addr - (size_t)pblock) - size - blockSize;
-        bNowBlock->size = size;
-        bNowBlock->size |= blockAllocateBit;
-        pblock->size = addr - (size_t)pblock - blockSize;
+            bNowBlock->size = pblock->size - (addr - (size_t)pblock);
+            bNowBlock->size |= (blockAllocateBit);    
+            pblock->size = addr - (size_t)pblock - blockSize;
+            pblock->size &= ~(blockAllocateBit);
+        }
     }
     unlock(&linkLock);
 
