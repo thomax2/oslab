@@ -88,7 +88,14 @@ static void *kalloc(size_t size) {
                 break;
         pblock = pblock->next;
     }
+    for (blockLink_t *pblock = &bstart; pblock; pblock = pblock->next)
+    {
+        printf("addr:%p\n",pblock);
+        printf("size:%d\n",pblock->size);
+    }
+    
     assert(addr != 0);
+    
     if(addr - blockSize == (size_t)pblock)
     {
         blockLink_t *bNextBlock = (void *)(addr + size);
