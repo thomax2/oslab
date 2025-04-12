@@ -61,6 +61,7 @@ static void os_run() {
         putch('p');
         putch('u');
         putch('0'+cpu_current());
+        putch('\n');
     }
 }
 
