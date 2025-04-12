@@ -2,7 +2,7 @@
 
 static void test0(void)
 {
-    printf("start\n");
+    // printf("start\n");
 	void *add1 = pmm->alloc(1020);
 	if (add1 == NULL)
 	{
@@ -57,11 +57,7 @@ static void os_run() {
     while (1)
     {
         test0();
-        putch('c');
-        putch('p');
-        putch('u');
-        putch('0'+cpu_current());
-        putch('\n');
+        printf("cpu:%d\n",cpu_current());
     }
 }
 
