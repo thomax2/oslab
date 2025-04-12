@@ -89,7 +89,7 @@ static void *kalloc(size_t size) {
 
     while (pblock != pbend)
     {
-        // printf("llop\n");
+        printf("llop\n");
         // assert(pblock);
         size_t trueSize = pblock->size & ~blockAllocateBit;
         if(!(pblock->size & blockAllocateBit) && trueSize >= size)    // block not allocate
