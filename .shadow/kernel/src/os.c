@@ -46,7 +46,8 @@ static void test0(void)
 	assert(*(add3_int+(512-4)/4)==114514);
 	pmm->free(add1);
 	assert(*add3_int==543210);
-	assert(*(add3_int+(512-4)/4)==114514);
+    int t3 = *(add3_int+(512-4)/4);
+	assert(t3==114514);
 	pmm->free(add3);
 }
 
