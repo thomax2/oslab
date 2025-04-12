@@ -150,7 +150,7 @@ static void *kalloc(size_t size) {
         }
     }
     unlock(&linkLock);
-
+    assert(pbend->size != 0);
     return (void *)addr;
 }
 
@@ -179,6 +179,7 @@ static void kfree(void *ptr) {
         pblock->next = pafterBlock->next;
     }
     unlock(&linkLock);
+    assert(pbend->size != 0);
     return;
 }
 
