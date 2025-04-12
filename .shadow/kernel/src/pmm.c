@@ -58,10 +58,12 @@ static void kinit(void){
 
 size_t addr_valid(blockLink_t *pblock, size_t size, size_t addrMod){
     size_t startAddr = (size_t)pblock + blockSize;
+    printf("starAddr %x\n", startAddr);
     if(startAddr%addrMod == 0)
         return startAddr;
     startAddr += blockSize;
     size_t validAddr = startAddr;
+    printf("validAddr %x\n", validAddr);
     validAddr += addrMod - (validAddr%addrMod);
     if (validAddr + size <= (size_t)pblock + pblock->size)
         return validAddr;
@@ -88,13 +90,13 @@ static void *kalloc(size_t size) {
                 break;
         pblock = pblock->next;
     }
-    for (blockLink_t *pblock = &bstart; pblock; pblock = pblock->next)
-    {
-        printf("addr:%p\n",pblock);
-        printf("size:%d\n",pblock->size);
-        printf("-----\n");
-    }
-    printf("******\n");
+    // for (blockLink_t *pblock = &bstart; pblock; pblock = pblock->next)
+    // {
+    //     printf("addr:%p\n",pblock);
+    //     printf("size:%d\n",pblock->size);
+    //     printf("-----\n");
+    // }
+    // printf("******\n");
     assert(addr != 0);
     
     if(addr - blockSize == (size_t)pblock)

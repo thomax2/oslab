@@ -18,7 +18,7 @@ static void test0(void)
 	void *add2 = pmm->alloc(20);
 	if (add2 == NULL)
 	{
-		printf("add3 is NULL\n");
+		printf("add2 is NULL\n");
 		assert(1);
 	}
 	else
