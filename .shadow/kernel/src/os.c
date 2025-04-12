@@ -2,6 +2,7 @@
 
 static void test0(void)
 {
+    printf("start\n");
 	void *add1 = pmm->alloc(1020);
 	if (add1 == NULL)
 	{

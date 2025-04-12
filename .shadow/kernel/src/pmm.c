@@ -72,7 +72,7 @@ size_t addr_valid(blockLink_t *pblock, size_t size, size_t addrMod){
 static void *kalloc(size_t size) {
     
     // align size
-    assert(size==0);
+    assert(size == 0);
     size_t addrMod = 1;
     while(addrMod < size)
         addrMod <<= 1;
