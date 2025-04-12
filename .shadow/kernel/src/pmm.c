@@ -82,11 +82,14 @@ static void *kalloc(size_t size) {
         addrMod <<= 1;
 
     // get list lock to find suit block, suit= enough/nowait/
-    blockLink_t *pblock = bstart.next;
     size_t addr=0;
+
     lock(&linkLock);
+    blockLink_t *pblock = bstart.next;
+
     while (pblock != pbend)
     {
+        // printf("llop\n");
         // assert(pblock);
         size_t trueSize = pblock->size & ~blockAllocateBit;
         if(!(pblock->size & blockAllocateBit) && trueSize >= size)    // block not allocate
@@ -95,7 +98,7 @@ static void *kalloc(size_t size) {
         pblock = pblock->next;
     }
 
-    printf("cpu:%d\n",cpu_current());
+    // printf("cpu:%d\n",cpu_current());
     assert(pblock != pbend);
     
     assert(addr != 0);
