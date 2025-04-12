@@ -88,70 +88,66 @@ static void *kalloc(size_t size) {
     while (pblock != pbend)
     {
         // assert(pblock);
-        if(!(pblock->size & blockAllocateBit) && pblock->size >= size)    // block not allocate
+        size_t trueSize = pblock->size & ~blockAllocateBit;
+        if(!(pblock->size & blockAllocateBit) && trueSize >= size)    // block not allocate
             if((addr = addr_valid(pblock, size, addrMod)) != 0) // size enough
                 break;
         pblock = pblock->next;
     }
-    // for (blockLink_t *pblock = &bstart; pblock; pblock = pblock->next)
-    // {
-    //     printf("addr:%p\n",pblock);
-    //     printf("size:%d\n",pblock->size);
-    //     printf("-----\n");
-    // }
-    // printf("******\n");
+
     printf("cpu:%d\n",cpu_current());
     assert(pblock != pbend);
     
     assert(addr != 0);
+    size_t trueSize = pblock->size & ~blockAllocateBit;
     if(addr - blockSize == (size_t)pblock)
     {
-        // if(addr + size < (size_t)pblock + pblock->size)
-        // {
+        if(addr + size < (size_t)pblock + trueSize)
+        {
             blockLink_t *bNextBlock = (void *)(addr + size);
             bNextBlock->next = pblock->next;
-            bNextBlock->size = pblock->size - size - blockSize;
+            bNextBlock->size = trueSize - size - blockSize;
             bNextBlock->size &= ~(blockAllocateBit);
 
             pblock->next = bNextBlock;
             pblock->size = size;
             pblock->size |= (blockAllocateBit);
             
-        // }
-        // else
-        //     pblock->size |= (blockAllocateBit);
+        }
+        else
+            pblock->size |= (blockAllocateBit);
         
     }
     else
     {
-        // if(addr + size < (size_t)pblock + pblock->size)
-        // {
+        if(addr + size < (size_t)pblock + trueSize)
+        {
             blockLink_t *bNextBlock = (void *)(addr + size);
             blockLink_t *bNowBlock = (void *)(addr - blockSize);
             bNextBlock->next = pblock->next;
             bNowBlock->next = bNextBlock;
             pblock->next = bNowBlock;
     
-            bNextBlock->size = pblock->size - (addr - (size_t)pblock) - size - blockSize;
+            bNextBlock->size = trueSize - (addr - (size_t)pblock) - size - blockSize;
             bNextBlock->size &= ~(blockAllocateBit);
             bNowBlock->size = size;
             bNowBlock->size |= blockAllocateBit;
             pblock->size = addr - (size_t)pblock - blockSize;
             pblock->size &= ~(blockAllocateBit);
             
-        // }
-        // else
-        // {
-        //     blockLink_t *bNowBlock = (void *)(addr - blockSize);
-        //     bNowBlock->next = pblock->next;
-        //     pblock->next = bNowBlock;
+        }
+        else
+        {
+            blockLink_t *bNowBlock = (void *)(addr - blockSize);
+            bNowBlock->next = pblock->next;
+            pblock->next = bNowBlock;
 
-        //     bNowBlock->size = pblock->size - (addr - (size_t)pblock);
-        //     bNowBlock->size |= (blockAllocateBit);    
-        //     pblock->size = addr - (size_t)pblock - blockSize;
-        //     pblock->size &= ~(blockAllocateBit);
+            bNowBlock->size = trueSize - (addr - (size_t)pblock);
+            bNowBlock->size |= (blockAllocateBit);    
+            pblock->size = addr - (size_t)pblock - blockSize;
+            pblock->size &= ~(blockAllocateBit);
             
-        // }
+        }
     }
     unlock(&linkLock);
     
@@ -166,10 +162,11 @@ static void kfree(void *ptr) {
     //find pre block
     for(ppreBlock = &bstart; ppreBlock->next != pblock; ppreBlock = ppreBlock->next);
     
+    size_t trueSize = pblock->size & ~blockAllocateBit;
     // merge pre block
     if(!(ppreBlock->size & blockAllocateBit))
     {
-        ppreBlock->size += pblock->size + blockSize;
+        ppreBlock->size += trueSize + blockSize;
         ppreBlock->next = pblock->next;
         pblock = ppreBlock;
     }
