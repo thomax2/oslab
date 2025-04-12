@@ -62,7 +62,7 @@ size_t addr_valid(blockLink_t *pblock, size_t size, size_t addrMod){
     if(startAddr%addrMod == 0)
         return startAddr;
     startAddr += blockSize;
-    size_t validAddr = startAddr;
+    size_t validAddr = startAddr+1;
     // printf("validAddr %x\n", validAddr);
     validAddr += addrMod - (validAddr%addrMod);
     
