@@ -97,9 +97,9 @@ static void *kalloc(size_t size) {
     //     printf("-----\n");
     // }
     // printf("******\n");
+    assert(pblock != pbend);
     assert(pbend->size != 0);
     assert(addr != 0);
-    assert(pblock != pbend);
     if(addr - blockSize == (size_t)pblock)
     {
         if(addr + size < (size_t)pblock + pblock->size)
