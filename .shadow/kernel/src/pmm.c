@@ -106,8 +106,8 @@ static void *kalloc(size_t size) {
     assert(addr != 0);
     if(addr - blockSize == (size_t)pblock)
     {
-        if(addr + size < (size_t)pblock + pblock->size)
-        {
+        // if(addr + size < (size_t)pblock + pblock->size)
+        // {
             blockLink_t *bNextBlock = (void *)(addr + size);
             bNextBlock->next = pblock->next;
             bNextBlock->size = pblock->size - size - blockSize;
@@ -117,15 +117,15 @@ static void *kalloc(size_t size) {
             pblock->size = size;
             pblock->size |= (blockAllocateBit);
             
-        }
-        else
-            pblock->size |= (blockAllocateBit);
+        // }
+        // else
+        //     pblock->size |= (blockAllocateBit);
         
     }
     else
     {
-        if(addr + size < (size_t)pblock + pblock->size)
-        {
+        // if(addr + size < (size_t)pblock + pblock->size)
+        // {
             blockLink_t *bNextBlock = (void *)(addr + size);
             blockLink_t *bNowBlock = (void *)(addr - blockSize);
             bNextBlock->next = pblock->next;
@@ -139,19 +139,19 @@ static void *kalloc(size_t size) {
             pblock->size = addr - (size_t)pblock - blockSize;
             pblock->size &= ~(blockAllocateBit);
             
-        }
-        else
-        {
-            blockLink_t *bNowBlock = (void *)(addr - blockSize);
-            bNowBlock->next = pblock->next;
-            pblock->next = bNowBlock;
+        // }
+        // else
+        // {
+        //     blockLink_t *bNowBlock = (void *)(addr - blockSize);
+        //     bNowBlock->next = pblock->next;
+        //     pblock->next = bNowBlock;
 
-            bNowBlock->size = pblock->size - (addr - (size_t)pblock);
-            bNowBlock->size |= (blockAllocateBit);    
-            pblock->size = addr - (size_t)pblock - blockSize;
-            pblock->size &= ~(blockAllocateBit);
+        //     bNowBlock->size = pblock->size - (addr - (size_t)pblock);
+        //     bNowBlock->size |= (blockAllocateBit);    
+        //     pblock->size = addr - (size_t)pblock - blockSize;
+        //     pblock->size &= ~(blockAllocateBit);
             
-        }
+        // }
     }
     unlock(&linkLock);
     
