@@ -112,10 +112,11 @@ static void *kalloc(size_t size) {
             pblock->next = bNextBlock;
             pblock->size = size;
             pblock->size |= (blockAllocateBit);
-    
+            assert(pbend->size != 0);
         }
         else
             pblock->size |= (blockAllocateBit);
+        assert(pbend->size != 0);
     }
     else
     {
@@ -132,7 +133,8 @@ static void *kalloc(size_t size) {
             bNowBlock->size = size;
             bNowBlock->size |= blockAllocateBit;
             pblock->size = addr - (size_t)pblock - blockSize;
-            pblock->size &= ~(blockAllocateBit);    
+            pblock->size &= ~(blockAllocateBit);
+            assert(pbend->size != 0);
         }
         else
         {
@@ -144,6 +146,7 @@ static void *kalloc(size_t size) {
             bNowBlock->size |= (blockAllocateBit);    
             pblock->size = addr - (size_t)pblock - blockSize;
             pblock->size &= ~(blockAllocateBit);
+            assert(pbend->size != 0);
         }
     }
     unlock(&linkLock);
