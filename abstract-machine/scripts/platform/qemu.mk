@@ -1,10 +1,10 @@
 .PHONY: build-arg
 
-smp        ?= 1
+smp        ?= 4
 LDFLAGS    += -N -Ttext-segment=0x00100000
 QEMU_FLAGS += -serial mon:stdio \
               -machine accel=tcg \
-              -smp "$(smp),cores=$(smp),sockets=1" \
+              -smp "$(smp),cores=1,sockets=$(smp)" \
               -drive format=raw,file=$(IMAGE)
 
 build-arg: image

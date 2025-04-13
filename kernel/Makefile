@@ -10,3 +10,12 @@ endif
 include $(AM_HOME)/Makefile
 include ../oslabs.mk
 image: git
+
+
+log:
+	make -nB \
+	     | grep -ve '^\(\#\|echo\|mkdir\|make\)' \
+	     | sed "s#$(AM_HOME)#\AM#g" \
+	     | sed "s#$(PWD)#.#g" \
+		 | vim -
+	     #> compile.log
