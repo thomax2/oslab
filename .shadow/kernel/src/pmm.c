@@ -211,9 +211,10 @@ static void kfree(void *ptr) {
     while ((size_t)pafterBlock < (size_t) pblock)
     {
         lock(&pafterBlock->next->lk);
+        blockLink_t *tmpAfterBlock = pafterBlock;
         pafterBlock = pafterBlock->next;
         unlock(&preBlock->lk);
-        preBlock = pafterBlock;
+        preBlock = tmpAfterBlock;
     }
     assert(preBlock->next == pafterBlock);
     
