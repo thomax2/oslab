@@ -363,7 +363,7 @@ void gpt2_build_from_checkpoint(GPT2 *model, char* checkpoint_path) {
     int model_header[256];
     fread(model_header, sizeof(int), 256, model_file);
     if (model_header[0] != 20240326) { printf("Bad magic model file"); exit(1); }
-    if (model_header[1] != 3) { printf("Bad version in model file"); exit(1); }
+    if (model_header[1] != 1) { printf("Bad version in model file"); exit(1); }
 
     // read in hyperparameters
     int maxT, V, L, NH, C;
