@@ -147,7 +147,7 @@ void part_matmul(int id)
     {
         P(&cvMatmul[id-1]);
         int upbound = id*(partT/THREADCOUNT) + (id < (partT%THREADCOUNT + 1)) ;
-        int downbound = (id-1)*(partT/THREADCOUNT) + ((id-1) < (partT%THREADCOUNT + 1)) - (id == 1);
+        int downbound = (id-1)*(partT/THREADCOUNT) + ((id-1) < (partT%THREADCOUNT + 1)) ;
         // assert(upbound<=partT);
         // assert(downbound>=0); 
         // printf("%d\t%d\n",downbound,upbound);
