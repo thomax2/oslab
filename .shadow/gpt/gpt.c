@@ -418,6 +418,10 @@ void gpt2_build_from_checkpoint(GPT2 *model, char* checkpoint_path) {
     model->mean_loss = -1.0f; // -1.0f will designate no loss
 }
 
+mutex_t lk = MUTEX_INIT();
+cond_t cvMain = COND_INIT();
+cond_t cvForward = COND_INIT();
+
 
 void gpt2_forward(GPT2 *model, int* inputs, int B, int T) {
     // convenience parameters
@@ -493,9 +497,6 @@ void gpt2_forward(GPT2 *model, int* inputs, int B, int T) {
     softmax_forward(acts.probs, acts.logits, B, T, Vi);
 }
 
-mutex_t lk = MUTEX_INIT();
-cond_t cvMain = COND_INIT();
-cond_t cvForward = COND_INIT();
 
 
 void part_forward(int id)
