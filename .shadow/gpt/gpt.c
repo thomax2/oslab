@@ -115,7 +115,7 @@ void matmul_forward(float* out,
     partbias = bias;
     partweight = weight;
     partT = T;
-
+    print("%d\n",T);
     for(int i = 0; i<THREADCOUNT;i++)
         V(&cvMatmul[i]);
 
@@ -150,7 +150,7 @@ void part_matmul(int id)
         int downbound = (id-1)*(partT/THREADCOUNT) + ((id-1) < (partT%THREADCOUNT + 1)) - (id == 1);
         // assert(upbound<=partT);
         // assert(downbound>=0); 
-        printf("%d\t%d\n",downbound,upbound);
+        // printf("%d\t%d\n",downbound,upbound);
         for (int t = downbound; t < upbound; t++) {
             out_bt = partout + t * partOC;
             inp_bt = partinp + t * partC;
