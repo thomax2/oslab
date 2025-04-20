@@ -14,14 +14,16 @@
 
 // ----------------------------------------------------------------------------
 // all the individual layers' forward passes
-// B = batch_size, T = sequence_length, C = channels, V = vocab_size
+// B = batch_size, T = sequence_length, C = channels, Vi = vocab_size
+
+#define THREADCOUNT 4
 
 void encoder_forward(float* out,
                    int* inp, float* wte, float* wpe,
                    int B, int T, int C) {
     // out is (B,T,C). At each position (b,t), a C-dimensional vector summarizing token & position
     // inp is (B,T) of integers, holding the token ids at each (b,t) position
-    // wte is (V,C) of token embeddings, short for "weight token embeddings"
+    // wte is (Vi,C) of token embeddings, short for "weight token embeddings"
     // wpe is (maxT,C) of position embeddings, short for "weight positional embedding"
     for (int b = 0; b < B; b++) {
         for (int t = 0; t < T; t++) {
@@ -109,7 +111,7 @@ void matmul_forward(float* out,
 void attention_forward(float* out, float* preatt, float* att,
                        float* inp,
                        int B, int T, int C, int NH) {
-    // input is (B, T, 3C) holding the query, key, value (Q, K, V) vectors
+    // input is (B, T, 3C) holding the query, key, value (Q, K, Vi) vectors
     // preatt, att are (B, NH, T, T). NH = number of heads, T = sequence length
     // that holds the pre-attention and post-attention scores (used in backward)
     // output is (B, T, C)
@@ -197,28 +199,28 @@ void residual_forward(float* out, float* inp1, float* inp2, int N) {
     }
 }
 
-void softmax_forward(float* probs, float* logits, int B, int T, int V) {
-    // output: probs are (B,T,V) of the probabilities (sums to 1.0 in each b,t position)
-    // input: logits is (B,T,V) of the unnormalized log probabilities
+void softmax_forward(float* probs, float* logits, int B, int T, int Vi) {
+    // output: probs are (B,T,Vi) of the probabilities (sums to 1.0 in each b,t position)
+    // input: logits is (B,T,Vi) of the unnormalized log probabilities
     for (int b = 0; b < B; b++) {
         for (int t = 0; t < T; t++) {
             // probs <- softmax(logits)
-            float* logits_bt = logits + b * T * V + t * V;
-            float* probs_bt = probs + b * T * V + t * V;
+            float* logits_bt = logits + b * T * Vi + t * Vi;
+            float* probs_bt = probs + b * T * Vi + t * Vi;
 
             // maxval is only calculated and subtracted for numerical stability
             float maxval = -10000.0f; // TODO something better
-            for (int i = 0; i < V; i++) {
+            for (int i = 0; i < Vi; i++) {
                 if (logits_bt[i] > maxval) {
                     maxval = logits_bt[i];
                 }
             }
             float sum = 0.0f;
-            for (int i = 0; i < V; i++) {
+            for (int i = 0; i < Vi; i++) {
                 probs_bt[i] = expf(logits_bt[i] - maxval);
                 sum += probs_bt[i];
             }
-            for (int i = 0; i < V; i++) {
+            for (int i = 0; i < Vi; i++) {
                 probs_bt[i] /= sum;
             }
         }
@@ -231,7 +233,7 @@ void softmax_forward(float* probs, float* logits, int B, int T, int V) {
 // the parameters of the model
 #define NUM_PARAMETER_TENSORS 16
 typedef struct {
-    float* wte; // (V, C)
+    float* wte; // (Vi, C)
     float* wpe; // (maxT, C)
     float* ln1w; // (L, C)
     float* ln1b; // (L, C)
@@ -293,8 +295,8 @@ typedef struct {
     float* lnf; // (B, T, C)
     float* lnf_mean; // (B, T)
     float* lnf_rstd; // (B, T)
-    float* logits; // (B, T, V)
-    float* probs; // (B, T, V)
+    float* logits; // (B, T, Vi)
+    float* probs; // (B, T, Vi)
     float* losses; // (B, T)
 } ActivationTensors;
 
@@ -366,15 +368,15 @@ void gpt2_build_from_checkpoint(GPT2 *model, char* checkpoint_path) {
     if (model_header[1] != 1) { printf("Bad version in model file"); exit(1); }
 
     // read in hyperparameters
-    int maxT, V, L, NH, C;
+    int maxT, Vi, L, NH, C;
     model->config.max_seq_len = maxT = model_header[2];
-    model->config.vocab_size = V = model_header[3];
+    model->config.vocab_size = Vi = model_header[3];
     model->config.num_layers = L = model_header[4];
     model->config.num_heads = NH = model_header[5];
     model->config.channels = C = model_header[6];
 
     // allocate space for all the parameters and read them in
-    model->param_sizes[0] = V * C; // wte
+    model->param_sizes[0] = Vi * C; // wte
     model->param_sizes[1] = maxT * C; // wpe
     model->param_sizes[2] = L * C; // ln1w
     model->param_sizes[3] = L * C; // ln1b
@@ -416,9 +418,10 @@ void gpt2_build_from_checkpoint(GPT2 *model, char* checkpoint_path) {
     model->mean_loss = -1.0f; // -1.0f will designate no loss
 }
 
+
 void gpt2_forward(GPT2 *model, int* inputs, int B, int T) {
     // convenience parameters
-    int V = model->config.vocab_size;
+    int Vi = model->config.vocab_size;
     int L = model->config.num_layers;
     int NH = model->config.num_heads;
     int C = model->config.channels;
@@ -447,8 +450,8 @@ void gpt2_forward(GPT2 *model, int* inputs, int B, int T) {
     model->act_sizes[17] = B * T * C; // lnf
     model->act_sizes[18] = B * T; // lnf_mean
     model->act_sizes[19] = B * T; // lnf_rstd
-    model->act_sizes[20] = B * T * V; // logits
-    model->act_sizes[21] = B * T * V; // probs
+    model->act_sizes[20] = B * T * Vi; // logits
+    model->act_sizes[21] = B * T * Vi; // probs
     model->act_sizes[22] = B * T; // losses
     size_t num_activations = 0;
     for (size_t i = 0; i < NUM_ACTIVATION_TENSORS; i++) {
@@ -474,9 +477,38 @@ void gpt2_forward(GPT2 *model, int* inputs, int B, int T) {
     // forward pass
     ParameterTensors params = model->params; // for brevity
     ActivationTensors acts = model->acts;
-    float* residual;
+    // float* residual;
     encoder_forward(acts.encoded, inputs, params.wte, params.wpe, B, T, C); // encoding goes into residual[0]
-    for (int l = 0; l < L; l++) {
+    
+    for(int i = 0; i<THREADCOUNT; i++)
+        V(&cvForward);
+
+    for(int i = 0; i<THREADCOUNT; i++)
+        P(&cvMain);
+
+    float* residual;
+    residual = acts.residual3 + (L-1) * B * T * C; // last residual is in residual3
+    layernorm_forward(acts.lnf, acts.lnf_mean, acts.lnf_rstd, residual, params.lnfw, params.lnfb, B, T, C);
+    matmul_forward(acts.logits, acts.lnf, params.wte, NULL, B, T, C, Vi);
+    softmax_forward(acts.probs, acts.logits, B, T, Vi);
+}
+
+void part_forward(int id)
+{
+    P(&cvForward);
+    assert(id != 0);
+    GPT2 *tmodel = &model;
+    ParameterTensors params = tmodel->params; // for brevity
+    ActivationTensors acts = tmodel->acts;
+    int L = tmodel->config.num_layers;
+    int C = tmodel->config.channels;
+    int NH = tmodel->config.num_heads;
+    int B = 1;
+    int T = t;
+    float* residual;
+    int upbound = id*(L/THREADCOUNT) + id < (L % THREADCOUNT + 1);
+    int downbound = (id-1)*(L/THREADCOUNT) + (id-1) < (L % THREADCOUNT + 1);
+    for (int l = downbound; l < upbound; l++) {
 
         residual = l == 0 ? acts.encoded : acts.residual3 + (l-1) * B * T * C;
 
@@ -524,10 +556,7 @@ void gpt2_forward(GPT2 *model, int* inputs, int B, int T) {
         matmul_forward(l_fcproj, l_fch_gelu, l_fcprojw, l_fcprojb, B, T, 4*C, C);
         residual_forward(l_residual3, l_residual2, l_fcproj, B*T*C);
     }
-    residual = acts.residual3 + (L-1) * B * T * C; // last residual is in residual3
-    layernorm_forward(acts.lnf, acts.lnf_mean, acts.lnf_rstd, residual, params.lnfw, params.lnfb, B, T, C);
-    matmul_forward(acts.logits, acts.lnf, params.wte, NULL, B, T, C, V);
-    softmax_forward(acts.probs, acts.logits, B, T, V);
+    V(&cvMain);
 }
 
 void gpt2_zero_grad(GPT2 *model) {
@@ -562,8 +591,14 @@ int sample_mult(float* probabilities, int n) {
 // the GPT-2 end-of-text token id
 #define GPT2_EOT 50256
 
+GPT2 model;
+int t;
+mutex_t lk = MUTEX_INIT();
+cond_t cvMain = COND_INIT();
+cond_t cvForward = COND_INIT();
+
 int main(int argc, char** argv) {
-    GPT2 model;
+    // GPT2 model;
     gpt2_build_from_checkpoint(&model, "gpt2_124M.bin");
     const int n = 10;  // Token limit.
 
@@ -586,7 +621,11 @@ int main(int argc, char** argv) {
         }
     }
 
-    for (int t = argc - 1; t < n; t++) {
+
+    for (int i = 0; i < THREADCOUNT; i++)
+        create(part_forward);
+
+    for (t = argc - 1; t < n; t++) {
         gpt2_forward(&model, tokens, 1, t);
         float* probs = model.acts.probs + (t-1) * model.config.vocab_size;
         int next_token = sample_mult(probs, model.config.vocab_size);
