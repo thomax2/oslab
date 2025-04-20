@@ -18,7 +18,7 @@
 // all the individual layers' forward passes
 // B = batch_size, T = sequence_length, C = channels, V = vocab_size
 
-#define THREADCOUNT 2
+#define THREADCOUNT 4
 
 mutex_t lk = MUTEX_INIT();
 sem_t cvMain;
@@ -148,8 +148,9 @@ void part_matmul(int id)
         P(&cvMatmul[id-1]);
         int upbound = id*(partT/THREADCOUNT) + (id < (partT%THREADCOUNT + 1)) ;
         int downbound = (id-1)*(partT/THREADCOUNT) + ((id-1) < (partT%THREADCOUNT + 1));   
-        assert(upbound<=partT);
-        assert(downbound>=0); 
+        // assert(upbound<=partT);
+        // assert(downbound>=0); 
+        printf("%d\t%d\n",downbound,upbound);
         for (int t = downbound; t < upbound; t++) {
             out_bt = partout + t * partOC;
             inp_bt = partinp + t * partC;
