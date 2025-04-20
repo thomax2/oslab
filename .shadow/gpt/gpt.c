@@ -419,9 +419,8 @@ void gpt2_build_from_checkpoint(GPT2 *model, char* checkpoint_path) {
 }
 
 mutex_t lk = MUTEX_INIT();
-cond_t cvMain = COND_INIT();
-cond_t cvForward = COND_INIT();
-
+sem_t cvMain;
+sem_t cvForward;
 
 void gpt2_forward(GPT2 *model, int* inputs, int B, int T) {
     // convenience parameters
@@ -624,6 +623,8 @@ int main(int argc, char** argv) {
         }
     }
 
+    SEM_INIT(&cvForward,0);
+    SEM_INIT(&cvForward,0);
 
     for (int i = 0; i < THREADCOUNT; i++)
         create(part_forward);
