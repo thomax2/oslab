@@ -9,6 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <assert.h>
+#include <stdbool.h>
 
 #include "thread.h"
 #include "thread-sync.h"
@@ -100,6 +101,7 @@ float* partbias;
 float* partweight;
 float* partout;
 float* partinp;
+bool mainOver = 0;
 
 void matmul_forward(float* out,
                     float* inp, float* weight, float* bias,
@@ -139,7 +141,7 @@ void matmul_forward(float* out,
 void part_matmul(int id)
 {
     assert(id!=0);
-    while (1)
+    while (mainOver != 1)
     {
         P(&cvMatmul[id-1]);
         int upbound = id*(partT/THREADCOUNT) + (id < (partT%THREADCOUNT + 1)) ;
@@ -664,7 +666,7 @@ int main(int argc, char** argv) {
         printf("%d\n", tokens[t]);
         fflush(stdout);
     }
-
+    mainOver = 1;
     gpt2_free(&model);
 
     return 0;
