@@ -8,6 +8,7 @@
 #include <time.h>
 #include <string.h>
 #include <unistd.h>
+#include <assert.h>
 
 #include "thread.h"
 #include "thread-sync.h"
@@ -139,7 +140,9 @@ void part_matmul(int id)
     {
         P(&cvMatmul[id-1]);
         int upbound = id*(partT/THREADCOUNT) + (id < (partT%THREADCOUNT + 1)) ;
-        int downbound = (id-1)*(partT/THREADCOUNT) + ((id-1) < (partT%THREADCOUNT + 1));    
+        int downbound = (id-1)*(partT/THREADCOUNT) + ((id-1) < (partT%THREADCOUNT + 1));   
+        assert(upbound<=L);
+        assert(downbound>=0); 
         for (int t = downbound; t < upbound; t++) {
             out_bt = partout + t * partOC;
             inp_bt = partinp + t * partC;
