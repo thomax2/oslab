@@ -143,18 +143,15 @@ void part_matmul(int id)
     assert(id!=0);
     float* out_bt;
     float* inp_bt;
-    while (mainOver != 1)
+    while (1)
     {
         P(&cvMatmul[id-1]);
-        // int upbound = id*(partT/THREADCOUNT) + (id < (partT%THREADCOUNT + 1)) ;
-        // int downbound = (id-1)*(partT/THREADCOUNT) + ((id-1) < (partT%THREADCOUNT + 1)) - (id == 1);
+        if(mainOver)
+            break;
         int segNum = partT/THREADCOUNT;
         int mod = partT%THREADCOUNT;
-        // int per_offset = ((id-1) < (partT%THREADCOUNT + 1) && id !=1) ? 1:0;
         int downbound = (segNum + (mod > 0))*(((id-1)<=mod)?(id-1):mod) + (((id-1)>mod)?(id-1-mod):0)*segNum;
         int upbound = (segNum + (mod > 0))*(((id)<=mod)?(id):mod) + (((id)>mod)?(id-mod):0)*segNum;
-        // assert(downbound>=0); 
-        // printf("%d\t%d\n",downbound,upbound);
         for (int t = downbound; t < upbound; t++) {
             out_bt = partout + t * partOC;
             inp_bt = partinp + t * partC;
@@ -675,7 +672,10 @@ int main(int argc, char** argv) {
         printf("%d\n", tokens[t]);
         fflush(stdout);
     }
-    // mainOver = 1;
+    mainOver = 1;
+    for(int i = 0; i<THREADCOUNT;i++)
+        V(&cvMatmul[i]);
+
     gpt2_free(&model);
 
     return 0;
