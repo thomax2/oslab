@@ -108,6 +108,8 @@ void matmul_forward(float* out,
     // OC is short for "output channels"
     // inp is (B,T,C), weight is (OC, C), bias is (OC)
     // out will be (B,T,OC)
+    partout = out;
+    partinp = inp;
     partOC = OC;
     partC = C;
     partbias = bias;
