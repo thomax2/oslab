@@ -496,6 +496,8 @@ void gpt2_forward(GPT2 *model, int* inputs, int B, int T) {
     softmax_forward(acts.probs, acts.logits, B, T, Vi);
 }
 
+GPT2 model;
+int t;
 
 
 void part_forward(int id)
@@ -596,8 +598,6 @@ int sample_mult(float* probabilities, int n) {
 // the GPT-2 end-of-text token id
 #define GPT2_EOT 50256
 
-GPT2 model;
-int t;
 
 int main(int argc, char** argv) {
     // GPT2 model;
