@@ -115,7 +115,7 @@ void matmul_forward(float* out,
     partbias = bias;
     partweight = weight;
     partT = T;
-    print("%d\n",T);
+    printf("%d\n",T);
     for(int i = 0; i<THREADCOUNT;i++)
         V(&cvMatmul[i]);
 
