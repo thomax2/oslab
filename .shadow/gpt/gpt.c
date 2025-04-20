@@ -8,8 +8,6 @@
 #include <time.h>
 #include <string.h>
 #include <unistd.h>
-#include <assert.h>
-#include <stdbool.h>
 
 #include "thread.h"
 #include "thread-sync.h"
@@ -17,13 +15,6 @@
 // ----------------------------------------------------------------------------
 // all the individual layers' forward passes
 // B = batch_size, T = sequence_length, C = channels, V = vocab_size
-
-#define THREADCOUNT 4
-
-mutex_t lk = MUTEX_INIT();
-sem_t cvMain;
-sem_t cvMatmul[THREADCOUNT];
-
 
 void encoder_forward(float* out,
                    int* inp, float* wte, float* wpe,
@@ -92,14 +83,92 @@ void layernorm_forward(float* out, float* mean, float* rstd,
     }
 }
 
-int partOC;
-int partC;
-int partT;
-float* partbias;
-float* partweight;
-float* partout;
-float* partinp;
-bool mainOver = 0;
+#define BUFFER_SIZE 10
+#define THREAD_NUM 4
+
+typedef struct {
+    float* out_bt;
+    float* inp_bt;
+    float* weight;
+    float* bias;
+    int C;
+    int OC;
+} calc_args;
+
+// 环形缓冲区
+calc_args buffer[BUFFER_SIZE];
+int head = 0;
+int tail = 0;
+int buf_count = 0; // 表示当前缓冲区中的元素个数
+
+// 引入remaining计数器，为了保证`matmul_forward`函数退出时，结果已经全部计算完毕
+int remaining = 0; // 单次调用`matmul_forward`时未消费的计数，
+
+int finished = 0; // 结束所有线程的标志
+
+mutex_t lk = MUTEX_INIT();
+cond_t cv = COND_INIT();
+
+void buffer_push(calc_args args) {
+    buffer[tail] = args;
+    tail = (tail + 1) % BUFFER_SIZE;
+    buf_count++;
+}
+
+void buffer_pop(calc_args* args) {
+    *args = buffer[head];
+    head = (head + 1) % BUFFER_SIZE;
+    buf_count--;
+}
+
+// 摘取自原`matmul_forward`函数的核心计算逻辑，通过指针修改out_bt（即out）的值
+void calc(calc_args args) {
+    float* out_bt = args.out_bt;
+    float* inp_bt = args.inp_bt;
+    float* weight = args.weight;
+    float* bias = args.bias;
+    int C = args.C;
+    int OC = args.OC;
+
+    for (int o = 0; o < OC; o++) {
+        float val = (bias != NULL) ? bias[o] : 0.0f;
+        float* wrow = weight + o*C;
+        for (int i = 0; i < C; i++) {
+            val += inp_bt[i] * wrow[i];
+        }
+        out_bt[o] = val;
+    }
+}
+
+void worker(int id) {
+    calc_args args;
+    while (1) {
+        mutex_lock(&lk);
+        while (buf_count == 0 && !finished) {
+            cond_wait(&cv, &lk);
+        }
+        if (finished) { //主线程已执行完毕（全部生产完，并且消费完），子线程就可以退出了
+            assert(buf_count == 0);
+            assert(remaining == 0);
+            mutex_unlock(&lk);
+            break;
+        }
+
+        buffer_pop(&args);
+        cond_broadcast(&cv);
+        mutex_unlock(&lk);
+
+        // 释放锁再计算
+        calc(args);
+
+        mutex_lock(&lk);
+        remaining--;
+        cond_broadcast(&cv);
+        // 这里只会有一个线程执行到这里时remaining刚好为0，所以不能在此时判断break（其他线程仍然会继续循环）
+        // 并且如果remaining==0，那buf_count也一定为0，直接到下一次循环的开头再等待即可
+        mutex_unlock(&lk);
+    }
+}
 
 void matmul_forward(float* out,
                     float* inp, float* weight, float* bias,
@@ -108,66 +177,30 @@ void matmul_forward(float* out,
     // OC is short for "output channels"
     // inp is (B,T,C), weight is (OC, C), bias is (OC)
     // out will be (B,T,OC)
-    partout = out;
-    partinp = inp;
-    partOC = OC;
-    partC = C;
-    partbias = bias;
-    partweight = weight;
-    partT = T;
-    // printf("%d\n",T);
-    for(int i = 0; i<THREADCOUNT;i++)
-        V(&cvMatmul[i]);
+    assert(remaining == 0);
+    for (int b = 0; b < B; b++) {
+        for (int t = 0; t < T; t++) {
+            float* out_bt = out + b * T * OC + t * OC;
+            float* inp_bt = inp + b * T * C + t * C;
+            calc_args args = {out_bt, inp_bt, weight, bias, C, OC};
 
-    for(int i=0; i<THREADCOUNT;i++)
-        P(&cvMain);
-
-    // for (int t = 0; t < T; t++) {
-    //     out_bt = out + t * OC;
-    //     inp_bt = inp + t * C;
-    //     for (int o = 0; o < OC; o++) {
-    //         float val = (bias != NULL) ? bias[o] : 0.0f;
-    //         float* wrow = weight + o*C;
-    //         for (int i = 0; i < C; i++) {
-    //             val += inp_bt[i] * wrow[i];
-    //         }
-            
-    //         out_bt[o] = val;
-            
-    //     }
-    // }
-}
-
-void part_matmul(int id)
-{
-    assert(id!=0);
-    float* out_bt;
-    float* inp_bt;
-    while (1)
-    {
-        P(&cvMatmul[id-1]);
-        if(mainOver)
-            break;
-        int segNum = partT/THREADCOUNT;
-        int mod = partT%THREADCOUNT;
-        int downbound = (segNum + (mod > 0))*(((id-1)<=mod)?(id-1):mod) + (((id-1)>mod)?(id-1-mod):0)*segNum;
-        int upbound = (segNum + (mod > 0))*(((id)<=mod)?(id):mod) + (((id)>mod)?(id-mod):0)*segNum;
-        for (int t = downbound; t < upbound; t++) {
-            out_bt = partout + t * partOC;
-            inp_bt = partinp + t * partC;
-            for (int o = 0; o < partOC; o++) {
-                float val = (partbias != NULL) ? partbias[o] : 0.0f;
-                float* wrow = partweight + o*partC;
-                for (int i = 0; i < partC; i++) {
-                    val += inp_bt[i] * wrow[i];
-                }
-                mutex_lock(&lk);
-                out_bt[o] = val;
-                mutex_unlock(&lk);
+            mutex_lock(&lk);
+            remaining++;
+            while (buf_count == BUFFER_SIZE) {
+                cond_wait(&cv, &lk);
             }
+            buffer_push(args);
+
+            cond_broadcast(&cv);
+            mutex_unlock(&lk);
         }
-        V(&cvMain);
     }
+
+    mutex_lock(&lk);
+    while (remaining > 0) {
+        cond_wait(&cv, &lk);
+    }
+    mutex_unlock(&lk);
 }
 
 void attention_forward(float* out, float* preatt, float* att,
@@ -480,7 +513,6 @@ void gpt2_build_from_checkpoint(GPT2 *model, char* checkpoint_path) {
     model->mean_loss = -1.0f; // -1.0f will designate no loss
 }
 
-
 void gpt2_forward(GPT2 *model, int* inputs, int B, int T) {
     // convenience parameters
     int V = model->config.vocab_size;
@@ -541,8 +573,8 @@ void gpt2_forward(GPT2 *model, int* inputs, int B, int T) {
     ActivationTensors acts = model->acts;
     float* residual;
     encoder_forward(acts.encoded, inputs, params.wte, params.wpe, B, T, C); // encoding goes into residual[0]
-    
     for (int l = 0; l < L; l++) {
+
         residual = l == 0 ? acts.encoded : acts.residual3 + (l-1) * B * T * C;
 
         // get the pointers of the weights for this layer
@@ -589,14 +621,11 @@ void gpt2_forward(GPT2 *model, int* inputs, int B, int T) {
         matmul_forward(l_fcproj, l_fch_gelu, l_fcprojw, l_fcprojb, B, T, 4*C, C);
         residual_forward(l_residual3, l_residual2, l_fcproj, B*T*C);
     }
-
-
     residual = acts.residual3 + (L-1) * B * T * C; // last residual is in residual3
     layernorm_forward(acts.lnf, acts.lnf_mean, acts.lnf_rstd, residual, params.lnfw, params.lnfb, B, T, C);
     matmul_forward(acts.logits, acts.lnf, params.wte, NULL, B, T, C, V);
     softmax_forward(acts.probs, acts.logits, B, T, V);
 }
-
 
 void gpt2_zero_grad(GPT2 *model) {
     if(model->grads_memory != NULL) { memset(model->grads_memory, 0, model->num_parameters * sizeof(float)); }
@@ -630,11 +659,10 @@ int sample_mult(float* probabilities, int n) {
 // the GPT-2 end-of-text token id
 #define GPT2_EOT 50256
 
-
 int main(int argc, char** argv) {
     GPT2 model;
     gpt2_build_from_checkpoint(&model, "gpt2_124M.bin");
-    const int n = 10;  // Token limit.
+    const int n = 20;  // Token limit.
 
     if (argc == 1) {
         printf("Provide at least one token.\n");
@@ -655,13 +683,9 @@ int main(int argc, char** argv) {
         }
     }
 
-    SEM_INIT(&cvMain,0);
-    
-    for(int i = 0; i<THREADCOUNT;i++)
-        SEM_INIT(&cvMatmul[i],0);
-
-    for (int i = 0; i < THREADCOUNT; i++)
-        create(part_matmul);
+    for (int i = 0; i < THREAD_NUM; i++) {
+        create(worker);
+    }
 
     for (int t = argc - 1; t < n; t++) {
         gpt2_forward(&model, tokens, 1, t);
@@ -672,9 +696,13 @@ int main(int argc, char** argv) {
         printf("%d\n", tokens[t]);
         fflush(stdout);
     }
-    mainOver = 1;
-    for(int i = 0; i<THREADCOUNT;i++)
-        V(&cvMatmul[i]);
+
+    mutex_lock(&lk);
+    finished = 1;
+    cond_broadcast(&cv);
+    mutex_unlock(&lk);
+
+    join();
 
     gpt2_free(&model);
 
