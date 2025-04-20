@@ -20,7 +20,7 @@
 
 mutex_t lk = MUTEX_INIT();
 sem_t cvMain;
-sem_t cvMatmul;
+sem_t cvMatmul[THREADCOUNT];
 
 
 void encoder_forward(float* out,
@@ -114,7 +114,7 @@ void matmul_forward(float* out,
     partT = T;
 
     for(int i = 0; i<THREADCOUNT;i++)
-        V(&cvMatmul);
+        V(&cvMatmul[i]);
 
     for(int i=0; i<THREADCOUNT;i++)
         P(&cvMain);
@@ -137,7 +137,7 @@ void part_matmul(int id)
 {
     while (1)
     {
-        P(&cvMatmul);
+        P(&cvMatmul[id-1]);
         int upbound = id*(partT/THREADCOUNT) + (id < (partT%THREADCOUNT + 1)) ;
         int downbound = (id-1)*(partT/THREADCOUNT) + ((id-1) < (partT%THREADCOUNT + 1));    
         for (int t = downbound; t < upbound; t++) {
@@ -642,7 +642,9 @@ int main(int argc, char** argv) {
     }
 
     SEM_INIT(&cvMain,0);
-    SEM_INIT(&cvMatmul,0);
+    
+    for(int i = 0; i<THREADCOUNT;i++)
+        SEM_INIT(&cvMatmul[i],0);
 
     for (int i = 0; i < THREADCOUNT; i++)
         create(part_matmul);
