@@ -141,7 +141,7 @@ void part_matmul(int id)
         P(&cvMatmul[id-1]);
         int upbound = id*(partT/THREADCOUNT) + (id < (partT%THREADCOUNT + 1)) ;
         int downbound = (id-1)*(partT/THREADCOUNT) + ((id-1) < (partT%THREADCOUNT + 1));   
-        assert(upbound<=L);
+        assert(upbound<=partT);
         assert(downbound>=0); 
         for (int t = downbound; t < upbound; t++) {
             out_bt = partout + t * partOC;
