@@ -502,68 +502,71 @@ int t;
 
 void part_forward(int id)
 {
-    P(&cvForward);
-    assert(id != 0);
-    GPT2 *tmodel = &model;
-    ParameterTensors params = tmodel->params; // for brevity
-    ActivationTensors acts = tmodel->acts;
-    int L = tmodel->config.num_layers;
-    int C = tmodel->config.channels;
-    int NH = tmodel->config.num_heads;
-    int B = 1;
-    int T = t;
-    float* residual;
-    int upbound = id*(L/THREADCOUNT) + id < (L % THREADCOUNT + 1);
-    int downbound = (id-1)*(L/THREADCOUNT) + (id-1) < (L % THREADCOUNT + 1);
-    for (int l = downbound; l < upbound; l++) {
-
-        residual = l == 0 ? acts.encoded : acts.residual3 + (l-1) * B * T * C;
-
-        // get the pointers of the weights for this layer
-        float* l_ln1w = params.ln1w + l * C;
-        float* l_ln1b = params.ln1b + l * C;
-        float* l_qkvw = params.qkvw + l * 3*C * C;
-        float* l_qkvb = params.qkvb + l * 3*C;
-        float* l_attprojw = params.attprojw + l * C * C;
-        float* l_attprojb = params.attprojb + l * C;
-        float* l_ln2w = params.ln2w + l * C;
-        float* l_ln2b = params.ln2b + l * C;
-        float* l_fcw = params.fcw + l * 4*C * C;
-        float* l_fcb = params.fcb + l * 4*C;
-        float* l_fcprojw = params.fcprojw + l * C * 4*C;
-        float* l_fcprojb = params.fcprojb + l * C;
-
-        // get the pointers of the activations for this layer
-        float* l_ln1 = acts.ln1 + l * B * T * C;
-        float* l_ln1_mean = acts.ln1_mean + l * B * T;
-        float* l_ln1_rstd = acts.ln1_rstd + l * B * T;
-        float* l_qkv = acts.qkv + l * B * T * 3*C;
-        float* l_atty = acts.atty + l * B * T * C;
-        float* l_preatt = acts.preatt + l * B * NH * T * T;
-        float* l_att = acts.att + l * B * NH * T * T;
-        float* l_attproj = acts.attproj + l * B * T * C;
-        float* l_residual2 = acts.residual2 + l * B * T * C;
-        float* l_ln2 = acts.ln2 + l * B * T * C;
-        float* l_ln2_mean = acts.ln2_mean + l * B * T;
-        float* l_ln2_rstd = acts.ln2_rstd + l * B * T;
-        float* l_fch = acts.fch + l * B * T * 4*C;
-        float* l_fch_gelu = acts.fch_gelu + l * B * T * 4*C;
-        float* l_fcproj = acts.fcproj + l * B * T * C;
-        float* l_residual3 = acts.residual3 + l * B * T * C;
-
-        // now do the forward pass
-        layernorm_forward(l_ln1, l_ln1_mean, l_ln1_rstd, residual, l_ln1w, l_ln1b, B, T, C);
-        matmul_forward(l_qkv, l_ln1, l_qkvw, l_qkvb, B, T, C, 3*C);
-        attention_forward(l_atty, l_preatt, l_att, l_qkv, B, T, C, NH);
-        matmul_forward(l_attproj, l_atty, l_attprojw, l_attprojb, B, T, C, C);
-        residual_forward(l_residual2, residual, l_attproj, B*T*C);
-        layernorm_forward(l_ln2, l_ln2_mean, l_ln2_rstd, l_residual2, l_ln2w, l_ln2b, B, T, C);
-        matmul_forward(l_fch, l_ln2, l_fcw, l_fcb, B, T, C, 4*C);
-        gelu_forward(l_fch_gelu, l_fch, B*T*4*C);
-        matmul_forward(l_fcproj, l_fch_gelu, l_fcprojw, l_fcprojb, B, T, 4*C, C);
-        residual_forward(l_residual3, l_residual2, l_fcproj, B*T*C);
+    while (1)
+    {
+        P(&cvForward);
+        assert(id != 0);
+        GPT2 *tmodel = &model;
+        ParameterTensors params = tmodel->params; // for brevity
+        ActivationTensors acts = tmodel->acts;
+        int L = tmodel->config.num_layers;
+        int C = tmodel->config.channels;
+        int NH = tmodel->config.num_heads;
+        int B = 1;
+        int T = t;
+        float* residual;
+        int upbound = id*(L/THREADCOUNT) + id < (L % THREADCOUNT + 1);
+        int downbound = (id-1)*(L/THREADCOUNT) + (id-1) < (L % THREADCOUNT + 1);
+        for (int l = downbound; l < upbound; l++) {
+    
+            residual = l == 0 ? acts.encoded : acts.residual3 + (l-1) * B * T * C;
+    
+            // get the pointers of the weights for this layer
+            float* l_ln1w = params.ln1w + l * C;
+            float* l_ln1b = params.ln1b + l * C;
+            float* l_qkvw = params.qkvw + l * 3*C * C;
+            float* l_qkvb = params.qkvb + l * 3*C;
+            float* l_attprojw = params.attprojw + l * C * C;
+            float* l_attprojb = params.attprojb + l * C;
+            float* l_ln2w = params.ln2w + l * C;
+            float* l_ln2b = params.ln2b + l * C;
+            float* l_fcw = params.fcw + l * 4*C * C;
+            float* l_fcb = params.fcb + l * 4*C;
+            float* l_fcprojw = params.fcprojw + l * C * 4*C;
+            float* l_fcprojb = params.fcprojb + l * C;
+    
+            // get the pointers of the activations for this layer
+            float* l_ln1 = acts.ln1 + l * B * T * C;
+            float* l_ln1_mean = acts.ln1_mean + l * B * T;
+            float* l_ln1_rstd = acts.ln1_rstd + l * B * T;
+            float* l_qkv = acts.qkv + l * B * T * 3*C;
+            float* l_atty = acts.atty + l * B * T * C;
+            float* l_preatt = acts.preatt + l * B * NH * T * T;
+            float* l_att = acts.att + l * B * NH * T * T;
+            float* l_attproj = acts.attproj + l * B * T * C;
+            float* l_residual2 = acts.residual2 + l * B * T * C;
+            float* l_ln2 = acts.ln2 + l * B * T * C;
+            float* l_ln2_mean = acts.ln2_mean + l * B * T;
+            float* l_ln2_rstd = acts.ln2_rstd + l * B * T;
+            float* l_fch = acts.fch + l * B * T * 4*C;
+            float* l_fch_gelu = acts.fch_gelu + l * B * T * 4*C;
+            float* l_fcproj = acts.fcproj + l * B * T * C;
+            float* l_residual3 = acts.residual3 + l * B * T * C;
+    
+            // now do the forward pass
+            layernorm_forward(l_ln1, l_ln1_mean, l_ln1_rstd, residual, l_ln1w, l_ln1b, B, T, C);
+            matmul_forward(l_qkv, l_ln1, l_qkvw, l_qkvb, B, T, C, 3*C);
+            attention_forward(l_atty, l_preatt, l_att, l_qkv, B, T, C, NH);
+            matmul_forward(l_attproj, l_atty, l_attprojw, l_attprojb, B, T, C, C);
+            residual_forward(l_residual2, residual, l_attproj, B*T*C);
+            layernorm_forward(l_ln2, l_ln2_mean, l_ln2_rstd, l_residual2, l_ln2w, l_ln2b, B, T, C);
+            matmul_forward(l_fch, l_ln2, l_fcw, l_fcb, B, T, C, 4*C);
+            gelu_forward(l_fch_gelu, l_fch, B*T*4*C);
+            matmul_forward(l_fcproj, l_fch_gelu, l_fcprojw, l_fcprojb, B, T, 4*C, C);
+            residual_forward(l_residual3, l_residual2, l_fcproj, B*T*C);
+        }
+        V(&cvMain);
     }
-    V(&cvMain);
 }
 
 void gpt2_zero_grad(GPT2 *model) {
