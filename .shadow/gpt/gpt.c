@@ -136,6 +136,7 @@ void matmul_forward(float* out,
 
 void part_matmul(int id)
 {
+    assert(id!=0);
     while (1)
     {
         P(&cvMatmul[id-1]);
