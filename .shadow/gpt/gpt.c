@@ -18,7 +18,7 @@
 // all the individual layers' forward passes
 // B = batch_size, T = sequence_length, C = channels, V = vocab_size
 
-#define THREADCOUNT 4
+#define THREADCOUNT 2
 
 mutex_t lk = MUTEX_INIT();
 sem_t cvMain;
@@ -124,20 +124,20 @@ void matmul_forward(float* out,
     for(int i=0; i<THREADCOUNT;i++)
         P(&cvMain);
 
-    for (int t = 0; t < T; t++) {
-        out_bt = out + t * OC;
-        inp_bt = inp + t * C;
-        for (int o = 0; o < OC; o++) {
-            float val = (bias != NULL) ? bias[o] : 0.0f;
-            float* wrow = weight + o*C;
-            for (int i = 0; i < C; i++) {
-                val += inp_bt[i] * wrow[i];
-            }
-            mutex_lock(&lk);
-            out_bt[o] = val;
-            mutex_unlock(&lk);
-        }
-    }
+    // for (int t = 0; t < T; t++) {
+    //     out_bt = out + t * OC;
+    //     inp_bt = inp + t * C;
+    //     for (int o = 0; o < OC; o++) {
+    //         float val = (bias != NULL) ? bias[o] : 0.0f;
+    //         float* wrow = weight + o*C;
+    //         for (int i = 0; i < C; i++) {
+    //             val += inp_bt[i] * wrow[i];
+    //         }
+            
+    //         out_bt[o] = val;
+            
+    //     }
+    // }
 }
 
 void part_matmul(int id)
@@ -159,7 +159,9 @@ void part_matmul(int id)
                 for (int i = 0; i < partC; i++) {
                     val += inp_bt[i] * wrow[i];
                 }
+                mutex_lock(&lk);
                 out_bt[o] = val;
+                mutex_unlock(&lk);
             }
         }
         V(&cvMain);
