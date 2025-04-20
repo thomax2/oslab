@@ -662,7 +662,7 @@ int sample_mult(float* probabilities, int n) {
 int main(int argc, char** argv) {
     GPT2 model;
     gpt2_build_from_checkpoint(&model, "gpt2_124M.bin");
-    const int n = 20;  // Token limit.
+    const int n = 10;  // Token limit.
 
     if (argc == 1) {
         printf("Provide at least one token.\n");
