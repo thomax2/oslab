@@ -124,18 +124,20 @@ void matmul_forward(float* out,
     for(int i=0; i<THREADCOUNT;i++)
         P(&cvMain);
 
-    // for (int t = 0; t < T; t++) {
-    //     out_bt = out + t * OC;
-    //     inp_bt = inp + t * C;
-    //     for (int o = 0; o < OC; o++) {
-    //         float val = (bias != NULL) ? bias[o] : 0.0f;
-    //         float* wrow = weight + o*C;
-    //         for (int i = 0; i < C; i++) {
-    //             val += inp_bt[i] * wrow[i];
-    //         }
-    //         out_bt[o] = val;
-    //     }
-    // }
+    for (int t = 0; t < T; t++) {
+        out_bt = out + t * OC;
+        inp_bt = inp + t * C;
+        for (int o = 0; o < OC; o++) {
+            float val = (bias != NULL) ? bias[o] : 0.0f;
+            float* wrow = weight + o*C;
+            for (int i = 0; i < C; i++) {
+                val += inp_bt[i] * wrow[i];
+            }
+            mutex_lock(&lk);
+            out_bt[o] = val;
+            mutex_unlock(&lk);
+        }
+    }
 }
 
 void part_matmul(int id)
@@ -666,7 +668,7 @@ int main(int argc, char** argv) {
         printf("%d\n", tokens[t]);
         fflush(stdout);
     }
-    mainOver = 1;
+    // mainOver = 1;
     gpt2_free(&model);
 
     return 0;
