@@ -493,6 +493,11 @@ void gpt2_forward(GPT2 *model, int* inputs, int B, int T) {
     softmax_forward(acts.probs, acts.logits, B, T, Vi);
 }
 
+mutex_t lk = MUTEX_INIT();
+cond_t cvMain = COND_INIT();
+cond_t cvForward = COND_INIT();
+
+
 void part_forward(int id)
 {
     P(&cvForward);
@@ -593,9 +598,6 @@ int sample_mult(float* probabilities, int n) {
 
 GPT2 model;
 int t;
-mutex_t lk = MUTEX_INIT();
-cond_t cvMain = COND_INIT();
-cond_t cvForward = COND_INIT();
 
 int main(int argc, char** argv) {
     // GPT2 model;
