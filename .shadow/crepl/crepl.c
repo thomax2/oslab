@@ -73,8 +73,7 @@ int main(int argc, char *argv[]) {
         }
         else
         {
-            wait(NULL);
-
+            int rc_wait = wait(NULL);
         }
         
 
