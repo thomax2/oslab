@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
         }
         else // express
         {
-            fprintf(fdtmp,"int _expr_wraapper_%d() { return %s; }\n",expressNum,line);
+            fprintf(fdtmp,"int _expr_wraapper_%d() { return (%s); }\n",expressNum,line);
             fflush(fdtmp);
         }
         pid_t pd = fork();
