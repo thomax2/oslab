@@ -32,6 +32,11 @@ int main(int argc, char *argv[]) {
             break;
         }
 
+        size_t len = strlen(line);
+        if(len>0 && line[len-1] == '\n')
+            line[len-1] = '\0';
+
+
         char tmpLine[4];
         for (int i = 0; i < 3; i++)
         {
