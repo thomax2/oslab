@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
             char exprName[30];
             sprintf(exprName,"_expr_wraapper_%d",expressNum);
 
-            *(int **) (&expr) = dlsym(handle, expr);
+            *(int **) (&expr) = dlsym(handle, expressNum);
 
             if ((error = dlerror()) != NULL)  {
                 fprintf(stderr, "%s\n", error);
