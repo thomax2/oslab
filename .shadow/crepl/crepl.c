@@ -90,6 +90,7 @@ int main(int argc, char *argv[]) {
                     return EXIT_FAILURE;
                 }
                 freopen("/dev/null","w",stdout);
+                freopen("/dev/null","w",stderr);
                 int ret = execl("/bin/sh","sh","-c","make env",(char *)NULL);    
             }
             else
