@@ -62,6 +62,13 @@ int main(int argc, char *argv[]) {
         pid_t pd = fork();
         if (pd == 0)
         {
+            const char *target_dir = "/tmp/crepl";
+    
+            if (chdir(target_dir) != 0) {
+                perror("chdir failed");
+                return EXIT_FAILURE;
+            }
+        
             int ret = execl("/bin/sh","sh","-c","make tmp",(char *)NULL);
             if(ret != -1)
                 printf("good\n");
