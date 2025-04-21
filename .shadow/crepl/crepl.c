@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
         }
         else
         {
-            wait();
+            wait(NULL);
 
         }
         
