@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
                 dlclose(handle);
                 return 1;
             }
-            freopen("/dev/null","w",stderr);
+            // freopen("/dev/null","w",stderr);
             printf("%d\n",expr());
             dlclose(handle);
             expressNum++;
