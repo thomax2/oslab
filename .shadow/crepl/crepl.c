@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <stdlib.h>
+#include <dlfcn.h>
 
 int main(int argc, char *argv[]) {
     static char line[4096];
@@ -22,6 +23,7 @@ int main(int argc, char *argv[]) {
     
     // pid_t pd = fork();
     // fprintf(fd,"good is bad\n");
+
 
     while (1) {
         
@@ -58,7 +60,6 @@ int main(int argc, char *argv[]) {
         {
             fprintf(fdtmp,"int _expr_wraapper_%d() { return %s; }\n",expressNum,line);
             fflush(fdtmp);
-            expressNum++;
         }
         pid_t pd = fork();
         if (pd == 0)
@@ -69,6 +70,7 @@ int main(int argc, char *argv[]) {
                 perror("chdir failed");
                 return EXIT_FAILURE;
             }
+
             freopen("/dev/null","w",stdout);
             int ret = execl("/bin/sh","sh","-c","make tmp",(char *)NULL);
         }
@@ -77,8 +79,55 @@ int main(int argc, char *argv[]) {
             int rc_wait = wait(NULL);
         }
         
+        if(strcmp(tmpLine,"int") != 0){
+            pid_t pd = fork();
+            if(pd == 0)
+            {
+                const char *target_dir = "/tmp/crepl";
+    
+                if (chdir(target_dir) != 0) {
+                    perror("chdir failed");
+                    return EXIT_FAILURE;
+                }
+                freopen("/dev/null","w",stdout);
+                int ret = execl("/bin/sh","sh","-c","make env",(char *)NULL);    
+            }
+            else
+            {
+                wait(NULL);
+            }
+
+            void *handle;
+            int (*expr)(void);
+            char *error;
+
+            handle = dlopen("/tmp/crepl/crepl.so", RTLD_LAZY);
+            if (!handle) {
+                fprintf(stderr, "%s\n", dlerror());
+                return 1;
+            }
+            dlerror();
+
+            char exprName[30];
+            sprintf(exprName,"_expr_wraapper_%d",expressNum);
+
+            *(int **) (&expr) = dlsym(handle, expr);
+
+            if ((error = dlerror()) != NULL)  {
+                fprintf(stderr, "%s\n", error);
+                dlclose(handle);
+                return 1;
+            }
+        
+            print("%d\n",expr());
+            dlclose(handle);
+            expressNum++;
+        }
+
+        fclose(fdtmp);
 
         // To be implemented.
         // printf("Got %zu chars.\n", strlen(line));
     }
+    fclose(fd);
 }
