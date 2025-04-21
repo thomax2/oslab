@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    FILE *fd = fdopen(tmpfd,'w');
+    FILE *fd = fdopen(tmpfd,"w");
     // pid_t pd = fork();
 
 
