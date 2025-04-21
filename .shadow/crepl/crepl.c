@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[]) {
     static char line[4096];
-    char cfile[] = "/tmp/test/testfile_XXXXXX";
+    char cfile[] = "/tmp/test/testfile_XXXXXX.c";
 
     int tmpfd = mkstemp(cfile);
     int expressNum = 0;
@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
         else // express
         {
             printf("bad\n");
-            fprintf(fd,"int _expr_wraapper_%d() { return %s; }",expressNum,line);
+            fprintf(fd,"int _expr_wraapper_%d() { return %s; }\n",expressNum,line);
             fflush(fd);
             expressNum++;
         }
