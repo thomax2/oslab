@@ -8,15 +8,16 @@ int main(int argc, char *argv[]) {
     static char line[4096];
     char cfile[] = "/tmp/test/testfile_XXXXXX";
 
-    int fd = mkstemp(cfile);
+    int tmpfd = mkstemp(cfile);
     int expressNum = 0;
 
-    if(fd == -1)
+    if(tmpfd == -1)
     {
         perror("mkstemp");
         return 1;
     }
 
+    FILE *fd = fdopen(tmpfd,'w');
     // pid_t pd = fork();
 
 
