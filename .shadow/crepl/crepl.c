@@ -42,10 +42,12 @@ int main(int argc, char *argv[]) {
         // func
         if(strcmp(tmpLine,"int") == 0)
         {
+            printf("good\n");
             fprintf(fd,"%s\n",line);
         }
         else // express
         {
+            printf("bad\n");
             fprintf(fd,"int _expr_wraapper_%d() { return %s; }",expressNum,line);
             expressNum++;
         }
