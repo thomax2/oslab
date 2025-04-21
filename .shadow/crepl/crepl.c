@@ -9,6 +9,7 @@ int main(int argc, char *argv[]) {
     char cfile[] = "/tmp/test/testfile_XXXXXX";
 
     int fd = mkstemp(cfile);
+    int expressNum = 0;
 
     if(fd == -1)
     {
@@ -23,11 +24,31 @@ int main(int argc, char *argv[]) {
         
         printf("crepl> ");
         printf("%s",cfile);
+        printf(":");
         fflush(stdout);
 
         if (!fgets(line, sizeof(line), stdin)) {
             break;
         }
+
+        char tmpLine[4];
+        for (int i = 0; i < 3; i++)
+        {
+            tmpLine[i] = line[i];
+        }
+        tmpLine[3] = '\0';
+
+        // func
+        if(strcmp(tmpLine,"int") == 0)
+        {
+            fprintf(fd,"%s\n",line);
+        }
+        else // express
+        {
+            fprintf(fd,"int _expr_wraapper_%d() { return %s; }",expressNum,line);
+            expressNum++;
+        }
+        
 
         // To be implemented.
         printf("Got %zu chars.\n", strlen(line));
