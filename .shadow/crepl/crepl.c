@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[]) {
     static char line[4096];
-    char cfile[] = "/tmp/test/testfile_XXXXXX.c";
+    char cfile[] = "/tmp/test/testfile_XXXXXX";
 
     int tmpfd = mkstemp(cfile);
     int expressNum = 0;
