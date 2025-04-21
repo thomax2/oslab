@@ -18,6 +18,7 @@ int main(int argc, char *argv[]) {
     // }
 
     FILE *fd = fopen("/tmp/crepl/env.c","w");
+    
     // pid_t pd = fork();
     // fprintf(fd,"good is bad\n");
 
@@ -44,19 +45,30 @@ int main(int argc, char *argv[]) {
         }
         tmpLine[3] = '\0';
 
+        FILE *fdtmp = fopen("/tmp/crepl/tmp.c","w");
+
         // func
         if(strcmp(tmpLine,"int") == 0)
         {
-            printf("good\n");
-            fprintf(fd,"%s\n",line);
-            fflush(fd);
+            fprintf(fdtmp,"%s\n",line);
+            fflush(fdtmp);
         }
         else // express
         {
-            printf("bad\n");
-            fprintf(fd,"int _expr_wraapper_%d() { return %s; }\n",expressNum,line);
-            fflush(fd);
+            fprintf(fdtmp,"int _expr_wraapper_%d() { return %s; }\n",expressNum,line);
+            fflush(fdtmp);
             expressNum++;
+        }
+        pid_t pd = fork();
+        if (pd == 0)
+        {
+            int ret = execl("/bin/sh","sh","-c","make tmp",(char *)NULL);
+            if(ret != -1)
+                printf("good\n");
+        }
+        else
+        {
+            
         }
         
 
