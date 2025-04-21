@@ -22,6 +22,7 @@ int main(int argc, char *argv[]) {
     while (1) {
         
         printf("crepl> ");
+        printf("%s",cfile);
         fflush(stdout);
 
         if (!fgets(line, sizeof(line), stdin)) {
