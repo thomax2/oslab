@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
                 return 1;
             }
         
-            print("%d\n",expr());
+            printf("%d\n",expr());
             dlclose(handle);
             expressNum++;
         }
