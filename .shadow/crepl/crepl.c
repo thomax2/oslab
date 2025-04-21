@@ -19,41 +19,41 @@ int main(int argc, char *argv[]) {
 
     FILE *fd = fdopen(tmpfd,"w");
     // pid_t pd = fork();
+    fprintf(fd,"good is bad\n");
 
-
-    while (1) {
+    // while (1) {
         
-        printf("crepl> ");
-        printf("%s",cfile);
-        printf(":");
-        fflush(stdout);
+    //     printf("crepl> ");
+    //     printf("%s",cfile);
+    //     printf(":");
+    //     fflush(stdout);
 
-        if (!fgets(line, sizeof(line), stdin)) {
-            break;
-        }
+    //     if (!fgets(line, sizeof(line), stdin)) {
+    //         break;
+    //     }
 
-        char tmpLine[4];
-        for (int i = 0; i < 3; i++)
-        {
-            tmpLine[i] = line[i];
-        }
-        tmpLine[3] = '\0';
+    //     char tmpLine[4];
+    //     for (int i = 0; i < 3; i++)
+    //     {
+    //         tmpLine[i] = line[i];
+    //     }
+    //     tmpLine[3] = '\0';
 
-        // func
-        if(strcmp(tmpLine,"int") == 0)
-        {
-            printf("good\n");
-            fprintf(fd,"%s\n",line);
-        }
-        else // express
-        {
-            printf("bad\n");
-            fprintf(fd,"int _expr_wraapper_%d() { return %s; }",expressNum,line);
-            expressNum++;
-        }
+    //     // func
+    //     if(strcmp(tmpLine,"int") == 0)
+    //     {
+    //         printf("good\n");
+    //         fprintf(fd,"%s\n",line);
+    //     }
+    //     else // express
+    //     {
+    //         printf("bad\n");
+    //         fprintf(fd,"int _expr_wraapper_%d() { return %s; }",expressNum,line);
+    //         expressNum++;
+    //     }
         
 
-        // To be implemented.
-        printf("Got %zu chars.\n", strlen(line));
-    }
+    //     // To be implemented.
+    //     printf("Got %zu chars.\n", strlen(line));
+    // }
 }
