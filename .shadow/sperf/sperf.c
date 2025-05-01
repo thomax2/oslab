@@ -11,33 +11,35 @@
 // main parse info
 
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[], char *envp[]) {
     for (int i = 0; i < argc; i++) {
         assert(argv[i]);
         printf("argv[%d] = %s\n", i, argv[i]);
     }
     assert(!argv[argc]);
 
-    
+    char *exec_argv[] = {"strace",argv[1],NULL};
+    // char *exec_envp[] = {}
 
     // pipe 
-    // int pipefd[2];
+    int pipefd[2];
     
-    // if(pipe(pipefd) == -1)
-    // {
-    //     perror("pipe wrong\n");
-    //     exit(EXIT_FAILURE);
-    // }
+    if(pipe(pipefd) == -1)
+    {
+        perror("pipe wrong\n");
+        exit(EXIT_FAILURE);
+    }
 
-    // pid_t pid = fork();
+    pid_t pid = fork();
 
-    // if(pid == 0) //child
-    // {
-    //     close(pipefd[0]);
-    // }
-    // else
-    // {
-    //     close(pipefd[1]);
-    // }
+    if(pid == 0) //child
+    {
+        close(pipefd[0]);
+        execve("strace", exec_argv, envp);
+    }
+    else
+    {
+        close(pipefd[1]);
+    }
 
 }
