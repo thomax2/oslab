@@ -11,16 +11,16 @@
 // main parse info
 
 
-int main(int argc, char *argv[], char *envp[]) {
+int main(int argc, char *argv[]) {
     // for (int i = 0; i < argc; i++) {
     //     assert(argv[i]);
     //     printf("argv[%d] = %s\n", i, argv[i]);
     // }
     // assert(!argv[argc]);
-    char str[2000];
+    char str[200];
 
     char *exec_argv[] = {"strace",argv[1],NULL};
-    // char *exec_envp[] = {}
+    char *exec_envp[] = {NULL};
 
     // pipe 
     int pipefd[2];
@@ -37,7 +37,7 @@ int main(int argc, char *argv[], char *envp[]) {
     {
         close(pipefd[0]);
         dup2(pipefd[1],STDERR_FILENO);
-        execve("/bin/strace", exec_argv, envp);
+        execve("/bin/strace", exec_argv, exec_envp);
         // wait(NULL);
     }
     else
