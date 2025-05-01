@@ -51,7 +51,7 @@ int main(int argc, char *argv[], char *envp[]) {
         float sumTime = 0.0;
         char regerrbuf[256];
         regex_t reg;
-        const char* pattern = "^(.*?)\\s*\\([^)]*\\)\\s*=\\s*[^<]*<([^>]+)>\n$";
+        const char* pattern = "^(.*?)\\s*\\(.*\\)\\s*=\\s*[^<]*<([^>]+)>\n$";
         const size_t matchsz = 3;
 
         // file way open pipe port
