@@ -17,7 +17,7 @@ void print_str(const char* input, size_t _start, size_t _end)
 
 int main(viod) {
 
-    const char* inputstr = "execve(\"/usr/bin/ls\", [\"ls\"], 0x7ffdecd8fb88 /* 63 vars */) = 0 <0.000424>";
+    const char* inputstr = "execve(\"/usr/bin/ls\", [\"ls\"], 0x7ffdecd8fb88 /* 63 vars */) = 0 <0.000424>\n";
 
     char regerrbuf[256];
 	regex_t reg;
