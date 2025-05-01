@@ -17,7 +17,7 @@ void print_str(const char* input, size_t _start, size_t _end)
 
 int main(viod) {
 
-    const char* inputstr = "mmap(0x7f1a2b1ef000, 69632, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x6000) = 0x7f1a2b1ef000 <0.000010>";
+    const char* inputstr = "execve(\"/usr/bin/ls\", [\"ls\"], 0x7ffdecd8fb88 /* 63 vars */) = 0 <0.000424>";
 
     char regerrbuf[256];
 	regex_t reg;

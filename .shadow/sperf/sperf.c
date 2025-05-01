@@ -75,7 +75,7 @@ int main(int argc, char *argv[], char *envp[]) {
             regmatch_t pmatch[3];
             int matchcount = 0;
 
-            const char* p = str;
+            char* p = str;
             c = regexec(&reg, p, matchsz, pmatch, 0);
             if (REG_NOMATCH == c)
             {
