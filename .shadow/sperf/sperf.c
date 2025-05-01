@@ -73,7 +73,7 @@ int main(int argc, char *argv[], char *envp[]) {
         {
 
 
-            // printf("%s\n",str);
+            printf("%s\n",str);
             regmatch_t pmatch[3];
             int matchcount = 0;
 
