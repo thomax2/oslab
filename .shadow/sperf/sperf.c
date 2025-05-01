@@ -98,7 +98,15 @@ int main(int argc, char *argv[], char *envp[]) {
                 // }
                 char *NameStr = (char *)malloc((size_t)pmatch[1].rm_eo - (size_t)pmatch[1].rm_so + 1);
                 memcpy(NameStr, p + pmatch[1].rm_so,(size_t)pmatch[1].rm_eo - (size_t)pmatch[1].rm_so);
-                printf("%s\n",NameStr);
+                // printf("%s\n",NameStr);
+                char *TimeStr = (char *)malloc((size_t)pmatch[1].rm_eo - (size_t)pmatch[1].rm_so + 1);
+                memcpy(TimeStr, p + pmatch[1].rm_so,(size_t)pmatch[1].rm_eo - (size_t)pmatch[1].rm_so);
+                float oneTime;
+                sscanf(TimeStr,"%f",&oneTime);
+                StringNode *newNode = (StringNode *)malloc(sizeof(StringNode));
+                newNode->str = NameStr;
+                newNode->time = oneTime;
+                sumTime += oneTime;
                 continue;
             }
             else
