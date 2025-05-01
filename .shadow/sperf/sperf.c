@@ -16,7 +16,8 @@ int main(int argc, char *argv[], char *envp[]) {
     //     assert(argv[i]);
     //     printf("argv[%d] = %s\n", i, argv[i]);
     // }
-    assert(!argv[argc]);
+    // assert(!argv[argc]);
+    char str[200];
 
     char *exec_argv[] = {"strace",argv[1],NULL};
     // char *exec_envp[] = {}
@@ -40,6 +41,11 @@ int main(int argc, char *argv[], char *envp[]) {
     else
     {
         close(pipefd[1]);
+        while (fgets(str,200,pipefd[0]))
+        {
+            printf("%s\n",str);
+        }
+        
     }
 
 }
