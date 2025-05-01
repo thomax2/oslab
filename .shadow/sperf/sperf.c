@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
     char str[200];
 
     char *exec_argv[] = {"strace",argv[1],NULL};
-    char *exec_envp[] = {NULL};
+    char *exec_envp[] = {"PATH=/bin",NULL};
 
     // pipe 
     int pipefd[2];
