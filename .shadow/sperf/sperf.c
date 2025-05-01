@@ -7,7 +7,7 @@
 #include <regex.h>
 
 typedef struct StringNode {
-    char *str;
+    char *name;
     float time;
     struct StringNode *next;
 } StringNode;
@@ -71,8 +71,6 @@ int main(int argc, char *argv[], char *envp[]) {
 
         while (fgets(str,sizeof(str),fd))
         {
-
-
             printf("%s\n",str);
             regmatch_t pmatch[3];
             int matchcount = 0;
@@ -104,7 +102,7 @@ int main(int argc, char *argv[], char *envp[]) {
                 float oneTime;
                 sscanf(TimeStr,"%f",&oneTime);
                 StringNode *newNode = (StringNode *)malloc(sizeof(StringNode));
-                newNode->str = NameStr;
+                newNode->name = NameStr;
                 newNode->time = oneTime;
                 sumTime += oneTime;
                 continue;
