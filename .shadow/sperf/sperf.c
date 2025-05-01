@@ -43,7 +43,8 @@ int main(int argc, char *argv[], char *envp[]) {
     else
     {
         close(pipefd[1]);
-        while (read(pipefd[0],str,sizeof(str)))
+        int fd = fopen(pipefd[0],"r");
+        while (fgets(str,siezof(str),fd))
         {
             printf("%s\n",str);
         }
