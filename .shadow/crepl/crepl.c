@@ -108,6 +108,7 @@ int main(int argc, char *argv[]) {
             }
             dlerror();
 
+            // get expr function name
             char exprName[30];
             sprintf(exprName,"_expr_wrapper_%d",expressNum);
 
@@ -122,9 +123,7 @@ int main(int argc, char *argv[]) {
             dlclose(handle);
             expressNum++;
         }
-
         fclose(fdtmp);
-
     }
     fclose(fd);
 }
