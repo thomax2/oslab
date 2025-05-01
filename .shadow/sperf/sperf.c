@@ -51,7 +51,7 @@ int main(int argc, char *argv[], char *envp[]) {
         float sumTime = 0.0;
         char regerrbuf[256];
         regex_t reg;
-        const char* pattern = "^(.*?)\\s*\\([^)]*\\)\\s*=\\s*[^<]*<([^>]+)>$\n";
+        const char* pattern = "^(.*?)\\s*\\([^)]*\\)\\s*=\\s*[^<]*<([^>]+)>\n$";
         const size_t matchsz = 3;
 
         // file way open pipe port
@@ -71,12 +71,9 @@ int main(int argc, char *argv[], char *envp[]) {
 
         while (fgets(str,sizeof(str),fd))
         {
-            for (int i = 0; str[i] != '\0'; i++) {
-                printf("%d ", str[i]); // 输出每个字符的ASCII码
-            }
-            printf("\n");
 
-            printf("%s\n",str);
+
+            // printf("%s\n",str);
             regmatch_t pmatch[3];
             int matchcount = 0;
 
