@@ -38,10 +38,11 @@ int main(int argc, char *argv[], char *envp[]) {
         close(pipefd[0]);
         dup2(pipefd[1], STDOUT_FILENO);
         execve("strace", exec_argv, envp);
+        wait(NULL);
+
     }
     else
     {
-        wait(NULL);
         close(pipefd[1]);
         while (read(pipefd[0],str,sizeof(str)))
         {
