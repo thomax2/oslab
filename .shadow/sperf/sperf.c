@@ -11,7 +11,7 @@
 // main parse info
 
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[], char *envp[]) {
     // for (int i = 0; i < argc; i++) {
     //     assert(argv[i]);
     //     printf("argv[%d] = %s\n", i, argv[i]);
@@ -19,8 +19,8 @@ int main(int argc, char *argv[]) {
     // assert(!argv[argc]);
     char str[200];
 
-    char *exec_argv[] = {"strace",argv[1],NULL};
-    char *exec_envp[] = {"PATH=/bin",NULL};
+    char *exec_argv[] = {"strace","-t",argv[1],NULL};
+    // char *exec_envp[] = {}
 
     // pipe 
     int pipefd[2];
@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
     {
         close(pipefd[0]);
         dup2(pipefd[1],STDERR_FILENO);
-        execve("/bin/strace", exec_argv, exec_envp);
+        execve("/bin/strace", exec_argv, envp);
         // wait(NULL);
     }
     else
