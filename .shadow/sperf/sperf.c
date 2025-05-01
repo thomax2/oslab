@@ -37,9 +37,8 @@ int main(int argc, char *argv[], char *envp[]) {
     {
         close(pipefd[0]);
         dup2(pipefd[1], STDOUT_FILENO);
-        execve("strace", exec_argv, envp);
-        wait(NULL);
-
+        execve("/bin/strace", exec_argv, envp);
+        // wait(NULL);
     }
     else
     {
