@@ -22,7 +22,7 @@ int main(viod) {
     char regerrbuf[256];
 	regex_t reg;
 
-    const char* pattern = "^(.*?)\\s*\\([^)]*\\)\\s*=\\s*[^<]*<([^>]+)>$";
+    const char* pattern = "^(.*?)\\s*\\([^)]*\\)\\s*=\\s*[^<]*<([^>]+)>\r\n$";
 
     int c = regcomp(&reg, pattern, REG_EXTENDED);
     if (0 != c)
