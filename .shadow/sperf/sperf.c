@@ -45,7 +45,7 @@ int main(int argc, char *argv[], char *envp[]) {
         close(pipefd[1]);
         while (read(pipefd[0],str,sizeof(str)))
         {
-            // printf("%s\n",str);
+            printf("%s\n",str);
         }
     }
 
