@@ -41,7 +41,7 @@ int main(int argc, char *argv[], char *envp[]) {
     else
     {
         close(pipefd[1]);
-        while (fgets(str,200,pipefd[0]))
+        while (read(pipefd[0],str,sizeof(str)))
         {
             printf("%s\n",str);
         }
