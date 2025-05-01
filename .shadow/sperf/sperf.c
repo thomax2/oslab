@@ -12,10 +12,10 @@
 
 
 int main(int argc, char *argv[], char *envp[]) {
-    for (int i = 0; i < argc; i++) {
-        assert(argv[i]);
-        printf("argv[%d] = %s\n", i, argv[i]);
-    }
+    // for (int i = 0; i < argc; i++) {
+    //     assert(argv[i]);
+    //     printf("argv[%d] = %s\n", i, argv[i]);
+    // }
     assert(!argv[argc]);
 
     char *exec_argv[] = {"strace",argv[1],NULL};
