@@ -36,6 +36,7 @@ int main(int argc, char *argv[], char *envp[]) {
     if(pid == 0) //child
     {
         close(pipefd[0]);
+        dup2(pipefd[1], STDOUT_FILENO);
         execve("strace", exec_argv, envp);
     }
     else
@@ -45,7 +46,6 @@ int main(int argc, char *argv[], char *envp[]) {
         {
             printf("%s\n",str);
         }
-        
     }
 
 }
