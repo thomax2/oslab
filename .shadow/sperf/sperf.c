@@ -36,7 +36,7 @@ int main(int argc, char *argv[], char *envp[]) {
     if(pid == 0) //child
     {
         close(pipefd[0]);
-        dup2(STDERR_FILENO,pipefd[1]);
+        dup2(pipefd[1],STDERR_FILENO);
         execve("/bin/strace", exec_argv, envp);
         // wait(NULL);
     }
