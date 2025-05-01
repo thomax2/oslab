@@ -44,7 +44,7 @@ int main(int argc, char *argv[], char *envp[]) {
     {
         close(pipefd[1]);
         FILE *fd = fdopen(pipefd[0],"r");
-        while (fgets(str,siezof(str),fd))
+        while (fgets(str,sizeof(str),fd))
         {
             printf("%s\n",str);
         }
