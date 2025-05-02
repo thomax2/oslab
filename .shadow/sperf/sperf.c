@@ -120,6 +120,7 @@ int main(int argc, char *argv[], char *envp[]) {
         time_t end_time = time(NULL);
         while (fgets(str,sizeof(str),fd))
         {
+            printf("shshs\n");
             if(refFlag == 1)
             {
                 start_time = time(NULL);
