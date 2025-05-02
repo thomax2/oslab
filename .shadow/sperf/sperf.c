@@ -25,15 +25,6 @@ StringNode *func_find(char *name_str,StringNode *head)
     return ret;
 }
 
-// void insert_node(StringNode *new,StringNode *head)
-// {
-//     StringNode *end = head;
-//     while (end->next != NULL)
-//         end = end->next;
-//     assert(end->next == NULL);
-//     end->next = new;
-//     return;    
-// }
 
 void free_list(StringNode *head)
 {
@@ -55,11 +46,6 @@ void free_list(StringNode *head)
 // pipe strace.stdout > main.stdio
 // main parse info
 int main(int argc, char *argv[], char *envp[]) {
-    // for (int i = 0; i < argc; i++) {
-    //     assert(argv[i]);
-    //     printf("argv[%d] = %s\n", i, argv[i]);
-    // }
-    // assert(!argv[argc]);
     char str[2000];
 
     // char *exec_argv[] = {"strace","-T",argv[1],NULL};
@@ -86,8 +72,6 @@ int main(int argc, char *argv[], char *envp[]) {
     if(pid == 0) //child
     {
         close(pipefd[0]);
-        // int fd = open("/dev/null", O_WRONLY);
-        // dup2(fd, STDOUT_FILENO);
         dup2(pipefd[1],STDERR_FILENO);
         execve("/bin/strace", exec_argv, envp);
         // wait(NULL);
@@ -187,9 +171,6 @@ int main(int argc, char *argv[], char *envp[]) {
                 char *maxName[5];
                 while (iterNode != NULL)
                 {
-                    // printf("%s (%f%%)",iterNode->name,(iterNode->time/sumTime)*(100));
-                    // iterNode->time = 0;
-                    // iterNode = iterNode->next;
                     for (int i = 0; i < 5; i++)
                     {
                         if(iterNode->time > maxTime[i])
@@ -219,11 +200,6 @@ int main(int argc, char *argv[], char *envp[]) {
         char *maxName[5];
         while (iterNode != NULL)
         {
-            // if((iterNode->time/sumTime)*(100) > 0.1){
-            //     printf("%s (%f%%)\n",iterNode->name,(iterNode->time/sumTime)*(100));
-            //     iterNode->time = 0;
-            //     iterNode = iterNode->next;    
-            // }
             for (int i = 0; i < 5; i++)
             {
                 if(iterNode->time > maxTime[i])
