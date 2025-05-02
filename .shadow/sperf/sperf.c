@@ -178,7 +178,7 @@ int main(int argc, char *argv[], char *envp[]) {
         printf("Time: %f\n",(float)sumTime);
         while (iterNode != NULL)
         {
-            printf("%s (%f)\n",iterNode->name,(iterNode->time/sumTime));
+            printf("%s (%f\%)\n",iterNode->name,(iterNode->time/sumTime)*(100));
             iterNode->time = 0;
             iterNode = iterNode->next;
         }
