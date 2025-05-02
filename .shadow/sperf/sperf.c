@@ -119,7 +119,7 @@ int main(int argc, char *argv[], char *envp[]) {
                 /** 没有找到匹配结束循环 */
                 printf("MATCH FINISHED\n");
                 regfree(&reg);
-                // break;
+                continue;
             }
             else if (0 == c)
             {
@@ -172,7 +172,7 @@ int main(int argc, char *argv[], char *envp[]) {
                 sumTime = 0;
             }
         }
-        
+
         StringNode *iterNode = head->next;
         allTimeNum += 1;
         printf("Time: %f\n",(float)(0.1*allTimeNum));
