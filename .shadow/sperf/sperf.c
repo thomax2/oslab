@@ -46,7 +46,7 @@ void free_list(StringNode *head)
 // pipe strace.stdout > main.stdio
 // main parse info
 int main(int argc, char *argv[], char *envp[]) {
-    char str[200];
+    char str[2000];
 
     // char *exec_argv[] = {"strace","-T",argv[1],NULL};
     char **exec_argv = malloc(sizeof(char *)*(argc+2));
