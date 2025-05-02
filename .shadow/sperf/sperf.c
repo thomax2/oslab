@@ -177,6 +177,7 @@ int main(int argc, char *argv[], char *envp[]) {
                         {
                             maxTime[i] = iterNode->time;
                             maxName[i] = iterNode->name;
+                            break;;
                         }
                     }
                     iterNode->time = 0;
@@ -184,7 +185,7 @@ int main(int argc, char *argv[], char *envp[]) {
                 }
                 for (int i = 0; i < 5; i++)
                 {
-                    printf("%s (%f%%)",maxName[i],(maxTime[i]/sumTime)*(100));
+                    printf("%s (%f%%)\n",maxName[i],(maxTime[i]/sumTime)*(100));
                 }
                 
                 sumTime = 0;
@@ -210,6 +211,7 @@ int main(int argc, char *argv[], char *envp[]) {
                 {
                     maxTime[i] = iterNode->time;
                     maxName[i] = iterNode->name;
+                    break;
                 }
             }
             iterNode->time = 0;
@@ -217,7 +219,7 @@ int main(int argc, char *argv[], char *envp[]) {
         }
         for (int i = 0; i < 5; i++)
         {
-            printf("%s (%f%%)",maxName[i],(maxTime[i]/sumTime)*(100));
+            printf("%s (%f%%)\n",maxName[i],(maxTime[i]/sumTime)*(100));
         }
     
         free_list(head);
