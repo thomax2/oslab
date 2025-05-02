@@ -129,22 +129,23 @@ int main(int argc, char *argv[], char *envp[]) {
                 printf("%s\n",NameStr);
                 char *TimeStr = (char *)malloc((size_t)pmatch[2].rm_eo - (size_t)pmatch[2].rm_so + 1);
                 memcpy(TimeStr, p + pmatch[2].rm_so,(size_t)pmatch[2].rm_eo - (size_t)pmatch[2].rm_so);
-                // float oneTime;
-                // sscanf(TimeStr,"%f",&oneTime);
-                // StringNode *findNode = func_find(NameStr,head);
-                // if(findNode == NULL)
-                // {
-                //     StringNode *newNode = (StringNode *)malloc(sizeof(StringNode));
-                //     newNode->name = NameStr;
-                //     newNode->time = oneTime;
-                //     newNode->next = NULL;
-                //     insert_node(newNode, head);
-                // }
-                // else
-                //     findNode->time += oneTime;
+                float oneTime;
+                sscanf(TimeStr,"%f",&oneTime);
+                StringNode *findNode = func_find(NameStr,head);
+                if(findNode == NULL)
+                {
+                    printf("newdd\n");
+                    StringNode *newNode = (StringNode *)malloc(sizeof(StringNode));
+                    newNode->name = NameStr;
+                    newNode->time = oneTime;
+                    newNode->next = NULL;
+                    insert_node(newNode, head);
+                }
+                else
+                    findNode->time += oneTime;
 
-                // // continue;
-                // sumTime += oneTime;
+                // continue;
+                sumTime += oneTime;
             }
             else
             {
@@ -154,6 +155,7 @@ int main(int argc, char *argv[], char *envp[]) {
                 // break;
                 assert(1);
             }
+
             if(sumTime > 0.1)
             {
                 StringNode *iterNode = head->next;
@@ -165,6 +167,7 @@ int main(int argc, char *argv[], char *envp[]) {
                     iterNode->time = 0;
                     iterNode = iterNode->next;
                 }
+                sumTime = 0;
             }
         }
 
