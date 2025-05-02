@@ -129,7 +129,7 @@ int main(int argc, char *argv[], char *envp[]) {
                 printf("%s\n",NameStr);
                 char *TimeStr = (char *)malloc((size_t)pmatch[2].rm_eo - (size_t)pmatch[2].rm_so + 1);
                 memcpy(TimeStr, p + pmatch[2].rm_so,(size_t)pmatch[2].rm_eo - (size_t)pmatch[2].rm_so);
-                float oneTime;
+                float oneTime=0;
                 // sscanf(TimeStr,"%f",&oneTime);
                 StringNode *findNode = func_find(NameStr,head);
                 if(findNode == NULL)
