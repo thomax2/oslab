@@ -86,8 +86,8 @@ int main(int argc, char *argv[], char *envp[]) {
     if(pid == 0) //child
     {
         close(pipefd[0]);
-        int fd = open("/dev/null", O_WRONLY);
-        dup2(fd, STDOUT_FILENO);
+        // int fd = open("/dev/null", O_WRONLY);
+        // dup2(fd, STDOUT_FILENO);
         dup2(pipefd[1],STDERR_FILENO);
         execve("/bin/strace", exec_argv, envp);
         // wait(NULL);
