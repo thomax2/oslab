@@ -137,7 +137,7 @@ int main(int argc, char *argv[], char *envp[]) {
             if (REG_NOMATCH == c)
             {
                 /** 没有找到匹配结束循环 */
-                printf("MATCH FINISHED\n");
+                // printf("MATCH FINISHED\n");
                 // regfree(&reg);
                 continue;
             }
