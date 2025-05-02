@@ -24,15 +24,15 @@ StringNode *func_find(char *name_str,StringNode *head)
     return ret;
 }
 
-void insert_node(StringNode *new,StringNode *head)
-{
-    StringNode *end = head;
-    while (end->next != NULL)
-        end = end->next;
-    assert(end->next == NULL);
-    end->next = new;
-    return;    
-}
+// void insert_node(StringNode *new,StringNode *head)
+// {
+//     StringNode *end = head;
+//     while (end->next != NULL)
+//         end = end->next;
+//     assert(end->next == NULL);
+//     end->next = new;
+//     return;    
+// }
 
 void free_list(StringNode *head)
 {
@@ -131,18 +131,21 @@ int main(int argc, char *argv[], char *envp[]) {
                 memcpy(TimeStr, p + pmatch[2].rm_so,(size_t)pmatch[2].rm_eo - (size_t)pmatch[2].rm_so);
                 float oneTime;
                 sscanf(TimeStr,"%f",&oneTime);
-                // StringNode *findNode = func_find(NameStr,head);
-                // if(findNode == NULL)
-                // {
-                //     printf("newdd\n");
-                //     StringNode *newNode = (StringNode *)malloc(sizeof(StringNode));
-                //     newNode->name = NameStr;
-                //     newNode->time = oneTime;
-                //     newNode->next = NULL;
-                //     insert_node(newNode, head);
-                // }
-                // else
-                //     findNode->time += oneTime;
+                free(TimeStr);
+                StringNode *findNode = func_find(NameStr,head);
+                if(findNode == NULL)
+                {
+                    printf("newdd\n");
+                    StringNode *newNode = (StringNode *)malloc(sizeof(StringNode));
+                    newNode->name = NameStr;
+                    newNode->time = oneTime;
+                    newNode->next = head->next;
+                    head->next = newNode;
+                    // insert_node(newNode, head);
+
+                }
+                else
+                    findNode->time += oneTime;
 
                 // continue;
                 sumTime += oneTime;
