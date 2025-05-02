@@ -135,7 +135,6 @@ int main(int argc, char *argv[], char *envp[]) {
                 StringNode *findNode = func_find(NameStr,head);
                 if(findNode == NULL)
                 {
-                    printf("newdd\n");
                     StringNode *newNode = (StringNode *)malloc(sizeof(StringNode));
                     newNode->name = NameStr;
                     newNode->time = oneTime;
