@@ -108,7 +108,7 @@ int main(int argc, char *argv[], char *envp[]) {
 
         while (fgets(str,sizeof(str),fd))
         {
-            printf("%s\n",str);
+            // printf("%s\n",str);
             regmatch_t pmatch[3];
             int matchcount = 0;
 
@@ -168,16 +168,17 @@ int main(int argc, char *argv[], char *envp[]) {
             }
         }
 
-        StringNode *iterNode = head->next;
-        allTimeNum += 1;
-        printf("Time: %f\n",(float)(0.1*allTimeNum));
-        while (iterNode != NULL)
-        {
-            printf("%s (%f)",iterNode->name,(iterNode->time/sumTime));
-            iterNode->time = 0;
-            iterNode = iterNode->next;
-        }
-
-        free_list(head);
     }
+    // StringNode *iterNode = head->next;
+    // allTimeNum += 1;
+    // printf("Time: %f\n",(float)(0.1*allTimeNum));
+    // while (iterNode != NULL)
+    // {
+    //     printf("%s (%f)",iterNode->name,(iterNode->time/sumTime));
+    //     iterNode->time = 0;
+    //     iterNode = iterNode->next;
+    // }
+
+    // free_list(head);
+
 }
