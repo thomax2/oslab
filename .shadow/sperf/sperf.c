@@ -118,7 +118,7 @@ int main(int argc, char *argv[], char *envp[]) {
             {
                 /** 没有找到匹配结束循环 */
                 printf("MATCH FINISHED\n");
-                regfree(&reg);
+                // regfree(&reg);
                 continue;
             }
             else if (0 == c)
