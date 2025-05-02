@@ -221,9 +221,7 @@ int main(int argc, char *argv[], char *envp[]) {
         {
             printf("%s (%f%%)\n",maxName[i],(maxTime[i]/sumTime)*(100));
         }
-    
         free_list(head);
-    
     }
-
+    return 0;
 }
