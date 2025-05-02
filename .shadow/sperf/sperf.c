@@ -157,7 +157,7 @@ int main(int argc, char *argv[], char *envp[]) {
                 regerrbuf[sizeof(regerrbuf) - 1] = '\0';
                 printf("%s\n", regerrbuf);
                 // break;
-                assert(1);
+                assert(0);
             }
 
             if(sumTime > 0.1)
