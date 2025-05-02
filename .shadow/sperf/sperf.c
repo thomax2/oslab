@@ -61,7 +61,15 @@ int main(int argc, char *argv[], char *envp[]) {
     // assert(!argv[argc]);
     char str[200];
 
-    char *exec_argv[] = {"strace","-T",argv[1],NULL};
+    // char *exec_argv[] = {"strace","-T",argv[1],NULL};
+    char **exec_argv = malloc(sizeof(char *)*(argc+2));
+    exec_argv[0] = "strace";
+    exec_argv[1] = "-T";
+    exec_argv[argc+1] = NULL;
+    for (size_t i = 0; i < argc-1; i++)
+        exec_argv[i+2] = argv[i+1];
+    
+
     // char *exec_envp[] = {}
 
     // pipe 
