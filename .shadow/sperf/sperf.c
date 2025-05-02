@@ -6,7 +6,7 @@
 #include <sys/wait.h>
 #include <regex.h>
 #include <time.h>
-
+#include <fcntl.h>
 typedef struct StringNode {
     char *name;
     float time;
@@ -69,7 +69,9 @@ int main(int argc, char *argv[], char *envp[]) {
     exec_argv[argc+1] = NULL;
     for (size_t i = 0; i < argc-1; i++)
         exec_argv[i+2] = argv[i+1];
-
+    for (int i = 0; i < argc; i++) {
+        printf("argv[%d] = %s\n", i, argv[i]);
+    }
     // char *exec_envp[] = {}
 
     // pipe 
@@ -86,6 +88,8 @@ int main(int argc, char *argv[], char *envp[]) {
     if(pid == 0) //child
     {
         close(pipefd[0]);
+        int fd = open("/dev/null", O_WRONLY);
+        dup2(fd, STDOUT_FILENO);
         dup2(pipefd[1],STDERR_FILENO);
         execve("/bin/strace", exec_argv, envp);
         // wait(NULL);
