@@ -133,7 +133,7 @@ int main(int argc, char *argv[], char *envp[]) {
                 float oneTime;
                 sscanf(TimeStr,"%f",&oneTime);
                 free(TimeStr);
-                StringNode *findNode = func_find(NameStr,head);
+                StringNode *findNode = NULL;
                 if(findNode == NULL)
                 {
                     printf("newdd\n");
