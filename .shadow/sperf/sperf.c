@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <sys/wait.h>
 #include <regex.h>
+#include <time.h>
 
 typedef struct StringNode {
     char *name;
@@ -93,6 +94,7 @@ int main(int argc, char *argv[], char *envp[]) {
     {
         float sumTime = 0.0;
         int allTimeNum = 0;
+        int refFlag = 0;
         char regerrbuf[256];
         regex_t reg;
         const char* pattern = "^([^(]+?)\\s*\\(.*\\)\\s*=\\s*[^<]*<([^>]+)>\\s*\n$";
@@ -112,9 +114,16 @@ int main(int argc, char *argv[], char *envp[]) {
         StringNode *head = (StringNode *)malloc(sizeof(StringNode));
         assert(head!=NULL);
         head->next = NULL;
-
+        time_t start_time = time(NULL);
+        time_t end_time = time(NULL);
         while (fgets(str,sizeof(str),fd))
         {
+            if(refFlag == 1)
+            {
+                start_time = time(NULL);
+                refFlag = 0;
+            }
+
             // printf("%s\n",str);
             regmatch_t pmatch[3];
             int matchcount = 0;
@@ -165,7 +174,8 @@ int main(int argc, char *argv[], char *envp[]) {
                 assert(0);
             }
 
-            if(sumTime > 0.1)
+            end_time = time(NULL);
+            if(difftime(end_time, start_time) > 0.1)
             {
                 printf("====================\n");
                 StringNode *iterNode = head->next;
@@ -196,11 +206,11 @@ int main(int argc, char *argv[], char *envp[]) {
                 }
                 
                 sumTime = 0;
+                refFlag = 1;
             }
         }
 
         StringNode *iterNode = head->next;
-        allTimeNum += 1;
         printf("====================\n");
         printf("Time: %f\n",(float)sumTime);
         float maxTime[5]={0.0};
