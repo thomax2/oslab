@@ -160,12 +160,13 @@ int main(int argc, char *argv[], char *envp[]) {
 
             if(sumTime > 0.1)
             {
+                printf("====================\n");
                 StringNode *iterNode = head->next;
                 allTimeNum += 1;
                 printf("Time: %f\n",(float)(0.1*allTimeNum));
                 while (iterNode != NULL)
                 {
-                    printf("%s (%f)",iterNode->name,(iterNode->time/sumTime));
+                    printf("%s (%f%%)",iterNode->name,(iterNode->time/sumTime)*(100));
                     iterNode->time = 0;
                     iterNode = iterNode->next;
                 }
