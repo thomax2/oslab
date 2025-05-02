@@ -46,7 +46,7 @@ void free_list(StringNode *head)
 // pipe strace.stdout > main.stdio
 // main parse info
 int main(int argc, char *argv[], char *envp[]) {
-    char str[2000];
+    char str[200];
 
     // char *exec_argv[] = {"strace","-T",argv[1],NULL};
     char **exec_argv = malloc(sizeof(char *)*(argc+2));
@@ -72,6 +72,8 @@ int main(int argc, char *argv[], char *envp[]) {
     if(pid == 0) //child
     {
         close(pipefd[0]);
+        int fd = open("/dev/null", O_WRONLY);
+        dup2(fd, STDOUT_FILENO);
         dup2(pipefd[1],STDERR_FILENO);
         execve("/bin/strace", exec_argv, envp);
         // wait(NULL);
@@ -171,6 +173,9 @@ int main(int argc, char *argv[], char *envp[]) {
                 char *maxName[5];
                 while (iterNode != NULL)
                 {
+                    // printf("%s (%f%%)",iterNode->name,(iterNode->time/sumTime)*(100));
+                    // iterNode->time = 0;
+                    // iterNode = iterNode->next;
                     for (int i = 0; i < 5; i++)
                     {
                         if(iterNode->time > maxTime[i])
@@ -200,6 +205,11 @@ int main(int argc, char *argv[], char *envp[]) {
         char *maxName[5];
         while (iterNode != NULL)
         {
+            // if((iterNode->time/sumTime)*(100) > 0.1){
+            //     printf("%s (%f%%)\n",iterNode->name,(iterNode->time/sumTime)*(100));
+            //     iterNode->time = 0;
+            //     iterNode = iterNode->next;    
+            // }
             for (int i = 0; i < 5; i++)
             {
                 if(iterNode->time > maxTime[i])
