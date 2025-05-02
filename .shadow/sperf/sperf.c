@@ -19,7 +19,7 @@ StringNode *func_find(char *name_str,StringNode *head)
     {
         if(strcmp(name_str, ret->name) == 0)
             break;
-        head = head->next;
+        ret = ret->next;
     }
     return ret;
 }
@@ -133,7 +133,7 @@ int main(int argc, char *argv[], char *envp[]) {
                 float oneTime;
                 sscanf(TimeStr,"%f",&oneTime);
                 free(TimeStr);
-                StringNode *findNode = NULL;
+                StringNode *findNode = func_find(NameStr,head);
                 if(findNode == NULL)
                 {
                     printf("newdd\n");
