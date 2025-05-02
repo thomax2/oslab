@@ -126,7 +126,7 @@ int main(int argc, char *argv[], char *envp[]) {
                 /** 找到匹配,则输出匹配到的所有捕获组(catch group) */
                 char *NameStr = (char *)malloc((size_t)pmatch[1].rm_eo - (size_t)pmatch[1].rm_so + 1);
                 memcpy(NameStr, p + pmatch[1].rm_so,(size_t)pmatch[1].rm_eo - (size_t)pmatch[1].rm_so);
-                printf("%s\n",NameStr);
+                // printf("%s\n",NameStr);
                 char *TimeStr = (char *)malloc((size_t)pmatch[2].rm_eo - (size_t)pmatch[2].rm_so + 1);
                 memcpy(TimeStr, p + pmatch[2].rm_so,(size_t)pmatch[2].rm_eo - (size_t)pmatch[2].rm_so);
                 float oneTime;
