@@ -175,10 +175,10 @@ int main(int argc, char *argv[], char *envp[]) {
 
         StringNode *iterNode = head->next;
         allTimeNum += 1;
-        printf("Time: %f\n",(float)(0.1*allTimeNum));
+        printf("Time: %f\n",(float)sumTime);
         while (iterNode != NULL)
         {
-            printf("%s (%f)",iterNode->name,(iterNode->time/sumTime));
+            printf("%s (%f)\n",iterNode->name,(iterNode->time/sumTime));
             iterNode->time = 0;
             iterNode = iterNode->next;
         }
