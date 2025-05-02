@@ -123,6 +123,7 @@ int main(int argc, char *argv[], char *envp[]) {
             }
             else if (0 == c)
             {
+                printf("findddd\n");
                 /** 找到匹配,则输出匹配到的所有捕获组(catch group) */
                 char *NameStr = (char *)malloc((size_t)pmatch[1].rm_eo - (size_t)pmatch[1].rm_so + 1);
                 memcpy(NameStr, p + pmatch[1].rm_so,(size_t)pmatch[1].rm_eo - (size_t)pmatch[1].rm_so);
