@@ -54,11 +54,11 @@ void free_list(StringNode *head)
 // pipe strace.stdout > main.stdio
 // main parse info
 int main(int argc, char *argv[], char *envp[]) {
-    // for (int i = 0; i < argc; i++) {
-    //     assert(argv[i]);
-    //     printf("argv[%d] = %s\n", i, argv[i]);
-    // }
-    // assert(!argv[argc]);
+    for (int i = 0; i < argc; i++) {
+        assert(argv[i]);
+        printf("argv[%d] = %s\n", i, argv[i]);
+    }
+    assert(!argv[argc]);
     char str[200];
 
     // char *exec_argv[] = {"strace","-T",argv[1],NULL};
