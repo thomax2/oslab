@@ -176,6 +176,7 @@ int main(int argc, char *argv[], char *envp[]) {
 
         StringNode *iterNode = head->next;
         allTimeNum += 1;
+        printf("====================\n");
         printf("Time: %f\n",(float)sumTime);
         while (iterNode != NULL)
         {
