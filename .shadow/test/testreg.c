@@ -15,15 +15,16 @@ void print_str(const char* input, size_t _start, size_t _end)
 }
 
 
-int main(viod) {
+int main(void) {
 
-    const char* inputstr = "pread64(3, \"\\4\\0\\0\\0\\24\\0\\0\\0\\3\\0\\0\\0GNU\\0\\3#\\253H\\6\\276\\346\\370F\\331\\255K\\314\\374)\\257\"..., 68, 880) = 68 <0.000003>\n";
+    // const char* inputstr = "pread64(3, \"\\4\\0\\0\\0\\24\\0\\0\\0\\3\\0\\0\\0GNU\\0\\3#\\253H\\6\\276\\346\\370F\\331\\255K\\314\\374)\\257\"..., 68, 880) = 68 <0.000003>\n";
+	const char* inputstr = "fstat(1, {st_mode=S_IFCHR|0620, st_rdev=makedev(0x88, 0), ...}) = 0 <0.000031>\n";
 
     char regerrbuf[256];
 	regex_t reg;
 
-    const char* pattern = "^(.*?)\\s*\\(.*\\)\\s*=\\s*[^<]*<([^>]+)>\n$";
-
+    // const char* pattern = "^(.*?)\\s*\\(.*\\)\\s*=\\s*[^<]*<([^>]+)>\n$";
+	const char* pattern = "^([^(]+?)\\s*\\(.*\\)\\s*=\\s*[^<]*<([^>]+)>\\s*\n$";
     int c = regcomp(&reg, pattern, REG_EXTENDED);
     if (0 != c)
     {
