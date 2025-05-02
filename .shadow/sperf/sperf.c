@@ -12,7 +12,43 @@ typedef struct StringNode {
     struct StringNode *next;
 } StringNode;
 
+StringNode *func_find(char *name_str,StringNode *head)
+{
+    StringNode *ret = head->next;
+    while (ret != NULL)
+    {
+        if(strcmp(name_str, ret->name) == 0)
+            break;
+        head = head->next;
+    }
+    return ret;
+}
 
+void insert_node(StringNode *new,StringNode *head)
+{
+    StringNode *end = head;
+    while (end->next != NULL)
+        end = end->next;
+    assert(end->next == NULL);
+    end->next = new;
+    return;    
+}
+
+void free_list(StringNode *head)
+{
+    StringNode *fore = head;
+    StringNode *later = head->next;
+    while (later != NULL)
+    {
+        free(fore->name);
+        free(fore);
+        fore = later;
+        later = fore->next;
+    }
+    free(fore->name);
+    free(fore);
+    return;
+}
 
 // fork process -> strace target
 // pipe strace.stdout > main.stdio
@@ -49,6 +85,7 @@ int main(int argc, char *argv[], char *envp[]) {
     else
     {
         float sumTime = 0.0;
+        int allTimeNum = 0;
         char regerrbuf[256];
         regex_t reg;
         const char* pattern = "^(.*?)\\s*\\(.*\\)\\s*=\\s*[^<]*<([^>]+)>\n$";
@@ -67,7 +104,7 @@ int main(int argc, char *argv[], char *envp[]) {
         }
         StringNode *head = (StringNode *)malloc(sizeof(StringNode));
         assert(head!=NULL);
-
+        head->next = NULL;
 
         while (fgets(str,sizeof(str),fd))
         {
@@ -87,13 +124,6 @@ int main(int argc, char *argv[], char *envp[]) {
             else if (0 == c)
             {
                 /** 找到匹配,则输出匹配到的所有捕获组(catch group) */
-                // printf("%d MATCH (%d-%d)\n", ++matchcount, pmatch[0].rm_so, pmatch[0].rm_eo);
-                // for (int i = 1; i < matchsz; ++i)
-                // {
-                //     printf("group %d :<<", i);
-                //     print_str(p, pmatch[i].rm_so, pmatch[i].rm_eo);
-                //     printf(">>\n");
-                // }
                 char *NameStr = (char *)malloc((size_t)pmatch[1].rm_eo - (size_t)pmatch[1].rm_so + 1);
                 memcpy(NameStr, p + pmatch[1].rm_so,(size_t)pmatch[1].rm_eo - (size_t)pmatch[1].rm_so);
                 printf("%s\n",NameStr);
@@ -101,11 +131,20 @@ int main(int argc, char *argv[], char *envp[]) {
                 memcpy(TimeStr, p + pmatch[2].rm_so,(size_t)pmatch[2].rm_eo - (size_t)pmatch[2].rm_so);
                 float oneTime;
                 sscanf(TimeStr,"%f",&oneTime);
-                StringNode *newNode = (StringNode *)malloc(sizeof(StringNode));
-                newNode->name = NameStr;
-                newNode->time = oneTime;
+                StringNode *findNode = func_find(NameStr,head);
+                if(findNode == NULL)
+                {
+                    StringNode *newNode = (StringNode *)malloc(sizeof(StringNode));
+                    newNode->name = NameStr;
+                    newNode->time = oneTime;
+                    newNode->next = NULL;
+                    insert_node(newNode, head);
+                }
+                else
+                    findNode->time += oneTime;
+
+                // continue;
                 sumTime += oneTime;
-                continue;
             }
             else
             {
@@ -115,8 +154,30 @@ int main(int argc, char *argv[], char *envp[]) {
                 // break;
                 assert(1);
             }
-
+            if(sumTime > 0.1)
+            {
+                StringNode *iterNode = head->next;
+                allTimeNum += 1;
+                printf("Time: %f\n",(float)(0.1*allTimeNum));
+                while (iterNode != NULL)
+                {
+                    printf("%s (%f)",iterNode->name,(iterNode->time/sumTime));
+                    iterNode->time = 0;
+                    iterNode = iterNode->next;
+                }
+            }
         }
-    }
 
+        StringNode *iterNode = head->next;
+        allTimeNum += 1;
+        printf("Time: %f\n",(float)(0.1*allTimeNum));
+        while (iterNode != NULL)
+        {
+            printf("%s (%f)",iterNode->name,(iterNode->time/sumTime));
+            iterNode->time = 0;
+            iterNode = iterNode->next;
+        }
+
+        free_list(head);
+    }
 }
