@@ -169,7 +169,7 @@ int main(int argc, char *argv[], char *envp[]) {
                 assert(0);
             }
 
-            if(sumTime > 0.0001)
+            if(sumTime > 0.1)
             {
                 printf("====================\n");
                 StringNode *iterNode = head->next;
