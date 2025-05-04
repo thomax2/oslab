@@ -173,9 +173,6 @@ int main(int argc, char *argv[], char *envp[]) {
                 char *maxName[5];
                 while (iterNode != NULL)
                 {
-                    // printf("%s (%f%%)",iterNode->name,(iterNode->time/sumTime)*(100));
-                    // iterNode->time = 0;
-                    // iterNode = iterNode->next;
                     for (int i = 0; i < 5; i++)
                     {
                         if(iterNode->time > maxTime[i])
@@ -205,11 +202,6 @@ int main(int argc, char *argv[], char *envp[]) {
         char *maxName[5];
         while (iterNode != NULL)
         {
-            // if((iterNode->time/sumTime)*(100) > 0.1){
-            //     printf("%s (%f%%)\n",iterNode->name,(iterNode->time/sumTime)*(100));
-            //     iterNode->time = 0;
-            //     iterNode = iterNode->next;    
-            // }
             for (int i = 0; i < 5; i++)
             {
                 if(iterNode->time > maxTime[i])
