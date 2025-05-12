@@ -251,6 +251,7 @@ static void kfree(void *ptr) {
         for(i = 0; i < BUDDY_NUM; i++){
             if((size_t)buddy_info.zone[i].start > (size_t)ptr) {
                 zone_ptr = &buddy_info.zone[i-1];
+                lock(&zone_ptr->buddy_lk);
                 break;
             }
         }
@@ -259,6 +260,7 @@ static void kfree(void *ptr) {
             page_ptr->remain_unit_num ++;
             *(uintptr_t *)ptr = page_ptr->head_free;
             page_ptr->head_free = (uintptr_t)ptr;
+            unlock(&zone_ptr->buddy_lk);
             return;
         }
 
@@ -268,6 +270,7 @@ static void kfree(void *ptr) {
         zone_ptr->remain_unit_num ++;
         *(uintptr_t *)ptr = zone_ptr->head_free;
         zone_ptr->head_free = (uintptr_t)ptr;
+        unlock(&zone_ptr->buddy_lk);
     }
     return;
 }
