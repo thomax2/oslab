@@ -258,7 +258,7 @@ static void pmm_init() {
     );
 
     printf("cpu_count: %d\n",cpu_count());
-
+    printf("sizeof: %d",sizeof(long));
     kinit();
     
 }
