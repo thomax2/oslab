@@ -257,7 +257,7 @@ static void pmm_init() {
         pmsize >> 20, heap.start, heap.end
     );
 
-    printf("cpu_count: %d\n",cpu_count);
+    printf("cpu_count: %d\n",cpu_count());
 
     kinit();
     
