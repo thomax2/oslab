@@ -37,16 +37,18 @@ void test0(void)
 	*(add3_int+(512-4)/4)=114514;
 	pmm->free(add2);
     printf("cpu:%d\n",cpu_current());
-
+	printf("free: add2\n");
     // printf("add1:%d\n",*add1_int);
 	assert(*add1_int==9876);
 	assert(*(add1_int+(1020-4)/4)==114514);
 	assert(*add3_int==543210);
 	assert(*(add3_int+(512-4)/4)==114514);
 	pmm->free(add1);
+	printf("free: add1\n");
 	assert(*add3_int==543210);
 	assert(*(add3_int+(512-4)/4)==114514);
 	pmm->free(add3);
+	printf("free: add3\n");
 
 
 	    // // 分配 32 字节
