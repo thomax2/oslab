@@ -231,28 +231,21 @@ static void *kalloc(size_t size) {
 static void kfree(void *ptr) {
     // in slab
     if((size_t)ptr < (size_t)buddy_start){
+        int cpu = cpu_current();
         slab_page *page_ptr = NULL;
-        for (size_t i = 0; i < CPU_NUM; i++)
-            for (size_t j = 0; j < SLAB_NUM; j++){
-                if((size_t)slab_info[i].page[j].start > (size_t)ptr)
-                {
-                    if(j==0)
-                    {
-                        assert(i!=0);
-                        page_ptr = &(slab_info[i-1].page[SLAB_NUM - 1]);
-                    }
-                    else
-                        page_ptr = &(slab_info[i].page[j-1]);
-                    goto found;
-                }
+        for (size_t j = 1; j < SLAB_NUM; j++){
+            if((size_t)slab_info[cpu].page[j].start > (size_t)ptr)
+            {
+                page_ptr = &(slab_info[cpu].page[j-1]);
+                break;
             }
-        found:
+        }
         if(page_ptr == NULL)
-            page_ptr = &(slab_info[CPU_NUM-1].page[SLAB_NUM-1]);
+            page_ptr = &(slab_info[cpu].page[SLAB_NUM-1]);
         page_ptr->remain_unit_num ++;
-        assert(page_ptr->head_free != (uintptr_t)NULL);
         *(uintptr_t *)ptr = page_ptr->head_free;
         page_ptr->head_free = (uintptr_t)ptr;
+        assert(page_ptr->head_free != (uintptr_t)NULL);
     }
     else { // in buddy
         buddy_zone *zone_ptr = NULL;
