@@ -261,6 +261,7 @@ static void kfree(void *ptr) {
             }
         }
         if(i == 1 && ((char *)ptr - (char *)zone_ptr->start) % PAGE_SIZE != 0){ // 4KB buddy assign to slab
+            printf("hhllo\n");
             slab_page *page_ptr = (slab_page *)((char *)ptr - ((char *)ptr - (char *)zone_ptr->start) % PAGE_SIZE);
             page_ptr->remain_unit_num ++;
             *(uintptr_t *)ptr = page_ptr->head_free;
