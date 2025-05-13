@@ -149,7 +149,6 @@ void *alloc_in_page(slab_page *page_ptr, int cpu, int page_num) {
         assert(addr != NULL);
     }
     else if (page_ptr->remain_unit_num == 1) {
-        assert(0);
         page_ptr->remain_unit_num --;
         slab_page *next_page_ptr = (slab_page *)manager_slab_area[cpu].pos[page_num];
         void *new_page = buddy_alloc(SLAB_SIZE);
@@ -232,7 +231,7 @@ static void *kalloc(size_t size) {
 
 static void kfree(void *ptr) {
     // in slab
-    printf("ptr::%d,buddy_start::%d\n",(size_t)ptr ,(size_t)buddy_start);
+    // printf("ptr::%d,buddy_start::%d\n",(size_t)ptr ,(size_t)buddy_start);
     if((size_t)ptr < (size_t)buddy_start){
         int cpu = cpu_current();
         slab_page *page_ptr = NULL;
@@ -246,13 +245,11 @@ static void kfree(void *ptr) {
         if(page_ptr == NULL)
             page_ptr = &(slab_info[cpu].page[SLAB_NUM-1]);
         page_ptr->remain_unit_num ++;
-        printf("ggggggggg:%d\n",page_ptr->remain_unit_num);
         *(uintptr_t *)ptr = page_ptr->head_free;
         page_ptr->head_free = (uintptr_t)ptr;
         assert(page_ptr->head_free != (uintptr_t)NULL);
     }
     else { // in buddy
-        assert(0);
         buddy_zone *zone_ptr = NULL;
         size_t i;
         for(i = 0; i < BUDDY_NUM; i++){
