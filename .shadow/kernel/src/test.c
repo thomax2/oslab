@@ -127,7 +127,7 @@ void test_repeated_alloc(void) {
         int *ptr = (int *)alloc_ptrs[i];
         *ptr = i; // 头部标记
         *(int *)((char *)ptr + ALLOC_SIZE - sizeof(int)) = ~i; // 尾部标记
-		printf("iiii:%d\n",i);
+		// printf("iiii:%d\n",i);
     }
 
     // ==== 阶段 2：验证数据完整性 ====
