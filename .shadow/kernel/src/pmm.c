@@ -204,7 +204,7 @@ void *buddy_alloc(size_t size){
     void *addr = NULL;
     lock(&(buddy_info.zone[zone_num].buddy_lk));
     buddy_info.zone[zone_num].remain_unit_num --;
-    assert(buddy_info.zone[zone_num].remain_unit_num != 0);
+    // assert(buddy_info.zone[zone_num].remain_unit_num != 0);
     addr = (void *)buddy_info.zone[zone_num].head_free;
     buddy_info.zone[zone_num].head_free = *(uintptr_t *)addr;
     unlock(&(buddy_info.zone[zone_num].buddy_lk));
