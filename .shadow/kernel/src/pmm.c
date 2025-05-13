@@ -91,7 +91,7 @@ static void kinit(void){
         }
     }
 
-    size_t buddy_start = heapStartAddr + 4*SLAB_NUM*SLAB_SIZE;
+    size_t buddy_start = heapStartAddr + CPU_NUM*SLAB_NUM*SLAB_SIZE;
     for (size_t i = 0; i < BUDDY_NUM; i++)
     {
         buddy_info.zone[i].start = buddy_start + i * BUDDY_SIZE;
@@ -206,7 +206,6 @@ void *buddy_alloc(size_t size){
     addr = (void *)buddy_info.zone[zone_num].head_free;
     buddy_info.zone[zone_num].head_free = *(uintptr_t *)addr;
     unlock(&(buddy_info.zone[zone_num].buddy_lk));
-    assert(addr!=NULL);
     return addr;
 }
 
@@ -251,6 +250,7 @@ static void kfree(void *ptr) {
         if(page_ptr == NULL)
             page_ptr = &(slab_info[CPU_NUM-1].page[SLAB_NUM-1]);
         page_ptr->remain_unit_num ++;
+        assert(page_ptr->head_free != (uintptr_t)NULL);
         *(uintptr_t *)ptr = page_ptr->head_free;
         page_ptr->head_free = (uintptr_t)ptr;
     }
