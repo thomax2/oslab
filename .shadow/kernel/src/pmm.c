@@ -196,8 +196,9 @@ void *slab_alloc(size_t size) {
 
             next_page_ptr->next_page = NULL;
             next_page_ptr->remain_unit_num = SLAB_SIZE/(page_ptr->size) - 1;
-            next_page_ptr->size = slab_info[cpu].page[page_num].size;
             printf("havettttttttttttt\n");
+
+            next_page_ptr->size = slab_info[cpu].page[page_num].size;
 
             next_page_ptr->start = (uintptr_t)new_page;
             next_page_ptr->head_free = (uintptr_t)((size_t)next_page_ptr->start + next_page_ptr->size);
