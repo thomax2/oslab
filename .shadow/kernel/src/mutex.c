@@ -8,7 +8,7 @@ void lock(lock_t *lk)
     while (atomic_xchg(&lk->status, 1))
     {
         locknum++;
-        assert(locknum < MAXLOCKNUM);
+        assert(0);
     }
     return;
 }
