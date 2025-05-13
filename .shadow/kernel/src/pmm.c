@@ -61,14 +61,14 @@ void *slab_alloc(size_t size);
 static void kinit(void){
     size_t heapStartAddr = (size_t) heap.start;
     size_t heapEndAddr = (size_t) heap.end;
-
+    
     for (size_t i = 0; i < CPU_NUM; i++){
         for (size_t j = 0; j < SLAB_NUM; j++){
             manager_slab_area[i].start[j] = (slab_page *)(heapEndAddr - 256 * SLAB_NUM * (CPU_NUM - 1 - i) - 256 * (SLAB_NUM - j));
             manager_slab_area[i].pos[j] = manager_slab_area[i].start[j];
         }
     }
-    
+    printf("init\n");
     for(size_t cpu_num = 0; cpu_num < CPU_NUM; cpu_num++)
     {
         for(size_t i=0;i<SLAB_NUM;i++)
@@ -287,7 +287,6 @@ static void pmm_init() {
     );
 
     printf("cpu_count: %d\n",cpu_count());
-    printf("sizeof: %d",sizeof(long));
     kinit();
     
 }
