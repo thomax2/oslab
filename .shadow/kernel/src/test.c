@@ -137,6 +137,7 @@ void test_repeated_alloc(void) {
         assert(*ptr == i); // 检查头部
         assert(*(int *)((char *)ptr + ALLOC_SIZE - sizeof(int)) == ~i); // 检查尾部
     }
+	printf("verify sucess\n");
 
     // ==== 阶段 3：交替释放并重新分配 ====
     for (int i = 0; i < MAX_ALLOC_TIMES; i += 2) {
