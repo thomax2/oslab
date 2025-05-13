@@ -291,6 +291,7 @@ static void kfree(void *ptr) {
             int cpu = cpu_current();
             slab_page *page_ptr;
             size_t page_start = (size_t)((char *)ptr - ((char *)ptr - (char *)zone_ptr->start) % PAGE_SIZE);
+            printf("ps:::%x\n",page_start);
             for (size_t i = 0; i < SLAB_NUM; i++)
             {
                 page_ptr = &(slab_info[cpu].page[i]);
