@@ -118,6 +118,8 @@ static void kinit(void){
 size_t align_size(size_t size)
 {
     if((size & (size - 1)) == 0) {
+        if(size < 64)
+            size = 64;
         return size;
     }
     size_t power = 1;
