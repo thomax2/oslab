@@ -288,7 +288,7 @@ static void pmm_init() {
         "Got %d MiB heap: [%p, %p)\n",
         pmsize >> 20, heap.start, heap.end
     );
-
+    assert(0);
     printf("cpu_count: %d\n",cpu_count());
     kinit();
     
