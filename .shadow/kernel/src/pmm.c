@@ -290,11 +290,11 @@ static void kfree(void *ptr) {
             printf("aaaaaaaaao\n");
             lock(&(zone_ptr->buddy_lk));
             slab_page *page_ptr = (slab_page *)((char *)ptr - ((char *)ptr - (char *)zone_ptr->start) % PAGE_SIZE);
+            assert(((size_t)page_ptr-buddy_start)%PAGE_SIZE == 0);
             page_ptr->remain_unit_num ++;
             *(uintptr_t *)ptr = page_ptr->head_free;
             page_ptr->head_free = (uintptr_t)ptr;
             unlock(&(zone_ptr->buddy_lk));
-            printf("bbbbbbbbbo\n");
             return;
         }
 
