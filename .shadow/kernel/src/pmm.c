@@ -185,6 +185,7 @@ void *slab_alloc(size_t size) {
     }
     else if( slab_info[cpu].page[page_num].remain_unit_num == 0 ) {
         slab_page *page_ptr = slab_info[cpu].page[page_num].next_page;
+        assert(page_ptr != NULL);
         while (page_ptr->remain_unit_num == 0){
             page_ptr = page_ptr->next_page;
         }
@@ -215,6 +216,7 @@ static void *kalloc(size_t size) {
     void *addr = NULL;
 
     size = align_size(size);
+    assert(size >= 64);
     if(size < SLAB_SIZE)
         addr = slab_alloc(size);
     else if( size < BUDDY_SIZE )
