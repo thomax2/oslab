@@ -72,8 +72,6 @@ static void kinit(void){
     {
         for(size_t i=0;i<SLAB_NUM;i++)
         {
-            // slab_block *block = (slab_block *)manager_slab_area[cpu_num].pos[i];
-            // manager_slab_area[cpu_num].pos[i] = (uintptr_t)((size_t)(manager_slab_area[cpu_num].pos[i]) + PAGE_SIZE);
             slab_info[cpu_num].page[i].size = 1<<(i+6);
             slab_info[cpu_num].page[i].start = (uintptr_t)(heapStartAddr + i*SLAB_SIZE + cpu_num * SLAB_SIZE*SLAB_NUM);
             slab_info[cpu_num].page[i].remain_unit_num = SLAB_SIZE/(slab_info[cpu_num].page[i].size);
@@ -91,7 +89,8 @@ static void kinit(void){
         }
     }
 
-    buddy_start = heapStartAddr + CPU_NUM*SLAB_NUM*SLAB_SIZE;
+    // buddy_start = heapStartAddr + CPU_NUM*SLAB_NUM*SLAB_SIZE;
+    buddy_start = heapStartAddr + 1*1024*1024;
     for (size_t i = 0; i < BUDDY_NUM; i++)
     {
         buddy_info.zone[i].start = buddy_start + i * BUDDY_SIZE;
