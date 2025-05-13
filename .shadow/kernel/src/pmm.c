@@ -232,6 +232,7 @@ static void *kalloc(size_t size) {
 
 static void kfree(void *ptr) {
     // in slab
+    printf("ptr::%d,buddy_start::%d\n",(size_t)ptr ,(size_t)buddy_start);
     if((size_t)ptr < (size_t)buddy_start){
         int cpu = cpu_current();
         slab_page *page_ptr = NULL;
