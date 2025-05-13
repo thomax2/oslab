@@ -180,6 +180,7 @@ void *slab_alloc(size_t size) {
         {
 
             if(page_ptr->remain_unit_num != 0){
+                printf("musttttttttt\n");
                 return alloc_in_page(page_ptr, cpu, page_num);
             }
             per_page_ptr = page_ptr;
@@ -211,7 +212,6 @@ void *slab_alloc(size_t size) {
             page_ptr = next_page_ptr;
         }
         return alloc_in_page(page_ptr, cpu, page_num);
-
     }
     else{
         assert(0);
