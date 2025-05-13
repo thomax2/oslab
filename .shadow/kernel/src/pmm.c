@@ -111,7 +111,6 @@ static void kinit(void){
     
     for (size_t i = 0; i < BUDDY_NUM; i++)
         lock_init(&buddy_info.zone[i].buddy_lk);
-    printf("init\n");
 
     return;
 }
@@ -126,6 +125,8 @@ size_t align_size(size_t size)
     {
         power <<= 1;
     }
+    if(power < 64)
+        power = 64;
     return power;
 }
 
