@@ -1,7 +1,7 @@
 #include <common.h>
 
 size_t locknum = 0;
-#define MAXLOCKNUM 10000000
+#define MAXLOCKNUM 100
 
 void lock(lock_t *lk)
 {
@@ -10,6 +10,7 @@ void lock(lock_t *lk)
         locknum++;
         assert(locknum < MAXLOCKNUM);
     }
+    locknum = 0;
     return;
 }
 
