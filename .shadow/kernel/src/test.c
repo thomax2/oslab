@@ -145,12 +145,12 @@ void test_repeated_alloc(void) {
         pmm->free(alloc_ptrs[i]);
         alloc_ptrs[i] = NULL;
 
-		printf("realse even\n");
+		printf("realse even %d\n",cpu_current());
         // 重新分配并验证新块独立性
         void *new_ptr = pmm->alloc(ALLOC_SIZE);
         assert(new_ptr != NULL);
 
-		printf("new assign\n");
+		printf("new assign %d\n",cpu_current());
         // 新块头部应为未初始化值（若分配器不自动清零）
         // 写入新数据并验证
         *(int *)new_ptr = 0xDEADBEEF;
