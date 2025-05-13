@@ -200,7 +200,7 @@ void *slab_alloc(size_t size) {
             // printf("havettttttttttttt\n");
 
             next_page_ptr->size = slab_info[cpu].page[page_num].size;
-
+            printf("ggboom%p\n",new_page);
             next_page_ptr->start = (uintptr_t)new_page;
             next_page_ptr->head_free = (uintptr_t)((size_t)next_page_ptr->start + next_page_ptr->size);
 
