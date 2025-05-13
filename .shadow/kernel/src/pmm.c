@@ -275,7 +275,6 @@ static void kfree(void *ptr) {
         zone_ptr->head_free = (uintptr_t)ptr;
         unlock(&zone_ptr->buddy_lk);
     }
-    assert(0);
     return;
 }
 
