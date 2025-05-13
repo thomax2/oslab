@@ -288,15 +288,16 @@ static void kfree(void *ptr) {
                 page_ptr = &(slab_info[cpu].page[i]);
                 while (page_ptr != NULL)
                 {
-                    printf("wtf%p\n",page_ptr->start);
+                    // printf("wtf%p\n",page_ptr->start);
                     if((size_t)page_ptr->start == page_start)
-                        break;
+                        goto found;
                     page_ptr = page_ptr->next_page;
                 }
             }
-            printf("ps1:::%x\n",(size_t)page_ptr->start);
-            printf("ps2:::%x\n",page_start);
+            // printf("ps1:::%x\n",(size_t)page_ptr->start);
+            // printf("ps2:::%x\n",page_start);
 
+            found:
             assert((size_t)page_ptr->start == page_start);
             lock(&(zone_ptr->buddy_lk));
             // assert(((size_t)page_ptr-buddy_start)%PAGE_SIZE == 0);
