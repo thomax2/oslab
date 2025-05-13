@@ -181,8 +181,6 @@ void *slab_alloc(size_t size) {
     int cpu = cpu_current();
     int page_num = get_index(size >> 6);
     
-    printf("cpu::%d , num::%d",cpu,page_num);
-
     if(slab_info[cpu].page[page_num].remain_unit_num >= 1){
         return alloc_in_page(&(slab_info[cpu].page[page_num]), cpu, page_num);
     }
