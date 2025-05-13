@@ -189,6 +189,7 @@ void *slab_alloc(size_t size) {
 
             next_page_ptr->remain_unit_num = (SLAB_SIZE)/(slab_info[cpu].page[page_num].size) - 1;
             // printf("havettttttttttttt\n");
+            printf("ggboom%p\n",next_page_ptr->start);
 
             next_page_ptr->size = slab_info[cpu].page[page_num].size;
             next_page_ptr->start = (uintptr_t)new_page;
@@ -204,7 +205,6 @@ void *slab_alloc(size_t size) {
             *(uintptr_t *)bpos = (uintptr_t)NULL;
             per_page_ptr -> next_page = next_page_ptr;
             page_ptr = next_page_ptr;
-            printf("ggboom%p\n",next_page_ptr->start);
         }
         return alloc_in_page(page_ptr, cpu, page_num);
     }
