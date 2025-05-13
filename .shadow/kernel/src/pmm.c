@@ -283,12 +283,12 @@ static void kfree(void *ptr) {
         for(i = 0; i < BUDDY_NUM; i++){
             if((size_t)buddy_info.zone[i].start > (size_t)ptr) {
                 zone_ptr = &(buddy_info.zone[i-1]);
-                lock(&(zone_ptr->buddy_lk));
                 break;
             }
         }
         if(i == 1 && ((char *)ptr - (char *)zone_ptr->start) % PAGE_SIZE != 0){ // 4KB buddy assign to slab
             // printf("hhllo\n");
+            lock(&(zone_ptr->buddy_lk));
             slab_page *page_ptr = (slab_page *)((char *)ptr - ((char *)ptr - (char *)zone_ptr->start) % PAGE_SIZE);
             page_ptr->remain_unit_num ++;
             *(uintptr_t *)ptr = page_ptr->head_free;
@@ -300,9 +300,9 @@ static void kfree(void *ptr) {
         if(zone_ptr == NULL)
         {
             zone_ptr = &(buddy_info.zone[BUDDY_NUM-1]);
-            lock(&(zone_ptr->buddy_lk));
         }
-        
+
+        lock(&(zone_ptr->buddy_lk));
         zone_ptr->remain_unit_num ++;
         *(uintptr_t *)ptr = zone_ptr->head_free;
         zone_ptr->head_free = (uintptr_t)ptr;
