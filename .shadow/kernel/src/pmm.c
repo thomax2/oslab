@@ -240,7 +240,7 @@ static void kfree(void *ptr) {
                         page_ptr = &slab_info[i-1].page[SLAB_NUM - 1];
                     }
                     else
-                        page_ptr = &slab_info[i-1].page[j-1];
+                        page_ptr = &slab_info[i].page[j-1];
                     goto found;
                 }
             }
@@ -271,7 +271,10 @@ static void kfree(void *ptr) {
         }
 
         if(zone_ptr == NULL)
+        {
             zone_ptr = &buddy_info.zone[BUDDY_NUM-1];
+            lock(&zone_ptr->buddy_lk);
+        }
         
         zone_ptr->remain_unit_num ++;
         *(uintptr_t *)ptr = zone_ptr->head_free;
