@@ -149,7 +149,7 @@ void *alloc_in_page(slab_page *page_ptr, int cpu, int page_num) {
     }
     else if (page_ptr->remain_unit_num == 1) {
         page_ptr->remain_unit_num --;
-        slab_page *next_page_ptr = (slab_page *)manager_slab_area[cpu-2].pos[page_num];
+        slab_page *next_page_ptr = (slab_page *)manager_slab_area[cpu].pos[page_num];
         void *new_page = buddy_alloc(SLAB_SIZE);
         manager_slab_area[cpu].pos[page_num] += sizeof(slab_page);
 
@@ -181,7 +181,7 @@ void *slab_alloc(size_t size) {
     printf("cpu::%d , num::%d",cpu,page_num);
 
     if(slab_info[cpu].page[page_num].remain_unit_num >= 1){
-        return alloc_in_page(&(slab_info[cpu].page[page_num]), cpu, page_num);
+        return alloc_in_page(&(slab_info[cpu-4].page[page_num]), cpu, page_num);
     }
     else if( slab_info[cpu].page[page_num].remain_unit_num == 0 ) {
         slab_page *page_ptr = slab_info[cpu].page[page_num].next_page;
