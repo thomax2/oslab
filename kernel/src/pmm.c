@@ -1,248 +1,301 @@
 #include <common.h>
 // #include <threads.h>
 
-enum blockStatus {
-    bnon = 1,
-    bused,
-};
+#define PAGE_SIZE 4096
 
-typedef struct blockLink{
-    struct blockLink *next;
+// 4KB
+#define SLAB_SIZE PAGE_SIZE
+// 64B ~ 2KB
+#define SLAB_NUM 6 
+
+// 4MB
+#define BUDDY_SIZE 4*1024*1024
+// 4KB ~ 1MB
+#define BUDDY_NUM 9
+
+#define CPU_NUM 4
+
+
+typedef struct slab_page
+{
+    uintptr_t start;
+    uintptr_t head_free;
+    struct slab_page *next_page;
     size_t size;
-    lock_t lk;
-}blockLink_t;
+    size_t remain_unit_num;
+}slab_page;
 
-// lock_t linkLock;
+struct Manager_slab_area{
+    slab_page *start[SLAB_NUM];
+    slab_page *pos[SLAB_NUM];
+}manager_slab_area[CPU_NUM];
 
-size_t blockSize;
-size_t blockAllocateBit;
-#define byteAlignment 16
 
-blockLink_t bstart,*pbend;
-size_t freeBytesRemaining;
-size_t maxFreeBytesRemaining;
+struct Slab_info{    
+    slab_page page[SLAB_NUM];
+}slab_info[CPU_NUM];
+
+typedef struct buddy_zone
+{
+    lock_t buddy_lk;
+    uintptr_t start;
+    uintptr_t head_free;
+    size_t size;
+    size_t remain_unit_num;
+}buddy_zone;
+
+struct Buddy_info{
+    buddy_zone zone[BUDDY_NUM];
+}buddy_info;
+
+size_t buddy_start;
+
+// typedef struct {
+//     unsigned int bits[BITMAP_SIZE / (sizeof(unsigned int) * 8)]; // 根据unsigned int的大小来计算数组大小
+// } Bitmap;
+
+void *buddy_alloc(size_t size);
+void *alloc_in_page(slab_page *page_ptr, int cpu, int page_num);
+void *slab_alloc(size_t size);
 
 static void kinit(void){
     size_t heapStartAddr = (size_t) heap.start;
     size_t heapEndAddr = (size_t) heap.end;
+    
+    for (size_t i = 0; i < CPU_NUM; i++){
+        for (size_t j = 0; j < SLAB_NUM; j++){
+            manager_slab_area[i].start[j] = (slab_page *)(heapEndAddr - 256 * SLAB_NUM * (CPU_NUM - 1 - i) - 256 * (SLAB_NUM - j));
+            manager_slab_area[i].pos[j] = manager_slab_area[i].start[j];
+        }
+    }
+    for(size_t cpu_num = 0; cpu_num < CPU_NUM; cpu_num++)
+    {
+        for(size_t i=0;i<SLAB_NUM;i++)
+        {
+            slab_info[cpu_num].page[i].size = 1<<(i+6);
+            slab_info[cpu_num].page[i].start = (uintptr_t)(heapStartAddr + i*SLAB_SIZE + cpu_num * SLAB_SIZE*SLAB_NUM);
+            slab_info[cpu_num].page[i].remain_unit_num = SLAB_SIZE/(slab_info[cpu_num].page[i].size);
+            slab_info[cpu_num].page[i].head_free = slab_info[cpu_num].page[i].start;
+            slab_info[cpu_num].page[i].next_page = NULL;
+            
+            char *bpos = (char *)(slab_info[cpu_num].page[i].head_free);
+            for(int k=0; k < slab_info[cpu_num].page[i].remain_unit_num - 1;k++)
+            {
+                *(uintptr_t *)bpos = (uintptr_t)(bpos + slab_info[cpu_num].page[i].size);
+                bpos += slab_info[cpu_num].page[i].size;
+            }
+            *(uintptr_t *)bpos = (uintptr_t)NULL;
+        }
+    }
 
-    // set two constant
-    blockSize = sizeof(blockLink_t);
-    blockAllocateBit = ((size_t) 1) << (sizeof(size_t)*8-1);
-    // start align upward, end align downward
-    heapStartAddr += byteAlignment - 1;
-    heapStartAddr &= ~(byteAlignment - 1);
+    // buddy_start = heapStartAddr + CPU_NUM*SLAB_NUM*SLAB_SIZE;
+    buddy_start = heapStartAddr + 1*1024*1024;
+    for (size_t i = 0; i < BUDDY_NUM; i++)
+    {
+        buddy_info.zone[i].start = buddy_start + i * BUDDY_SIZE;
+        buddy_info.zone[i].head_free = buddy_info.zone[i].start;
+        buddy_info.zone[i].size = 1<<(i+12);
+        buddy_info.zone[i].remain_unit_num = (BUDDY_SIZE)/(buddy_info.zone[i].size);
 
-    heapEndAddr &= ~(byteAlignment - 1);
-    heapEndAddr -= blockSize;
-
-    // bstart ----> first heap block ----> pbend
-    bstart.next = (blockLink_t *)heapStartAddr;
-    bstart.size = 0;
-    lock_init(&bstart.lk);  // assume start.lock is list's overall lock
-    // lock_init(&bstart);
-
-    pbend->next = NULL;
-    pbend->size = 0;
-    lock_init(&pbend->lk);
-
-    // set firstblock, and size not include block struct
-    blockLink_t *bFirstBlock = (void *)heapStartAddr;
-    bFirstBlock->next = pbend;
-    bFirstBlock->size = heapEndAddr - heapStartAddr - blockSize;
-    lock_init(&bFirstBlock->lk);
-
-    // set heapblock remain size
-    freeBytesRemaining = bFirstBlock->size;
-    maxFreeBytesRemaining = freeBytesRemaining;
+        char *bpos = (char *)(buddy_info.zone[i].head_free);
+        for(int k=0; k < buddy_info.zone[i].remain_unit_num - 1; k++)
+        {
+            // (uintptr_t)((size_t)block->head_free + k)
+            *(uintptr_t *)bpos = (uintptr_t)(bpos + buddy_info.zone[i].size);
+            bpos += buddy_info.zone[i].size;
+        }
+        *(uintptr_t *)bpos = (uintptr_t)NULL;
+    }
+    
+    for (size_t i = 0; i < BUDDY_NUM; i++)
+        lock_init(&(buddy_info.zone[i].buddy_lk));
 
     return;
 }
 
-size_t addr_valid(blockLink_t *pblock, size_t size, size_t addrMod){
-    size_t startAddr = (size_t)pblock + blockSize;
-    // printf("starAddr %x\n", startAddr);
-    if(startAddr%addrMod == 0)
-        return startAddr;
-    startAddr += blockSize;
-    size_t validAddr = startAddr+1;
-    // printf("validAddr %x\n", validAddr);
-    validAddr += addrMod - (validAddr%addrMod);
-    
-    if (validAddr + size <= (size_t)pblock + pblock->size)
-        return validAddr;
-    else
-        return 0;
+size_t align_size(size_t size)
+{
+    if((size & (size - 1)) == 0) {
+        if(size < 64)
+            size = 64;
+        return size;
+    }
+    size_t power = 1;
+    while (power < size)
+    {
+        power <<= 1;
+    }
+    if(power < 64)
+        power = 64;
+    return power;
+}
+
+size_t get_index(size_t size)
+{
+    int pow = 0;
+    while (size > 1){
+        pow += 1;
+        size /= 2;
+    }
+    return pow;
+}
+
+void *alloc_in_page(slab_page *page_ptr, int cpu, int page_num) {
+    void *addr=NULL;
+
+    page_ptr->remain_unit_num --;
+    addr = (void *)page_ptr->head_free;
+    page_ptr->head_free = *(uintptr_t *)addr;
+    assert(addr != NULL);
+    return addr;
+}
+
+void *slab_alloc(size_t size) {
+    int cpu = cpu_current();
+    int page_num = get_index(size >> 6);
+
+    if(slab_info[cpu].page[page_num].remain_unit_num >= 1){
+        return alloc_in_page(&(slab_info[cpu].page[page_num]), cpu, page_num);
+    }
+    else if( slab_info[cpu].page[page_num].remain_unit_num == 0 ) {
+
+        slab_page *per_page_ptr = &(slab_info[cpu].page[page_num]);
+        slab_page *page_ptr = per_page_ptr->next_page;
+
+
+        while (page_ptr != NULL)
+        {
+            if(page_ptr->remain_unit_num > 0){
+                return alloc_in_page(page_ptr, cpu, page_num);
+            }
+            per_page_ptr = page_ptr;
+            page_ptr = page_ptr->next_page;
+        }
+        
+        if(page_ptr == NULL)
+        {
+
+            slab_page *next_page_ptr = (slab_page *)manager_slab_area[cpu].pos[page_num];
+            void *new_page = buddy_alloc(SLAB_SIZE);
+            manager_slab_area[cpu].pos[page_num] += sizeof(slab_page);
+
+            next_page_ptr->next_page = NULL;
+            next_page_ptr->remain_unit_num = (SLAB_SIZE)/(slab_info[cpu].page[page_num].size) - 1;
+            next_page_ptr->size = slab_info[cpu].page[page_num].size;
+            next_page_ptr->start = (uintptr_t)new_page;
+            next_page_ptr->head_free = (uintptr_t)((size_t)next_page_ptr->start + next_page_ptr->size);
+
+            char *bpos = (char *)next_page_ptr->head_free;
+            for(int k=0; k < next_page_ptr->remain_unit_num - 1; k++)
+            {
+                *(uintptr_t *)bpos = (uintptr_t)(bpos + next_page_ptr->size);
+                bpos += next_page_ptr->size;
+            }
+            *(uintptr_t *)bpos = (uintptr_t)NULL;
+            per_page_ptr -> next_page = next_page_ptr;
+            page_ptr = next_page_ptr;
+        }
+        return alloc_in_page(page_ptr, cpu, page_num);
+    }
+    else{
+        assert(0);
+    }
+    return NULL;
+}
+
+void *buddy_alloc(size_t size){
+    int zone_num = get_index(size >> 12);
+    void *addr = NULL;
+    lock(&(buddy_info.zone[zone_num].buddy_lk));
+    buddy_info.zone[zone_num].remain_unit_num --;
+    addr = (void *)buddy_info.zone[zone_num].head_free;
+    buddy_info.zone[zone_num].head_free = *(uintptr_t *)addr;
+    unlock(&(buddy_info.zone[zone_num].buddy_lk));
+    assert(addr != NULL);
+    return addr;
 }
 
 static void *kalloc(size_t size) {
-    // printf("%d\n",size);
     // align size
     assert(size != 0);
-    
-    size_t addrMod = 1;
-    while(addrMod < size)
-        addrMod <<= 1;
+    void *addr = NULL;
 
-    // get list lock to find suit block, suit= enough/nowait/
-    size_t addr=0;
-
-    blockLink_t *preblock = &bstart;
-    lock(&preblock->lk);
-    lock(&preblock->next->lk);
-    blockLink_t *pblock =preblock->next;
-
-    // get usable block lock and pre block lock 
-    while (pblock != pbend)
-    {
-        if(pblock->size & blockAllocateBit) // get free block but alloced
-        {
-            unlock(&pblock->lk);
-            unlock(&preblock->lk);
-            preblock = &bstart;
-            lock(&preblock->lk);
-            lock(&preblock->next->lk);
-            pblock = preblock->next;
-        }
-        else                                // get free block and free
-        {
-            size_t trueSize = pblock->size & ~blockAllocateBit;
-            if(trueSize >= size)
-                if((addr = addr_valid(pblock, size, addrMod)) != 0)
-                    break;
-            
-            lock(&pblock->next->lk);
-            unlock(&preblock->lk);
-            preblock = pblock;
-            pblock = pblock->next;
-        }
-    }
-
-    assert(pblock != pbend);
-    assert(addr != 0);
-
-    // printf("cpu:%d\n",cpu_current());    
-
-    size_t trueSize = (pblock->size) & ~(blockAllocateBit);    
-
-
-    lock(&pblock->next->lk);
-    lock_t *lk3 = &pblock->next->lk;
-    lock_t *lk2 = &pblock->lk;
-    lock_t *lk1 = &preblock->lk;
-
-    if(addr - blockSize == (size_t)pblock)
-    {   
-        // delete block, insert new free block
-        if(addr + size < (size_t)pblock + trueSize)
-        {
-            blockLink_t *bNewBlock = (void *)(addr + size);
-            lock_init(&bNewBlock->lk);
-            bNewBlock->next = pblock->next;
-            preblock->next = bNewBlock;
-            bNewBlock->size = trueSize - size - blockSize;
-            bNewBlock->size &= ~(blockAllocateBit);
-
-            pblock->next = (struct blockLink *)0x55555555;       // specify allocated block next=0x55555555
-            pblock->size = size;
-            pblock->size |= (blockAllocateBit);
-            unlock(&bNewBlock->next->lk);
-
-        }
-        else    // delete block
-        {
-            preblock->next = pblock->next;
-            pblock->next = (struct blockLink *)0x55555555;
-            pblock->size |= (blockAllocateBit);
-        }
-    }
+    size = align_size(size);
+    assert(size >= 64);
+    if(size < SLAB_SIZE)
+        addr = slab_alloc(size);
+    else if( size < BUDDY_SIZE )
+        addr = buddy_alloc(size);
+    else if( size < 16*1024*1024)
+        {}// addr = huge_alloc(size);
     else
-    {
-        // insert new free block
-        if(addr + size < (size_t)pblock + trueSize)
-        {
-            blockLink_t *bNewBlock = (void *)(addr + size);
-            blockLink_t *bNowBlock = (void *)(addr - blockSize);
-            lock_init(&bNewBlock->lk);
-            lock_init(&bNowBlock->lk);
-            bNewBlock->next = pblock->next;
-            bNowBlock->next = (struct blockLink *)0x55555555;
-            pblock->next = bNewBlock ;
-    
-            bNowBlock->size = (size_t)(bNewBlock) - addr;
-            bNowBlock->size |= blockAllocateBit;
-            pblock->size = (size_t)bNowBlock - (size_t)pblock - blockSize;
-            pblock->size &= ~(blockAllocateBit);
-            bNewBlock->size = trueSize - pblock->size - (bNowBlock->size & ~(blockAllocateBit)) - 2*blockSize;
-            bNewBlock->size &= ~(blockAllocateBit);
-            
-        }
-        else // non delete/insert, just change size
-        {
-            blockLink_t *bNewBlock = (void *)(addr - blockSize);
-            lock_init(&bNewBlock->lk);
-            bNewBlock->next = (struct blockLink *)0x55555555;
-
-            pblock->size = (size_t)bNewBlock - (size_t)pblock - blockSize;
-            pblock->size &= ~(blockAllocateBit);
-            bNewBlock->size = trueSize - pblock->size - blockSize;
-            bNewBlock->size |= (blockAllocateBit);    
-            
-        }
-    }
-
-    unlock(lk3);
-    unlock(lk2);
-    unlock(lk1);
-    return (void *)addr;
+        assert(0);
+    return addr;
 }
 
 static void kfree(void *ptr) {
-    blockLink_t *pblock = (void *)((size_t)ptr - blockSize);
-    blockLink_t *preBlock;
-    blockLink_t *pafterBlock;
-
-    lock(&bstart.lk);
-    preBlock = &bstart;
-    lock(&preBlock->next->lk);
-    pafterBlock = preBlock->next;
-
-    //find pre & after block
-    while ((size_t)pafterBlock < (size_t) pblock)
-    {
-        lock(&pafterBlock->next->lk);
-        blockLink_t *tmpAfterBlock = pafterBlock;
-        pafterBlock = pafterBlock->next;
-        unlock(&preBlock->lk);
-        preBlock = tmpAfterBlock;
+    // in slab
+    if((size_t)ptr < (size_t)buddy_start){
+        int cpu = cpu_current();
+        slab_page *page_ptr = NULL;
+        for (size_t j = 1; j < SLAB_NUM; j++){
+            if((size_t)slab_info[cpu].page[j].start > (size_t)ptr)
+            {
+                page_ptr = &(slab_info[cpu].page[j-1]);
+                break;
+            }
+        }
+        if(page_ptr == NULL)
+            page_ptr = &(slab_info[cpu].page[SLAB_NUM-1]);
+        page_ptr->remain_unit_num ++;
+        *(uintptr_t *)ptr = page_ptr->head_free;
+        page_ptr->head_free = (uintptr_t)ptr;
+        assert(page_ptr->head_free != (uintptr_t)NULL);
     }
-    assert(preBlock->next == pafterBlock);
-    
-    preBlock->next = pblock;
-    pblock->next =pafterBlock;
+    else { // in buddy
+        buddy_zone *zone_ptr = NULL;
+        size_t i;
+        for(i = 0; i < BUDDY_NUM; i++){
+            if((size_t)buddy_info.zone[i].start > (size_t)ptr) {
+                zone_ptr = &(buddy_info.zone[i-1]);
+                break;
+            }
+        }
+        if(i == 1 && ((char *)ptr - (char *)zone_ptr->start) % PAGE_SIZE != 0){ // 4KB buddy assign to slab
+            int cpu = cpu_current();
+            slab_page *page_ptr;
+            size_t page_start = (size_t)((char *)ptr - ((char *)ptr - (char *)zone_ptr->start) % PAGE_SIZE);
+            for (size_t i = 0; i < SLAB_NUM; i++)
+            {
+                page_ptr = &(slab_info[cpu].page[i]);
+                while (page_ptr != NULL)
+                {
+                    if((size_t)page_ptr->start == page_start)
+                        goto found;
+                    page_ptr = page_ptr->next_page;
+                }
+            }
+            found:
+            assert((size_t)page_ptr->start == page_start);
+            lock(&(zone_ptr->buddy_lk));
+            page_ptr->remain_unit_num ++;
+            *(uintptr_t *)ptr = page_ptr->head_free;
+            page_ptr->head_free = (uintptr_t)ptr;
+            unlock(&(zone_ptr->buddy_lk));
+            return;
+        }
 
-    lock_t *lk1 = &preBlock->lk;
-    lock_t *lk2 = &pafterBlock->lk;
-    // size_t trueSize = pblock->size & ~blockAllocateBit;
-    // merge pre block
-    if( (size_t)pblock - ((size_t)preBlock + preBlock->size + blockSize) < blockSize )
-    {
-        preBlock->size = (size_t)(pblock) - (size_t)preBlock + pblock->size;
-        preBlock->next = pafterBlock;
-        pblock = preBlock;
-        pblock->size &= ~(blockAllocateBit);
+        if(zone_ptr == NULL)
+        {
+            zone_ptr = &(buddy_info.zone[BUDDY_NUM-1]);
+        }
+
+        lock(&(zone_ptr->buddy_lk));
+        zone_ptr->remain_unit_num ++;
+        *(uintptr_t *)ptr = zone_ptr->head_free;
+        zone_ptr->head_free = (uintptr_t)ptr;
+        unlock(&(zone_ptr->buddy_lk));
     }
-
-    // merge after block
-    if(!(pafterBlock->size & blockAllocateBit))
-    {
-        pblock->size = (size_t)(pafterBlock) - (size_t)pblock + pafterBlock->size;
-        pblock->size &= ~(blockAllocateBit);
-        pblock->next = pafterBlock->next;
-    }
-
-    unlock(lk2);
-    unlock(lk1);
     return;
 }
 
@@ -257,6 +310,7 @@ static void pmm_init() {
         pmsize >> 20, heap.start, heap.end
     );
 
+    printf("cpu_count: %d\n",cpu_count());
     kinit();
     
 }

@@ -4,8 +4,8 @@ smp        ?= 4
 LDFLAGS    += -N -Ttext-segment=0x00100000
 QEMU_FLAGS += -serial mon:stdio \
               -machine accel=tcg \
-			  -D ./qemu.log -d exec,cpu_reset,guest_errors \
-              -smp "$(smp),cores=1,sockets=$(smp)" \
+              -s -S \
+			  -smp "$(smp),cores=1,sockets=$(smp)" \
               -drive format=raw,file=$(IMAGE)
 
 build-arg: image

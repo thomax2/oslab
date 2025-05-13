@@ -1,8 +1,15 @@
 #include <common.h>
 
+#define MAXLOCKNUM 1000000
+
 void lock(lock_t *lk)
 {
-    while (atomic_xchg(&lk->status, 1));
+    size_t locknum = 0;
+    while (atomic_xchg(&lk->status, 1))
+    {
+        locknum++;
+        assert(locknum < MAXLOCKNUM);
+    }
     return;
 }
 

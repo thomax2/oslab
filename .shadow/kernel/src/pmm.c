@@ -81,7 +81,6 @@ static void kinit(void){
             char *bpos = (char *)(slab_info[cpu_num].page[i].head_free);
             for(int k=0; k < slab_info[cpu_num].page[i].remain_unit_num - 1;k++)
             {
-                // (uintptr_t)((size_t)block->head_free + k)
                 *(uintptr_t *)bpos = (uintptr_t)(bpos + slab_info[cpu_num].page[i].size);
                 bpos += slab_info[cpu_num].page[i].size;
             }
@@ -142,10 +141,6 @@ size_t get_index(size_t size)
 }
 
 void *alloc_in_page(slab_page *page_ptr, int cpu, int page_num) {
-    // if(page_ptr->remain_unit_num >= 1){
-    // }
-    // else if (page_ptr->remain_unit_num == 1) {
-    // }
     void *addr=NULL;
 
     page_ptr->remain_unit_num --;
@@ -170,7 +165,6 @@ void *slab_alloc(size_t size) {
 
         while (page_ptr != NULL)
         {
-            // printf("musttttttttt\n");
             if(page_ptr->remain_unit_num > 0){
                 return alloc_in_page(page_ptr, cpu, page_num);
             }
@@ -186,11 +180,7 @@ void *slab_alloc(size_t size) {
             manager_slab_area[cpu].pos[page_num] += sizeof(slab_page);
 
             next_page_ptr->next_page = NULL;
-
             next_page_ptr->remain_unit_num = (SLAB_SIZE)/(slab_info[cpu].page[page_num].size) - 1;
-            // printf("havettttttttttttt\n");
-            // printf("ggboom%p\n",new_page);
-
             next_page_ptr->size = slab_info[cpu].page[page_num].size;
             next_page_ptr->start = (uintptr_t)new_page;
             next_page_ptr->head_free = (uintptr_t)((size_t)next_page_ptr->start + next_page_ptr->size);
@@ -198,14 +188,12 @@ void *slab_alloc(size_t size) {
             char *bpos = (char *)next_page_ptr->head_free;
             for(int k=0; k < next_page_ptr->remain_unit_num - 1; k++)
             {
-                // (uintptr_t)((size_t)block->head_free + k)
                 *(uintptr_t *)bpos = (uintptr_t)(bpos + next_page_ptr->size);
                 bpos += next_page_ptr->size;
             }
             *(uintptr_t *)bpos = (uintptr_t)NULL;
             per_page_ptr -> next_page = next_page_ptr;
             page_ptr = next_page_ptr;
-            // printf("ggboom%p\n",next_page_ptr->start);
         }
         return alloc_in_page(page_ptr, cpu, page_num);
     }
@@ -217,11 +205,9 @@ void *slab_alloc(size_t size) {
 
 void *buddy_alloc(size_t size){
     int zone_num = get_index(size >> 12);
-    // printf("zone_num%d\n",zone_num);
     void *addr = NULL;
     lock(&(buddy_info.zone[zone_num].buddy_lk));
     buddy_info.zone[zone_num].remain_unit_num --;
-    // assert(buddy_info.zone[zone_num].remain_unit_num != 0);
     addr = (void *)buddy_info.zone[zone_num].head_free;
     buddy_info.zone[zone_num].head_free = *(uintptr_t *)addr;
     unlock(&(buddy_info.zone[zone_num].buddy_lk));
@@ -230,7 +216,6 @@ void *buddy_alloc(size_t size){
 }
 
 static void *kalloc(size_t size) {
-    // printf("%d\n",size);
     // align size
     assert(size != 0);
     void *addr = NULL;
@@ -250,7 +235,6 @@ static void *kalloc(size_t size) {
 
 static void kfree(void *ptr) {
     // in slab
-    // printf("ptr::%d,buddy_start::%d\n",(size_t)ptr ,(size_t)buddy_start);
     if((size_t)ptr < (size_t)buddy_start){
         int cpu = cpu_current();
         slab_page *page_ptr = NULL;
@@ -278,29 +262,22 @@ static void kfree(void *ptr) {
             }
         }
         if(i == 1 && ((char *)ptr - (char *)zone_ptr->start) % PAGE_SIZE != 0){ // 4KB buddy assign to slab
-            // printf("aaaaaaaaao\n");
             int cpu = cpu_current();
             slab_page *page_ptr;
             size_t page_start = (size_t)((char *)ptr - ((char *)ptr - (char *)zone_ptr->start) % PAGE_SIZE);
-            // printf("wwwwwwwwwwwwwwwwwwwww%p\n",slab_info[cpu].page[0].next_page->start);
             for (size_t i = 0; i < SLAB_NUM; i++)
             {
                 page_ptr = &(slab_info[cpu].page[i]);
                 while (page_ptr != NULL)
                 {
-                    // printf("wtf%p\n",page_ptr->start);
                     if((size_t)page_ptr->start == page_start)
                         goto found;
                     page_ptr = page_ptr->next_page;
                 }
             }
-            // printf("ps1:::%x\n",(size_t)page_ptr->start);
-            // printf("ps2:::%x\n",page_start);
-
             found:
             assert((size_t)page_ptr->start == page_start);
             lock(&(zone_ptr->buddy_lk));
-            // assert(((size_t)page_ptr-buddy_start)%PAGE_SIZE == 0);
             page_ptr->remain_unit_num ++;
             *(uintptr_t *)ptr = page_ptr->head_free;
             page_ptr->head_free = (uintptr_t)ptr;
