@@ -251,6 +251,7 @@ static void kfree(void *ptr) {
         assert(page_ptr->head_free != (uintptr_t)NULL);
     }
     else { // in buddy
+        assert(0);
         buddy_zone *zone_ptr = NULL;
         size_t i;
         for(i = 0; i < BUDDY_NUM; i++){
