@@ -202,6 +202,7 @@ void *slab_alloc(size_t size) {
 void *buddy_alloc(size_t size){
     int zone_num = get_index(size >> 12);
     void *addr = NULL;
+    printf("hhhhhhhhhhh\n");
     lock(&(buddy_info.zone[zone_num].buddy_lk));
     buddy_info.zone[zone_num].remain_unit_num --;
     // assert(buddy_info.zone[zone_num].remain_unit_num != 0);
