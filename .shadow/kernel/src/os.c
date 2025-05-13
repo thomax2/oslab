@@ -14,8 +14,8 @@ static void os_run() {
         // test0();
         test_repeated_alloc(64,64*3);
         test_repeated_alloc(512,8*3);
-        test_repeated_alloc(4096,8);
-        test_repeated_alloc(4096*4,8);
+        test_repeated_alloc(4096,80);
+        test_repeated_alloc(4096*4,80);
 		// test1();
 		// test2();
     }
