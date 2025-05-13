@@ -179,7 +179,7 @@ void *slab_alloc(size_t size) {
 
         while (page_ptr != NULL)
         {
-            printf("musttttttttt\n");
+            // printf("musttttttttt\n");
             if(page_ptr->remain_unit_num > 0){
                 return alloc_in_page(page_ptr, cpu, page_num);
             }
