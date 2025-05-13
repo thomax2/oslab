@@ -235,7 +235,10 @@ static void kfree(void *ptr) {
                 if((size_t)slab_info[i].page[j].start > (size_t)ptr)
                 {
                     if(j==0)
+                    {
+                        assert(i!=0);
                         page_ptr = &slab_info[i-1].page[SLAB_NUM - 1];
+                    }
                     else
                         page_ptr = &slab_info[i-1].page[j-1];
                     goto found;
