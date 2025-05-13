@@ -129,7 +129,7 @@ void test_repeated_alloc(void) {
         *(int *)((char *)ptr + ALLOC_SIZE - sizeof(int)) = ~i; // 尾部标记
 		// printf("iiii:%d\n",i);
     }
-	printf("alloc sucess\n");
+	// printf("alloc sucess\n");
 
     // ==== 阶段 2：验证数据完整性 ====
     for (int i = 0; i < MAX_ALLOC_TIMES; i++) {
@@ -137,7 +137,7 @@ void test_repeated_alloc(void) {
         assert(*ptr == i); // 检查头部
         assert(*(int *)((char *)ptr + ALLOC_SIZE - sizeof(int)) == ~i); // 检查尾部
     }
-	printf("verify sucess\n");
+	// printf("verify sucess\n");
 
     // ==== 阶段 3：交替释放并重新分配 ====
     for (int i = 0; i < MAX_ALLOC_TIMES; i += 2) {
@@ -160,7 +160,7 @@ void test_repeated_alloc(void) {
         alloc_ptrs[i] = new_ptr;
     }
 
-	printf("replace sucess\n");
+	// printf("replace sucess\n");
 
     // ==== 阶段 4：释放所有内存 ====
     for (int i = 0; i < MAX_ALLOC_TIMES; i++) {
