@@ -74,7 +74,7 @@ static void kinit(void){
         {
             // slab_block *block = (slab_block *)manager_slab_area[cpu_num].pos[i];
             // manager_slab_area[cpu_num].pos[i] = (uintptr_t)((size_t)(manager_slab_area[cpu_num].pos[i]) + PAGE_SIZE);
-            slab_info[cpu_num].page[i].size = 2^(i+6);
+            slab_info[cpu_num].page[i].size = 1<<(i+6);
             slab_info[cpu_num].page[i].start = (uintptr_t)(heapStartAddr + i*SLAB_SIZE + cpu_num * SLAB_SIZE*SLAB_NUM);
             slab_info[cpu_num].page[i].remain_unit_num = SLAB_SIZE/(slab_info[cpu_num].page[i].size);
             slab_info[cpu_num].page[i].head_free = slab_info[cpu_num].page[i].start;
@@ -96,7 +96,7 @@ static void kinit(void){
     {
         buddy_info.zone[i].start = buddy_start + i * BUDDY_SIZE;
         buddy_info.zone[i].head_free = buddy_info.zone[i].start;
-        buddy_info.zone[i].size = 2^(i+12);
+        buddy_info.zone[i].size = 1<<(i+12);
         buddy_info.zone[i].remain_unit_num = (BUDDY_SIZE)/(buddy_info.zone[i].size);
 
         char *bpos = (char *)(buddy_info.zone[i].head_free);
@@ -148,7 +148,6 @@ void *alloc_in_page(slab_page *page_ptr, int cpu, int page_num) {
         page_ptr->head_free = *(uintptr_t *)addr;
     }
     else if (page_ptr->remain_unit_num == 1) {
-        assert(0);
         page_ptr->remain_unit_num --;
         slab_page *next_page_ptr = (slab_page *)manager_slab_area[cpu].pos[page_num];
         void *new_page = buddy_alloc(SLAB_SIZE);
