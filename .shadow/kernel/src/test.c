@@ -129,6 +129,7 @@ void test_repeated_alloc(void) {
         *(int *)((char *)ptr + ALLOC_SIZE - sizeof(int)) = ~i; // 尾部标记
 		// printf("iiii:%d\n",i);
     }
+	printf("alloc sucess\n");
 
     // ==== 阶段 2：验证数据完整性 ====
     for (int i = 0; i < MAX_ALLOC_TIMES; i++) {

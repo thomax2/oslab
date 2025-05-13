@@ -186,7 +186,7 @@ void *slab_alloc(size_t size) {
         return alloc_in_page(&(slab_info[cpu].page[page_num]), cpu, page_num);
     }
     else if( slab_info[cpu].page[page_num].remain_unit_num == 0 ) {
-        printf("nowewwwwwwwwwww\n");
+        // printf("nowewwwwwwwwwww\n");
         slab_page *page_ptr = slab_info[cpu].page[page_num].next_page;
         assert(page_ptr != NULL);
         while (page_ptr->remain_unit_num == 0){
