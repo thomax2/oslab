@@ -151,6 +151,7 @@ void *alloc_in_page(slab_page *page_ptr, int cpu, int page_num) {
         assert(addr != NULL);
     }
     else if (page_ptr->remain_unit_num == 1) {
+        printf("newbeeeeeee\n");
         page_ptr->remain_unit_num --;
         slab_page *next_page_ptr = (slab_page *)manager_slab_area[cpu].pos[page_num];
         void *new_page = buddy_alloc(SLAB_SIZE);
