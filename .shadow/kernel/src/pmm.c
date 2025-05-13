@@ -151,8 +151,10 @@ void *alloc_in_page(slab_page *page_ptr, int cpu, int page_num) {
         assert(addr != NULL);
     }
     else if (page_ptr->remain_unit_num == 1) {
-        printf("newbeeeeeee\n");
         page_ptr->remain_unit_num --;
+        addr = (void *)page_ptr->head_free;
+        page_ptr->head_free = (uintptr_t)NULL;
+
         slab_page *next_page_ptr = (slab_page *)manager_slab_area[cpu].pos[page_num];
         void *new_page = buddy_alloc(SLAB_SIZE);
         manager_slab_area[cpu].pos[page_num] += sizeof(slab_page);
@@ -164,7 +166,7 @@ void *alloc_in_page(slab_page *page_ptr, int cpu, int page_num) {
         next_page_ptr->head_free = (uintptr_t)((size_t)next_page_ptr->start + page_ptr->size);
 
         char *bpos = (char *)next_page_ptr->head_free;
-        for(int k=1; k < next_page_ptr->remain_unit_num - 1; k++)
+        for(int k=0; k < next_page_ptr->remain_unit_num - 1; k++)
         {
             // (uintptr_t)((size_t)block->head_free + k)
             *(uintptr_t *)bpos = (uintptr_t)(bpos + page_ptr->size);
@@ -172,8 +174,6 @@ void *alloc_in_page(slab_page *page_ptr, int cpu, int page_num) {
         }
         *(uintptr_t *)bpos = (uintptr_t)NULL;
         page_ptr->next_page = next_page_ptr;
-        addr = (void *)page_ptr->head_free;
-        page_ptr->head_free = (uintptr_t)NULL;
     }
     return addr;
 }
