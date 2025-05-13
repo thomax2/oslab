@@ -168,7 +168,7 @@ void test_repeated_alloc(void) {
 
 void test1(void)//page test
 {
-	void *add = pmm->alloc(4096);
+	void *add = pmm->alloc(4096*2);
 	if (add == NULL)
 	{
 		printf("add is NULL");
@@ -179,7 +179,7 @@ void test1(void)//page test
 	char *add_char=(char *)add;
 	*add_char='a';
 	*(add_char+4095)='b';
-	void *add1 = pmm->alloc(4096);
+	void *add1 = pmm->alloc(4096*2);
 	if (add1 == NULL)
 	{
 		printf("add1 is NULL");

@@ -12,8 +12,8 @@ static void os_run() {
     while (1)
     {
         // test0();
-        test_repeated_alloc();
-		// test1();
+        // test_repeated_alloc();
+		test1();
 		// test2();
     }
 }
