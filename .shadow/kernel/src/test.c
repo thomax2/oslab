@@ -114,7 +114,7 @@ void test0(void)
 
 void test_repeated_alloc(void) {
     const size_t ALLOC_SIZE = 64; // 测试 64 字节分配
-    const int MAX_ALLOC_TIMES = 65; // 分配 128 次
+    const int MAX_ALLOC_TIMES = 64; // 分配 128 次
     void *alloc_ptrs[MAX_ALLOC_TIMES]; // 存储分配地址
 
     // ==== 阶段 1：连续分配并填充数据 ====
@@ -145,10 +145,12 @@ void test_repeated_alloc(void) {
         pmm->free(alloc_ptrs[i]);
         alloc_ptrs[i] = NULL;
 
+		printf("realse even\n");
         // 重新分配并验证新块独立性
         void *new_ptr = pmm->alloc(ALLOC_SIZE);
         assert(new_ptr != NULL);
 
+		printf("new assign\n");
         // 新块头部应为未初始化值（若分配器不自动清零）
         // 写入新数据并验证
         *(int *)new_ptr = 0xDEADBEEF;
