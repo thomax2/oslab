@@ -245,7 +245,7 @@ static void kfree(void *ptr) {
         if(page_ptr == NULL)
             page_ptr = &(slab_info[cpu].page[SLAB_NUM-1]);
         page_ptr->remain_unit_num ++;
-        printf("%d\n",page_ptr->remain_unit_num);
+        printf("ggggggggg:%d\n",page_ptr->remain_unit_num);
         *(uintptr_t *)ptr = page_ptr->head_free;
         page_ptr->head_free = (uintptr_t)ptr;
         assert(page_ptr->head_free != (uintptr_t)NULL);
