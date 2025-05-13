@@ -188,7 +188,6 @@ void *slab_alloc(size_t size) {
         
         if(page_ptr == NULL)
         {
-            printf("ggggggdagasdgad\n");
 
             slab_page *next_page_ptr = (slab_page *)manager_slab_area[cpu].pos[page_num];
             void *new_page = buddy_alloc(SLAB_SIZE);
@@ -222,6 +221,7 @@ void *slab_alloc(size_t size) {
 
 void *buddy_alloc(size_t size){
     int zone_num = get_index(size >> 12);
+    printf("zone_num%d\n",zone_num);
     void *addr = NULL;
     lock(&(buddy_info.zone[zone_num].buddy_lk));
     buddy_info.zone[zone_num].remain_unit_num --;
