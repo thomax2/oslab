@@ -91,7 +91,7 @@ static void kinit(void){
         }
     }
 
-    size_t buddy_start = heapStartAddr + CPU_NUM*SLAB_NUM*SLAB_SIZE;
+    buddy_start = heapStartAddr + CPU_NUM*SLAB_NUM*SLAB_SIZE;
     for (size_t i = 0; i < BUDDY_NUM; i++)
     {
         buddy_info.zone[i].start = buddy_start + i * BUDDY_SIZE;
