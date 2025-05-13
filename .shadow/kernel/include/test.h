@@ -4,6 +4,6 @@
 void test0(void);
 void test1(void);
 void test2(void);
-void test_repeated_alloc(void);
+void test_repeated_alloc(size_t size, size_t times);
 
 #endif

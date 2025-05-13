@@ -112,9 +112,9 @@ void test0(void)
 
 }
 
-void test_repeated_alloc(void) {
-    const size_t ALLOC_SIZE = 64; // 测试 64 字节分配
-    const int MAX_ALLOC_TIMES = 128*2; // 分配 128 次
+void test_repeated_alloc(size_t size, size_t times) {
+    const size_t ALLOC_SIZE = size; // 测试 64 字节分配
+    const int MAX_ALLOC_TIMES = times; // 分配 128 次
     void *alloc_ptrs[MAX_ALLOC_TIMES]; // 存储分配地址
 
     // ==== 阶段 1：连续分配并填充数据 ====

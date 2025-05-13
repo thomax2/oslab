@@ -12,7 +12,9 @@ static void os_run() {
     while (1)
     {
         // test0();
-        test_repeated_alloc();
+        test_repeated_alloc(64,64*3);
+        test_repeated_alloc(512,8*3);
+        
 		// test1();
 		// test2();
     }
