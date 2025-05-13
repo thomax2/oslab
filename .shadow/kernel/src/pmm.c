@@ -199,6 +199,7 @@ void *slab_alloc(size_t size) {
             next_page_ptr->size = slab_info[cpu].page[page_num].size;
             next_page_ptr->start = (uintptr_t)new_page;
             next_page_ptr->head_free = (uintptr_t)((size_t)next_page_ptr->start + next_page_ptr->size);
+            printf("havettttttttttttt\n");
 
             char *bpos = (char *)next_page_ptr->head_free;
             for(int k=0; k < next_page_ptr->remain_unit_num - 1; k++)
@@ -210,7 +211,6 @@ void *slab_alloc(size_t size) {
             *(uintptr_t *)bpos = (uintptr_t)NULL;
             per_page_ptr -> next_page = next_page_ptr;
             page_ptr = next_page_ptr;
-            printf("havettttttttttttt\n");
 
         }
         return alloc_in_page(page_ptr, cpu, page_num);
