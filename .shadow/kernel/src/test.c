@@ -169,7 +169,7 @@ void test_repeated_alloc(size_t size, size_t times) {
         }
     }
 
-    printf("test_repeated_alloc: 64-byte repeated allocation passed\n");
+    printf("test: %d-byte %d-times  passed\n",ALLOC_SIZE,MAX_ALLOC_TIMES);
 }
 
 void test1(void)//page test
