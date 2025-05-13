@@ -287,10 +287,23 @@ static void kfree(void *ptr) {
             }
         }
         if(i == 1 && ((char *)ptr - (char *)zone_ptr->start) % PAGE_SIZE != 0){ // 4KB buddy assign to slab
-            printf("aaaaaaaaao\n");
+            // printf("aaaaaaaaao\n");
+            int cpu = cpu_current();
+            slab_page *page_ptr;
+            size_t page_start = (size_t)((char *)ptr - ((char *)ptr - (char *)zone_ptr->start) % PAGE_SIZE);
+            for (size_t i = 0; i < SLAB_NUM; i++)
+            {
+                page_ptr = &(slab_info[cpu].page[i]);
+                while (page_ptr != NULL)
+                {
+                    if((size_t)page_ptr->start == page_start)
+                        break;
+                    page_ptr = page_ptr->next_page;
+                }
+            }
+            assert((size_t)page_ptr->start == page_start);
             lock(&(zone_ptr->buddy_lk));
-            slab_page *page_ptr = (slab_page *)((char *)ptr - ((char *)ptr - (char *)zone_ptr->start) % PAGE_SIZE);
-            assert(((size_t)page_ptr-buddy_start)%PAGE_SIZE == 0);
+            // assert(((size_t)page_ptr-buddy_start)%PAGE_SIZE == 0);
             page_ptr->remain_unit_num ++;
             *(uintptr_t *)ptr = page_ptr->head_free;
             page_ptr->head_free = (uintptr_t)ptr;
