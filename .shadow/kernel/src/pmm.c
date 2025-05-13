@@ -146,6 +146,7 @@ void *alloc_in_page(slab_page *page_ptr, int cpu, int page_num) {
         page_ptr->remain_unit_num --;
         addr = (void *)page_ptr->head_free;
         page_ptr->head_free = *(uintptr_t *)addr;
+        assert(addr == NULL);
     }
     else if (page_ptr->remain_unit_num == 1) {
         page_ptr->remain_unit_num --;
