@@ -288,7 +288,7 @@ static void kfree(void *ptr) {
                 page_ptr = &(slab_info[cpu].page[i]);
                 while (page_ptr != NULL)
                 {
-                    printf("wtf%d\n",(size_t)page_ptr->start);
+                    printf("wtf%p\n",page_ptr->start);
                     if((size_t)page_ptr->start == page_start)
                         break;
                     page_ptr = page_ptr->next_page;
