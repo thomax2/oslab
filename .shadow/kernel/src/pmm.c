@@ -68,7 +68,6 @@ static void kinit(void){
             manager_slab_area[i].pos[j] = manager_slab_area[i].start[j];
         }
     }
-    printf("init\n");
     for(size_t cpu_num = 0; cpu_num < CPU_NUM; cpu_num++)
     {
         for(size_t i=0;i<SLAB_NUM;i++)
@@ -112,6 +111,7 @@ static void kinit(void){
     
     for (size_t i = 0; i < BUDDY_NUM; i++)
         lock_init(&buddy_info.zone[i].buddy_lk);
+    printf("init\n");
 
     return;
 }
