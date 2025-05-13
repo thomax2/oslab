@@ -4,7 +4,7 @@ smp        ?= 4
 LDFLAGS    += -N -Ttext-segment=0x00100000
 QEMU_FLAGS += -serial mon:stdio \
               -machine accel=tcg \
-			  -D ./qemu.log -d exec,cpu_reset,guest_errors \
+			  -m 512 \
               -smp "$(smp),cores=1,sockets=$(smp)" \
               -drive format=raw,file=$(IMAGE)
 
