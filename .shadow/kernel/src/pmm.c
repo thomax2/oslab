@@ -178,7 +178,6 @@ void *slab_alloc(size_t size) {
         // page_ptr->head_free = (uintptr_t)NULL;
         while (page_ptr != NULL)
         {
-            printf("ggggggdagasdgad\n");
 
             if(page_ptr->remain_unit_num != 0){
                 return alloc_in_page(page_ptr, cpu, page_num);
@@ -189,6 +188,8 @@ void *slab_alloc(size_t size) {
         
         if(page_ptr == NULL)
         {
+            printf("ggggggdagasdgad\n");
+
             slab_page *next_page_ptr = (slab_page *)manager_slab_area[cpu].pos[page_num];
             void *new_page = buddy_alloc(SLAB_SIZE);
             manager_slab_area[cpu].pos[page_num] += sizeof(slab_page);
