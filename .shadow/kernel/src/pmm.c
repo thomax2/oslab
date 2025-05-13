@@ -167,15 +167,6 @@ void *slab_alloc(size_t size) {
         slab_page *per_page_ptr = &(slab_info[cpu].page[page_num]);
         slab_page *page_ptr = per_page_ptr->next_page;
 
-        // assert(page_ptr != NULL);
-        // while (page_ptr->remain_unit_num == 0){
-        //     page_ptr = page_ptr->next_page;
-        // }
-        // return alloc_in_page(page_ptr, cpu, page_num);
-
-        // page_ptr->remain_unit_num = 0;
-        // addr = (void *)page_ptr->head_free;
-        // page_ptr->head_free = (uintptr_t)NULL;
 
         while (page_ptr != NULL)
         {
@@ -291,6 +282,7 @@ static void kfree(void *ptr) {
             int cpu = cpu_current();
             slab_page *page_ptr;
             size_t page_start = (size_t)((char *)ptr - ((char *)ptr - (char *)zone_ptr->start) % PAGE_SIZE);
+            printf("wwwwwwwwwwwwwwwwwwwww%p\n",slab_info[cpu].page[0].next_page->start);
             for (size_t i = 0; i < SLAB_NUM; i++)
             {
                 page_ptr = &(slab_info[cpu].page[i]);
