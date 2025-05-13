@@ -110,7 +110,7 @@ static void kinit(void){
     }
     
     for (size_t i = 0; i < BUDDY_NUM; i++)
-        lock_init(&buddy_info.zone[i].buddy_lk);
+        lock_init(&(buddy_info.zone[i].buddy_lk));
 
     return;
 }
@@ -181,7 +181,7 @@ void *slab_alloc(size_t size) {
     printf("cpu::%d , num::%d",cpu,page_num);
 
     if(slab_info[cpu].page[page_num].remain_unit_num >= 1){
-        return alloc_in_page(&slab_info[cpu].page[page_num], cpu, page_num);
+        return alloc_in_page(&(slab_info[cpu].page[page_num]), cpu, page_num);
     }
     else if( slab_info[cpu].page[page_num].remain_unit_num == 0 ) {
         slab_page *page_ptr = slab_info[cpu].page[page_num].next_page;
@@ -199,12 +199,12 @@ void *slab_alloc(size_t size) {
 void *buddy_alloc(size_t size){
     int zone_num = get_index(size >> 12);
     void *addr = NULL;
-    lock(&buddy_info.zone[zone_num].buddy_lk);
+    lock(&(buddy_info.zone[zone_num].buddy_lk));
     buddy_info.zone[zone_num].remain_unit_num --;
     assert(buddy_info.zone[zone_num].remain_unit_num != 0);
     addr = (void *)buddy_info.zone[zone_num].head_free;
     buddy_info.zone[zone_num].head_free = *(uintptr_t *)addr;
-    unlock(&buddy_info.zone[zone_num].buddy_lk);
+    unlock(&(buddy_info.zone[zone_num].buddy_lk));
     return addr;
 }
 
@@ -237,16 +237,16 @@ static void kfree(void *ptr) {
                     if(j==0)
                     {
                         assert(i!=0);
-                        page_ptr = &slab_info[i-1].page[SLAB_NUM - 1];
+                        page_ptr = &(slab_info[i-1].page[SLAB_NUM - 1]);
                     }
                     else
-                        page_ptr = &slab_info[i].page[j-1];
+                        page_ptr = &(slab_info[i].page[j-1]);
                     goto found;
                 }
             }
         found:
         if(page_ptr == NULL)
-            page_ptr = &slab_info[CPU_NUM-1].page[SLAB_NUM-1];
+            page_ptr = &(slab_info[CPU_NUM-1].page[SLAB_NUM-1]);
         page_ptr->remain_unit_num ++;
         *(uintptr_t *)ptr = page_ptr->head_free;
         page_ptr->head_free = (uintptr_t)ptr;
@@ -256,8 +256,8 @@ static void kfree(void *ptr) {
         size_t i;
         for(i = 0; i < BUDDY_NUM; i++){
             if((size_t)buddy_info.zone[i].start > (size_t)ptr) {
-                zone_ptr = &buddy_info.zone[i-1];
-                lock(&zone_ptr->buddy_lk);
+                zone_ptr = &(buddy_info.zone[i-1]);
+                lock(&(zone_ptr->buddy_lk));
                 break;
             }
         }
@@ -266,20 +266,20 @@ static void kfree(void *ptr) {
             page_ptr->remain_unit_num ++;
             *(uintptr_t *)ptr = page_ptr->head_free;
             page_ptr->head_free = (uintptr_t)ptr;
-            unlock(&zone_ptr->buddy_lk);
+            unlock(&(zone_ptr->buddy_lk));
             return;
         }
 
         if(zone_ptr == NULL)
         {
-            zone_ptr = &buddy_info.zone[BUDDY_NUM-1];
-            lock(&zone_ptr->buddy_lk);
+            zone_ptr = &(buddy_info.zone[BUDDY_NUM-1]);
+            lock(&(zone_ptr->buddy_lk));
         }
         
         zone_ptr->remain_unit_num ++;
         *(uintptr_t *)ptr = zone_ptr->head_free;
         zone_ptr->head_free = (uintptr_t)ptr;
-        unlock(&zone_ptr->buddy_lk);
+        unlock(&(zone_ptr->buddy_lk));
     }
     return;
 }
