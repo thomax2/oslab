@@ -112,6 +112,59 @@ void test0(void)
 
 }
 
+void test_repeated_alloc(void) {
+    const size_t ALLOC_SIZE = 64; // 测试 64 字节分配
+    const int MAX_ALLOC_TIMES = 100; // 分配 128 次
+    void *alloc_ptrs[MAX_ALLOC_TIMES]; // 存储分配地址
+
+    // ==== 阶段 1：连续分配并填充数据 ====
+    for (int i = 0; i < MAX_ALLOC_TIMES; i++) {
+        // 分配内存
+        alloc_ptrs[i] = pmm->alloc(ALLOC_SIZE);
+        assert(alloc_ptrs[i] != NULL);
+
+        // 填充模式：前 4 字节写入序号 i，最后 4 字节写入 ~i（按位取反）
+        int *ptr = (int *)alloc_ptrs[i];
+        *ptr = i; // 头部标记
+        *(int *)((char *)ptr + ALLOC_SIZE - sizeof(int)) = ~i; // 尾部标记
+    }
+
+    // ==== 阶段 2：验证数据完整性 ====
+    for (int i = 0; i < MAX_ALLOC_TIMES; i++) {
+        int *ptr = (int *)alloc_ptrs[i];
+        assert(*ptr == i); // 检查头部
+        assert(*(int *)((char *)ptr + ALLOC_SIZE - sizeof(int)) == ~i); // 检查尾部
+    }
+
+    // ==== 阶段 3：交替释放并重新分配 ====
+    for (int i = 0; i < MAX_ALLOC_TIMES; i += 2) {
+        // 释放偶数序号块
+        pmm->free(alloc_ptrs[i]);
+        alloc_ptrs[i] = NULL;
+
+        // 重新分配并验证新块独立性
+        void *new_ptr = pmm->alloc(ALLOC_SIZE);
+        assert(new_ptr != NULL);
+
+        // 新块头部应为未初始化值（若分配器不自动清零）
+        // 写入新数据并验证
+        *(int *)new_ptr = 0xDEADBEEF;
+        assert(*(int *)new_ptr == 0xDEADBEEF);
+
+        // 暂存新指针，稍后统一释放
+        alloc_ptrs[i] = new_ptr;
+    }
+
+    // ==== 阶段 4：释放所有内存 ====
+    for (int i = 0; i < MAX_ALLOC_TIMES; i++) {
+        if (alloc_ptrs[i] != NULL) {
+            pmm->free(alloc_ptrs[i]);
+        }
+    }
+
+    printf("test_repeated_alloc: 64-byte repeated allocation passed\n");
+}
+
 void test1(void)//page test
 {
 	void *add = pmm->alloc(4096);
