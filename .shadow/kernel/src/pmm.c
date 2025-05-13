@@ -282,12 +282,13 @@ static void kfree(void *ptr) {
             int cpu = cpu_current();
             slab_page *page_ptr;
             size_t page_start = (size_t)((char *)ptr - ((char *)ptr - (char *)zone_ptr->start) % PAGE_SIZE);
-            printf("wwwwwwwwwwwwwwwwwwwww%p\n",slab_info[cpu].page[0].next_page->start);
+            // printf("wwwwwwwwwwwwwwwwwwwww%p\n",slab_info[cpu].page[0].next_page->start);
             for (size_t i = 0; i < SLAB_NUM; i++)
             {
                 page_ptr = &(slab_info[cpu].page[i]);
                 while (page_ptr != NULL)
                 {
+                    printf("wtf%d\n",(size_t)page_ptr->start);
                     if((size_t)page_ptr->start == page_start)
                         break;
                     page_ptr = page_ptr->next_page;
