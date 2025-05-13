@@ -177,8 +177,10 @@ void *slab_alloc(size_t size) {
         // page_ptr->head_free = (uintptr_t)NULL;
         while (page_ptr != NULL)
         {
-            if(page_ptr->remain_unit_num != 0)
+            if(page_ptr->remain_unit_num != 0){
+                printf("ggggggdagasdgad\n");
                 return alloc_in_page(page_ptr, cpu, page_num);
+            }
             per_page_ptr = page_ptr;
             page_ptr = page_ptr->next_page;
         }
