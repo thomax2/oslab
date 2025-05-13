@@ -142,56 +142,72 @@ size_t get_index(size_t size)
 }
 
 void *alloc_in_page(slab_page *page_ptr, int cpu, int page_num) {
+    // if(page_ptr->remain_unit_num >= 1){
+    // }
+    // else if (page_ptr->remain_unit_num == 1) {
+    // }
     void *addr=NULL;
-    if(page_ptr->remain_unit_num > 1){
-        page_ptr->remain_unit_num --;
-        addr = (void *)page_ptr->head_free;
-        page_ptr->head_free = *(uintptr_t *)addr;
-        assert(addr != NULL);
-    }
-    else if (page_ptr->remain_unit_num == 1) {
-        page_ptr->remain_unit_num --;
-        addr = (void *)page_ptr->head_free;
-        page_ptr->head_free = (uintptr_t)NULL;
 
-        slab_page *next_page_ptr = (slab_page *)manager_slab_area[cpu].pos[page_num];
-        void *new_page = buddy_alloc(SLAB_SIZE);
-        manager_slab_area[cpu].pos[page_num] += sizeof(slab_page);
-
-        next_page_ptr->next_page = NULL;
-        next_page_ptr->remain_unit_num = SLAB_SIZE/(page_ptr->size) - 1;
-        next_page_ptr->size = page_ptr->size;
-        next_page_ptr->start = (uintptr_t)new_page;
-        next_page_ptr->head_free = (uintptr_t)((size_t)next_page_ptr->start + page_ptr->size);
-
-        char *bpos = (char *)next_page_ptr->head_free;
-        for(int k=0; k < next_page_ptr->remain_unit_num - 1; k++)
-        {
-            // (uintptr_t)((size_t)block->head_free + k)
-            *(uintptr_t *)bpos = (uintptr_t)(bpos + page_ptr->size);
-            bpos += page_ptr->size;
-        }
-        *(uintptr_t *)bpos = (uintptr_t)NULL;
-        page_ptr->next_page = next_page_ptr;
-    }
+    page_ptr->remain_unit_num --;
+    addr = (void *)page_ptr->head_free;
+    page_ptr->head_free = *(uintptr_t *)addr;
+    assert(addr != NULL);
     return addr;
 }
 
 void *slab_alloc(size_t size) {
     int cpu = cpu_current();
     int page_num = get_index(size >> 6);
-    
+
     if(slab_info[cpu].page[page_num].remain_unit_num >= 1){
         return alloc_in_page(&(slab_info[cpu].page[page_num]), cpu, page_num);
     }
     else if( slab_info[cpu].page[page_num].remain_unit_num == 0 ) {
-        // printf("nowewwwwwwwwwww\n");
-        slab_page *page_ptr = slab_info[cpu].page[page_num].next_page;
-        assert(page_ptr != NULL);
-        while (page_ptr->remain_unit_num == 0){
+        slab_page *per_page_ptr = &(slab_info[cpu].page[page_num]);
+        slab_page *page_ptr = per_page_ptr->next_page;
+
+        // assert(page_ptr != NULL);
+        // while (page_ptr->remain_unit_num == 0){
+        //     page_ptr = page_ptr->next_page;
+        // }
+        // return alloc_in_page(page_ptr, cpu, page_num);
+
+        // page_ptr->remain_unit_num = 0;
+        // addr = (void *)page_ptr->head_free;
+        // page_ptr->head_free = (uintptr_t)NULL;
+        while (page_ptr != NULL)
+        {
+            if(page_ptr->remain_unit_num != 0)
+                return alloc_in_page(page_ptr, cpu, page_num);
+            per_page_ptr = page_ptr;
             page_ptr = page_ptr->next_page;
         }
+        
+        if(page_ptr == NULL)
+        {
+            slab_page *next_page_ptr = (slab_page *)manager_slab_area[cpu].pos[page_num];
+            void *new_page = buddy_alloc(SLAB_SIZE);
+            manager_slab_area[cpu].pos[page_num] += sizeof(slab_page);
+
+            next_page_ptr->next_page = NULL;
+            next_page_ptr->remain_unit_num = SLAB_SIZE/(page_ptr->size) - 1;
+            next_page_ptr->size = slab_info[cpu].page[page_num].size;
+            next_page_ptr->start = (uintptr_t)new_page;
+            next_page_ptr->head_free = (uintptr_t)((size_t)next_page_ptr->start + next_page_ptr->size);
+
+            char *bpos = (char *)next_page_ptr->head_free;
+            for(int k=0; k < next_page_ptr->remain_unit_num - 1; k++)
+            {
+                // (uintptr_t)((size_t)block->head_free + k)
+                *(uintptr_t *)bpos = (uintptr_t)(bpos + next_page_ptr->size);
+                bpos += next_page_ptr->size;
+            }
+            *(uintptr_t *)bpos = (uintptr_t)NULL;
+            per_page_ptr -> next_page = next_page_ptr;
+            page_ptr = next_page_ptr;
+        }
         return alloc_in_page(page_ptr, cpu, page_num);
+
     }
     else{
         assert(0);
@@ -202,7 +218,6 @@ void *slab_alloc(size_t size) {
 void *buddy_alloc(size_t size){
     int zone_num = get_index(size >> 12);
     void *addr = NULL;
-    printf("hhhhhhhhhhh\n");
     lock(&(buddy_info.zone[zone_num].buddy_lk));
     buddy_info.zone[zone_num].remain_unit_num --;
     // assert(buddy_info.zone[zone_num].remain_unit_num != 0);
