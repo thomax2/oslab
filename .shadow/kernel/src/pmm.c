@@ -206,6 +206,7 @@ void *buddy_alloc(size_t size){
     addr = (void *)buddy_info.zone[zone_num].head_free;
     buddy_info.zone[zone_num].head_free = *(uintptr_t *)addr;
     unlock(&(buddy_info.zone[zone_num].buddy_lk));
+    assert(addr!=NULL);
     return addr;
 }
 
