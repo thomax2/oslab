@@ -311,7 +311,7 @@ void *huge_alloc(size_t size) {
     for (int i = (int)huge_list_cnt - 1; i >= (int)block_cnt; i--) {
         base[i + 1] = base[i];
     }
-
+    block_ptr = &base[block_cnt];
     // assert( block_ptr == &base[block_cnt]);
     // printf("aagg\n");
     size_t oldsize = block_ptr->size;
