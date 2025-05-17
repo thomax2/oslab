@@ -261,16 +261,16 @@ void *buddy_alloc(size_t size){
 void *huge_alloc(size_t size) {
     
     lock(&huge_lk);
-    huge_block *block_ptr = (huge_block *)huge_list_start;
     huge_block *base = (huge_block *)huge_list_start;
     size_t block_cnt = 0;
+    huge_block *block_ptr = base;
     // printf("ddddddd:%d\n",size);
     // printf("ddddddd:%d\n",block_ptr->size);
-    while (block_ptr->is_used == HUGE_USED || block_ptr->is_used == HUGE_UNUSED)
+    while (block_cnt < huge_list_cnt)
     {
         // printf("ggggggggg:%d\n",block_ptr->is_used);
         // printf("ggd%p\n",block_ptr);
-        if(block_ptr->size >= size && block_ptr->is_used == HUGE_UNUSED)
+        if(block_ptr->is_used == HUGE_UNUSED && block_ptr->size >= size)
         {
             // printf("wh%d\n",cpu_current());
             break;
@@ -278,7 +278,11 @@ void *huge_alloc(size_t size) {
         block_ptr += 1;
         block_cnt++;
     }
-
+    if (block_cnt >= huge_list_cnt) {
+        unlock(&huge_lk);
+        assert(0);
+        return NULL; // 未找到合适块
+    }
     // assert(huge_list_cnt < 20);
     if (huge_list_cnt > 20) {
         printf("huge_list_cnt overflow: %d", huge_list_cnt);
@@ -318,7 +322,7 @@ void *huge_alloc(size_t size) {
     // assert(new_block->is_used == HUGE_UNUSED);
     huge_list_cnt ++;
     printf("hugecnt4%d  \n",huge_list_cnt);
-
+    
     unlock(&huge_lk);
     return (void *)block_ptr->start;
 }
