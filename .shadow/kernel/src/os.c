@@ -39,6 +39,7 @@ static inline task_t *task_alloc() {
 
 static void os_init() {
     pmm->init();
+    printf("a???????\n");
     kmt->init();    
     
     dev->init();
