@@ -28,7 +28,8 @@ static device_t *dev_create(int size, const char* name, int id, devops_t *ops) {
     .ops  = ops,
   };
   // printf("%d\n",sizeof(device_t));
-  assert(dev == NULL);
+  printf("%d\n",size);
+  assert(dev != NULL);
 
   return dev;
 }
