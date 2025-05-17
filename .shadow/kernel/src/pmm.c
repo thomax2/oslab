@@ -324,7 +324,7 @@ void *huge_alloc(size_t size) {
     new_block->size = oldsize - size;
     new_block->is_used = HUGE_UNUSED;
 
-    // printf("%p\n",new_block->start);
+    printf("new_block%p\n",new_block);
     // assert(new_block->is_used == HUGE_UNUSED);
     huge_list_cnt ++;
     // printf("hugecnt4%d  \n",huge_list_cnt);
