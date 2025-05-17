@@ -132,7 +132,7 @@ static void kinit(void){
     }
 
     huge_start = buddy_start + BUDDY_NUM * BUDDY_SIZE; // 37MB ~ 124MB
-
+    printf("huge_start::%p/n",huge_start);
     lock_init(&huge_lk);
 
     lock(&huge_lk);
