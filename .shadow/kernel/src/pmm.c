@@ -293,24 +293,24 @@ void *huge_alloc(size_t size) {
 
     // printf("%p\n",block_ptr + 1);
 
-    for (int i = (int)huge_list_cnt - 1; i >= (int)block_cnt; i--) {
-        // base[i + 1] = base[i];
-        huge_block *ablock = base + i + 1;
-        huge_block *pblock = base + i;
+    // for (int i = (int)huge_list_cnt - 1; i >= (int)block_cnt; i--) {
+    //     // base[i + 1] = base[i];
+    //     huge_block *ablock = base + i + 1;
+    //     huge_block *pblock = base + i;
         
-        // huge_block *ablock = (huge_block *)(huge_list_start + sizeof(huge_block)*(i+1));
-        // huge_block *pblock = (huge_block *)(huge_list_start + sizeof(huge_block)*(i));
-        ablock->end = pblock->end;
-        ablock->is_used = pblock->is_used;
-        ablock->size = pblock->size;
-        ablock->start = pblock->start;
-    }
+    //     // huge_block *ablock = (huge_block *)(huge_list_start + sizeof(huge_block)*(i+1));
+    //     // huge_block *pblock = (huge_block *)(huge_list_start + sizeof(huge_block)*(i));
+    //     ablock->end = pblock->end;
+    //     ablock->is_used = pblock->is_used;
+    //     ablock->size = pblock->size;
+    //     ablock->start = pblock->start;
+    // }
 
     // printf("huge_l?ist_cnt%d\n",huge_list_cnt);
 
-    // for (int i = (int)huge_list_cnt - 1; i >= (int)block_cnt; i--) {
-    //     base[i + 1] = base[i];
-    // }
+    for (int i = (int)huge_list_cnt - 1; i >= (int)block_cnt; i--) {
+        base[i + 1] = base[i];
+    }
 
 
     // printf("aagg\n");
@@ -436,7 +436,7 @@ static void kfree(void *ptr) {
         block->is_used = HUGE_UNUSED;
         // merge pre block
         printf("hugecnt6 %d\n",huge_list_cnt);
-        if(block_cnt > 0 && base[block_cnt-1].is_used ==HUGE_UNUSED) {
+        while(block_cnt > 0 && base[block_cnt-1].is_used ==HUGE_UNUSED) {
             base[block_cnt-1].size += block->size;
             base[block_cnt-1].end = block->end;
 
@@ -459,7 +459,7 @@ static void kfree(void *ptr) {
             block = &base[block_cnt];
         }
 
-        if(block_cnt < (int)huge_list_cnt-1 && base[block_cnt + 1].is_used == HUGE_UNUSED) {
+        while(block_cnt < (int)huge_list_cnt-1 && base[block_cnt + 1].is_used == HUGE_UNUSED) {
             block->size += base[block_cnt+1].size;
             block->end = base[block_cnt+1].end;
             
