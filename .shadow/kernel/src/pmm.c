@@ -276,6 +276,7 @@ void *huge_alloc(size_t size) {
     
     assert(block_ptr->is_used == HUGE_UNUSED);
 
+    printf("%p\n",block_ptr);
     for (int i = huge_list_cnt - 1; i >= block_cnt; i--) {
         base[i + 1] = base[i];
     }
@@ -285,7 +286,7 @@ void *huge_alloc(size_t size) {
     block_ptr->is_used = HUGE_USED;
     
     huge_block *new_block = block_ptr + 1;
-
+    printf("%p\n",new_block);
     new_block->start = block_ptr->end;
     new_block->size = new_block->size - size;
     new_block->is_used = HUGE_UNUSED;
