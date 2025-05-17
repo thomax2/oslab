@@ -432,6 +432,7 @@ static void kfree(void *ptr) {
             assert(0);
             // return; // 未找到合适块
         }
+        printf("block->is_used%d\n",block->is_used);
         assert(block->is_used == HUGE_USED);
         block->is_used = HUGE_UNUSED;
         // merge pre block

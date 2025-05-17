@@ -141,25 +141,25 @@ void test_repeated_alloc(size_t size, size_t times) {
 	// printf("verify sucess\n");
 
     // ==== 阶段 3：交替释放并重新分配 ====
-    // for (int i = 0; i < MAX_ALLOC_TIMES; i += 2) {
-    //     // 释放偶数序号块
-    //     pmm->free(alloc_ptrs[i]);
-    //     alloc_ptrs[i] = NULL;
+    for (int i = 0; i < MAX_ALLOC_TIMES; i += 2) {
+        // 释放偶数序号块
+        pmm->free(alloc_ptrs[i]);
+        alloc_ptrs[i] = NULL;
 
-	// 	// printf("realse even %d\n",cpu_current());
-    //     // 重新分配并验证新块独立性
-    //     void *new_ptr = pmm->alloc(ALLOC_SIZE);
-    //     assert(new_ptr != NULL);
+		// printf("realse even %d\n",cpu_current());
+        // 重新分配并验证新块独立性
+        void *new_ptr = pmm->alloc(ALLOC_SIZE);
+        assert(new_ptr != NULL);
 
-	// 	// printf("new assign %d\n",cpu_current());
-    //     // 新块头部应为未初始化值（若分配器不自动清零）
-    //     // 写入新数据并验证
-    //     *(int *)new_ptr = 0xDEADBEEF;
-    //     assert(*(int *)new_ptr == 0xDEADBEEF);
+		// printf("new assign %d\n",cpu_current());
+        // 新块头部应为未初始化值（若分配器不自动清零）
+        // 写入新数据并验证
+        *(int *)new_ptr = 0xDEADBEEF;
+        assert(*(int *)new_ptr == 0xDEADBEEF);
 
-    //     // 暂存新指针，稍后统一释放
-    //     alloc_ptrs[i] = new_ptr;
-    // }
+        // 暂存新指针，稍后统一释放
+        alloc_ptrs[i] = new_ptr;
+    }
 
 	// printf("replace sucess\n");
 
