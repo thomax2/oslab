@@ -65,7 +65,7 @@ size_t buddy_start;
 size_t huge_start;
 
 size_t huge_list_start;
-size_t huge_list_cnt;
+int huge_list_cnt;
 
 // typedef struct {
 //     unsigned int bits[BITMAP_SIZE / (sizeof(unsigned int) * 8)]; // 根据unsigned int的大小来计算数组大小
@@ -291,7 +291,6 @@ void *huge_alloc(size_t size) {
     
     assert(block_ptr->is_used == HUGE_UNUSED);
 
-    // 
     // printf("%p\n",block_ptr + 1);
 
     // for (int i = huge_list_cnt - 1; i >= block_cnt; i--) {
@@ -307,7 +306,7 @@ void *huge_alloc(size_t size) {
     //     ablock->start = pblock->start;
     // }
 
-    printf("huge_l?ist_cnt%d\n",huge_list_cnt);
+    // printf("huge_l?ist_cnt%d\n",huge_list_cnt);
 
     for (int i = (int)huge_list_cnt - 1; i >= (int)block_cnt; i--) {
         base[i + 1] = base[i];
@@ -434,7 +433,7 @@ static void kfree(void *ptr) {
             base[block_cnt-1].size += block->size;
             base[block_cnt-1].end = block->end;
 
-            for (int i = block_cnt; i < huge_list_cnt - 1; i++) {
+            for (int i = block_cnt; i < (int)huge_list_cnt - 1; i++) {
                 base[i] = base[i+1];
             }
             base[huge_list_cnt - 1].is_used = 0;
@@ -445,11 +444,11 @@ static void kfree(void *ptr) {
             block = &base[block_cnt];
         }
 
-        if(block_cnt < huge_list_cnt-1 && base[block_cnt + 1].is_used == HUGE_UNUSED) {
+        if(block_cnt < (int)huge_list_cnt-1 && base[block_cnt + 1].is_used == HUGE_UNUSED) {
             block->size += base[block_cnt+1].size;
             block->end = base[block_cnt+1].end;
             
-            for (int i = block_cnt+1; i < huge_list_cnt - 1; i++) {
+            for (int i = block_cnt+1; i < (int)huge_list_cnt - 1; i++) {
                 base[i] = base[i+1];
             }
             base[huge_list_cnt - 1].is_used = 0;
