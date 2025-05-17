@@ -438,6 +438,7 @@ static void kfree(void *ptr) {
             }
             base[huge_list_cnt - 1].is_used = 0;
             huge_list_cnt --;
+            assert(huge_list_cnt >= 0);
             // printf("hugecnt5%d  \n",huge_list_cnt);
 
             block_cnt --;
@@ -453,6 +454,7 @@ static void kfree(void *ptr) {
             }
             base[huge_list_cnt - 1].is_used = 0;
             huge_list_cnt --;
+            assert(huge_list_cnt >= 0);
             // printf("hugecnt6%d  \n",huge_list_cnt);
         }
         unlock(&huge_lk);
