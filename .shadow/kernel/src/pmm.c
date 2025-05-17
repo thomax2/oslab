@@ -434,6 +434,7 @@ static void kfree(void *ptr) {
         assert(block->is_used == HUGE_USED);
         block->is_used = HUGE_UNUSED;
         // merge pre block
+        printf("hugecnt6%d  \n",huge_list_cnt);
         if(block_cnt > 0 && base[block_cnt-1].is_used ==HUGE_UNUSED) {
             base[block_cnt-1].size += block->size;
             base[block_cnt-1].end = block->end;
