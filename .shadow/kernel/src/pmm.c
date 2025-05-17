@@ -249,6 +249,7 @@ void *buddy_alloc(size_t size){
 }
 
 void *huge_alloc(size_t size) {
+    lock(&huge_lk);
     huge_block *block_ptr = (huge_block *)huge_list_start;
     huge_block *base = (huge_block *)huge_list_start;
     size_t block_cnt = 0;
@@ -276,7 +277,7 @@ void *huge_alloc(size_t size) {
     new_block->start = block_ptr->end;
     new_block->size = new_block->size - size;
     assert(new_block->is_used == HUGE_UNUSED);
-
+    unlock(&huge_lk);
     return (void *)block_ptr->start;
 }
 
@@ -286,7 +287,7 @@ static void *kalloc(size_t size) {
     void *addr = NULL;
 
     size = align_size(size);
-    printf("pmm size:%d\n",size);
+    // printf("pmm size:%d\n",size);
     assert(size >= 64);
     if(size < SLAB_SIZE)
         addr = slab_alloc(size);
@@ -363,6 +364,7 @@ static void kfree(void *ptr) {
         unlock(&(zone_ptr->buddy_lk));
     }
     else {      // in huge
+        lock(&huge_lk);
         huge_block *block = (huge_block *)huge_list_start;
         huge_block *base = (huge_block *)huge_list_start;
         int block_cnt = 0;
@@ -398,7 +400,7 @@ static void kfree(void *ptr) {
             base[huge_list_cnt - 1].is_used = 0;
             huge_list_cnt --;
         }
-
+        unlock(&huge_lk);
     }
     return;
 }
