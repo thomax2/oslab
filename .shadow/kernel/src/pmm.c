@@ -275,14 +275,14 @@ void *huge_alloc(size_t size) {
     }
     // printf("hugecnt%d  block%d\n",huge_list_cnt, block_cnt);
 
-    assert(huge_list_cnt < 10);
-
+    assert(huge_list_cnt < 20);
+    
     assert(block_ptr->is_used == HUGE_UNUSED);
 
     // 
     // printf("%p\n",block_ptr + 1);
 
-    for (int i = huge_list_cnt - 2; i >= block_cnt; i--) {
+    for (int i = huge_list_cnt - 1; i >= block_cnt; i--) {
         // base[i + 1] = base[i];
         huge_block *ablock = base + i + 1;
         huge_block *pblock = base + i;
