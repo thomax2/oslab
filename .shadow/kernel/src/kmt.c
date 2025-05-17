@@ -8,6 +8,8 @@ uint16_t tid_cnt = 0;
 task_t *task_lib[TASK_NUM_MAX];
 task_t *task_current[CPU_NUM_MAX];
 
+// use when w/r task_lib/tid_cnt
+spinlock_t task_lk;
 
 void kmt_spin_init(spinlock_t *lk, const char *name)
 {
@@ -85,6 +87,7 @@ static Context *kmt_context_save(Event ev, Context *ctx)
 // no choose blocked
 static Context *kmt_schedule(Event ev, Context *ctx)
 {
+    kmt->spin_lock(&task_lk);
     int task_cnt = 0;
     int able_cnt = 0;
     for (size_t i = 0; task_cnt < tid_cnt; i++) {
@@ -102,6 +105,7 @@ static Context *kmt_schedule(Event ev, Context *ctx)
                 if(c == 0) {
                     task_lib[i]->status = RUNNING;
                     task_current[cpu_current()] = task_lib[i];
+                    kmt->spin_unlock(&task_lk);
                     return &task_lib[i]->context;
                 }
             }
@@ -114,15 +118,16 @@ static Context *kmt_schedule(Event ev, Context *ctx)
 
 task_t idle_task;
 
-void idle_func(void *arg)
+void idle_clean_func(void *arg)
 {
     while (1) {
+        kmt->spin_lock(&task_lk);
         for (size_t i = 0; i < tid_cnt; i++) {
             if(task_lib[i]->status == DEAD) {
                 bool flag_use = false;
                 for (size_t j = 0; j < CPU_NUM_MAX; j++)
                 {
-                    if(task_current[j] == task_lib[i])
+                    if(task_current[i] != NULL && task_current[j] == task_lib[i])
                         flag_use = true;
                 }
                 if(flag_use == false) {
@@ -132,16 +137,35 @@ void idle_func(void *arg)
                 }
             }
         }
+        kmt->spin_unlock(&task_lk);
         yield();
     }
 }
 
 static void kmt_init(void)
 {
+    kmt->spin_init(&task_lk, "task_lk");
+
     // idle task
-    kmt->create(&idle_task, "idle", idle_func, NULL);
+    kmt->create(&idle_task, "idle", idle_clean_func, NULL);
+
+
+    for (size_t i = 0; i < cpu_count(); i++)
+    {
+        if(i == 0 ) {
+            task_current[i] = &idle_task;
+            (&idle_task)->status = RUNNING;
+            continue;
+        }
+        task_t *t = pmm->alloc(sizeof(task_t));
+        kmt->create(t,"-",NULL,NULL);
+        task_current[i] = t;
+        t->status = RUNNING;
+    }
+
     os->on_irq(INT_MIN, EVENT_NULL, kmt_context_save);
     os->on_irq(INT_MAX, EVENT_NULL, kmt_schedule);
+    return;
 }
 
 static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg)
@@ -150,6 +174,7 @@ static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), 
     task->status = RUNNING;
     Area tstack = { .start = task->stack, .end = task + 1};
     kcontext(tstack, entry, arg);
+    kmt->spin_lock(&task_lk);
     for (size_t i = 0; i < TASK_NUM_MAX; i++)
     {
         if(task_lib[i] == NULL)
@@ -160,6 +185,7 @@ static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), 
         }
     }
     tid_cnt++;
+    kmt->spin_unlock(&task_lk);
     return tid_cnt;
 }
 
@@ -182,9 +208,11 @@ static void kmt_teardown(task_t *task)
     }
 
     // dont running 
+    kmt->spin_lock(&task_lk);
     task_lib[task->tid] = NULL;
     pmm->free(task);
     tid_cnt--;
+    kmt->spin_unlock(&task_lk);
     return;
 }
 
