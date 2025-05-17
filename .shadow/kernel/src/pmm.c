@@ -284,9 +284,10 @@ void *huge_alloc(size_t size) {
     huge_block *new_block = block_ptr + 1;
 
     new_block->start = block_ptr->end;
-    new_block->size = base[block_cnt + 1].size - size;
+    new_block->size = new_block->size - size;
     new_block->is_used = HUGE_UNUSED;
 
+    printf("%p\n",new_block->start);
     assert(new_block->is_used == HUGE_UNUSED);
     huge_list_cnt ++;
     
