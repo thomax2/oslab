@@ -310,7 +310,7 @@ static void *kalloc(size_t size) {
     assert(size >= 64);
     if(size < SLAB_SIZE)
         addr = slab_alloc(size);
-    else if( size < BUDDY_SIZE )
+    else if( size < BUDDY_SIZE/2 )
         addr = buddy_alloc(size);
     else if( size < 16*1024*1024)
         addr = huge_alloc(size);
