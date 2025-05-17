@@ -1,8 +1,29 @@
 #include <common.h>
+#include "os.h"
 
+// #define MAX_EVENT
+
+// seq in all event
+typedef struct 
+{
+    int seq;
+    int event;
+    handler_t handler;
+}irq_handler;
+
+typedef struct 
+{
+    int cnt;
+    irq_handler handlers[MAX_HANDLERS_PER_EVENT];
+}irq_handler_list;
+
+irq_handler_list irq_table;
+
+extern task_t *task_current[CPU_NUM_MAX];
 
 static void os_init() {
     pmm->init();
+    kmt->init();
 }
 
 static void os_run() {
@@ -21,7 +42,48 @@ static void os_run() {
     }
 }
 
+static Context *os_trap(Event ev, Context *context)
+{
+    Context *ret_ctx = NULL;    
+    irq_handler_list *list = &irq_table;
+    int cnt = list->cnt;
+
+    // only one handler return a context
+    for (int i = 0; i < cnt; i++) {
+        irq_handler h = list->handlers[i];
+        if(h.event == EVENT_NULL || h.event == ev.event) {
+            Context *r = h.handler(ev, context);
+            panic_on(r && ret_ctx, "return to multiple contexts");
+            if (r) ret_ctx = r;
+        }
+    }
+    panic_on(!ret_ctx, "return to NULL context");
+
+    return ret_ctx;
+}
+
+static void os_on_irq(int seq, int event, handler_t handler)
+{
+    irq_handler_list *list = &irq_table;
+    
+    assert(list->cnt <  MAX_HANDLERS_PER_EVENT);
+
+    // insert order
+    int i = list->cnt - 1;
+    while (i >= 0 && list->handlers[i].seq > seq)
+    {
+        list->handlers[i + 1] = list->handlers[i];
+        i--;
+    }
+    list->handlers[i+1].seq = seq;
+    list->handlers[i+1].handler = handler;
+    list->handlers[i+1].event = event;
+    list->cnt ++;
+}
+
 MODULE_DEF(os) = {
     .init = os_init,
     .run  = os_run,
+    .trap = os_trap,
+    .on_irq = os_on_irq
 };

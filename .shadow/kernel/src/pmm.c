@@ -299,6 +299,8 @@ static void kfree(void *ptr) {
     return;
 }
 
+
+
 static void pmm_init() {
     uintptr_t pmsize = (
         (uintptr_t)heap.end
@@ -315,8 +317,29 @@ static void pmm_init() {
     
 }
 
+static void *kalloc_irq(size_t size)
+{
+    int i = ienabled();
+    iset(false);
+    void *ret = kalloc(size);
+    if(i) iset(true);
+    return ret;
+}
+
+
+static void kfree_irq(void *ptr)
+{
+    int i = ienabled();
+    iset(false);
+    kfree(ptr);
+    if(i) iset(true);
+    return;
+}
+
 MODULE_DEF(pmm) = {
     .init  = pmm_init,
-    .alloc = kalloc,
-    .free  = kfree,
+    // .alloc = kalloc,
+    // .free  = kfree,
+    .alloc = kalloc_irq,
+    .free  = kfree_irq,
 };
