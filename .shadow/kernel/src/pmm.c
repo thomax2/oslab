@@ -331,6 +331,8 @@ void *huge_alloc(size_t size) {
     // printf("hugecnt4%d  \n",huge_list_cnt);
     
     unlock(&huge_lk);
+    printf("[get] request=%p block=%p block->start=%p is_used=%d\n", 
+        (void *)block_ptr->start, block_ptr, block_ptr->start, block_ptr->is_used);
     return (void *)block_ptr->start;
 }
 
