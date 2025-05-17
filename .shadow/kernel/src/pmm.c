@@ -90,8 +90,8 @@ static void kinit(void){
     // 125MB - 0.5MB
     huge_list_start = heapEndAddr - 800*1024;
     huge_list_cnt = 0;
-    printf("huge_list_cnt::%p\n",&huge_list_cnt);
-    printf("buddy_start::%p\n",&buddy_start);
+    // printf("huge_list_cnt::%p\n",&huge_list_cnt);
+    // printf("buddy_start::%p\n",&buddy_start);
     // printf("hugecnt2%d  \n",huge_list_cnt);
 
     for(size_t cpu_num = 0; cpu_num < CPU_NUM; cpu_num++)
@@ -132,7 +132,7 @@ static void kinit(void){
         }
         *(uintptr_t *)bpos = (uintptr_t)NULL;
     }
-    printf("buddy_start::%p\n",buddy_start);
+    // printf("buddy_start::%p\n",buddy_start);
 
     huge_start = buddy_start + BUDDY_NUM * BUDDY_SIZE; // 37MB ~ 124MB
     printf("huge_start::%p\n",huge_start);
@@ -153,6 +153,7 @@ static void kinit(void){
 
     // huge_block *block_ptr = (huge_block *)huge_list_start;
     // printf("%d\n", block_ptr->is_used);
+    assert(huge_list_cnt<20);
     return;
 }
 
