@@ -132,19 +132,22 @@ static void kinit(void){
 
     huge_start = buddy_start + BUDDY_NUM * BUDDY_SIZE; // 37MB ~ 124MB
 
+    lock_init(&huge_lk);
+
+    lock(&huge_lk);
     huge_block *first_huge = (huge_block *)huge_list_start;
     first_huge->start = huge_start;
     first_huge->size = HUGE_SIZE;
     first_huge->end = huge_start + HUGE_SIZE;
     first_huge->is_used = HUGE_UNUSED;
     huge_list_cnt ++;
+    unlock(&huge_lk);
 
     for (size_t i = 0; i < BUDDY_NUM; i++)
         lock_init(&(buddy_info.zone[i].buddy_lk));
 
     // huge_block *block_ptr = (huge_block *)huge_list_start;
     // printf("%d\n", block_ptr->is_used);
-    lock_init(&huge_lk);
     return;
 }
 
@@ -256,7 +259,6 @@ void *huge_alloc(size_t size) {
     huge_block *block_ptr = (huge_block *)huge_list_start;
     huge_block *base = (huge_block *)huge_list_start;
     size_t block_cnt = 0;
-    printf("aaaaaaaaaaaa%d\n",huge_list_cnt);
     // printf("ddddddd:%d\n",size);
     // printf("ddddddd:%d\n",block_ptr->size);
     while (block_ptr->is_used == HUGE_USED || block_ptr->is_used == HUGE_UNUSED)
