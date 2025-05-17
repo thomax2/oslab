@@ -264,7 +264,7 @@ void *huge_alloc(size_t size) {
     while (block_ptr->is_used == HUGE_USED || block_ptr->is_used == HUGE_UNUSED)
     {
         // printf("ggggggggg:%d\n",block_ptr->is_used);
-
+        printf("ggd%p\n",block_ptr);
         if(block_ptr->size >= size && block_ptr->is_used == HUGE_UNUSED)
         {
             printf("wh%d\n",cpu_current());
@@ -276,7 +276,7 @@ void *huge_alloc(size_t size) {
     
     assert(block_ptr->is_used == HUGE_UNUSED);
 
-    // printf("%p\n",block_ptr);
+    // 
     // printf("%p\n",block_ptr + 1);
 
     for (int i = huge_list_cnt - 1; i >= block_cnt; i--) {
