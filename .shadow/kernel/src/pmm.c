@@ -457,7 +457,7 @@ static void kfree(void *ptr) {
         block->is_used = HUGE_UNUSED;
         // merge pre block
         printf("hugecnt6 %d\n",huge_list_cnt);
-        while(block_cnt > 0 && base[block_cnt-1].is_used ==HUGE_UNUSED) {
+        while((size_t)block->start == (size_t)ptr && block->size != 0) {
             base[block_cnt-1].size += block->size;
             base[block_cnt-1].end = block->end;
 
