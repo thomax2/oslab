@@ -153,7 +153,6 @@ static void kinit(void){
 
     // huge_block *block_ptr = (huge_block *)huge_list_start;
     // printf("%d\n", block_ptr->is_used);
-    assert(huge_list_cnt<20);
     return;
 }
 
@@ -295,6 +294,9 @@ void *huge_alloc(size_t size) {
         // base[i + 1] = base[i];
         huge_block *ablock = base + i + 1;
         huge_block *pblock = base + i;
+        printf("ablock%p\n",ablock);
+        printf("ablock%p\n",pblock);
+        
         // huge_block *ablock = (huge_block *)(huge_list_start + sizeof(huge_block)*(i+1));
         // huge_block *pblock = (huge_block *)(huge_list_start + sizeof(huge_block)*(i));
         ablock->end = pblock->end;
