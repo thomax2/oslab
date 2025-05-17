@@ -293,24 +293,24 @@ void *huge_alloc(size_t size) {
 
     // printf("%p\n",block_ptr + 1);
 
-    // for (int i = huge_list_cnt - 1; i >= block_cnt; i--) {
-    //     // base[i + 1] = base[i];
-    //     huge_block *ablock = base + i + 1;
-    //     huge_block *pblock = base + i;
+    for (int i = huge_list_cnt - 1; i >= block_cnt; i--) {
+        // base[i + 1] = base[i];
+        huge_block *ablock = base + i + 1;
+        huge_block *pblock = base + i;
         
-    //     // huge_block *ablock = (huge_block *)(huge_list_start + sizeof(huge_block)*(i+1));
-    //     // huge_block *pblock = (huge_block *)(huge_list_start + sizeof(huge_block)*(i));
-    //     ablock->end = pblock->end;
-    //     ablock->is_used = pblock->is_used;
-    //     ablock->size = pblock->size;
-    //     ablock->start = pblock->start;
-    // }
+        // huge_block *ablock = (huge_block *)(huge_list_start + sizeof(huge_block)*(i+1));
+        // huge_block *pblock = (huge_block *)(huge_list_start + sizeof(huge_block)*(i));
+        ablock->end = pblock->end;
+        ablock->is_used = pblock->is_used;
+        ablock->size = pblock->size;
+        ablock->start = pblock->start;
+    }
 
     // printf("huge_l?ist_cnt%d\n",huge_list_cnt);
 
-    for (int i = (int)huge_list_cnt - 1; i >= (int)block_cnt; i--) {
-        base[i + 1] = base[i];
-    }
+    // for (int i = (int)huge_list_cnt - 1; i >= (int)block_cnt; i--) {
+    //     base[i + 1] = base[i];
+    // }
 
 
     // printf("aagg\n");
