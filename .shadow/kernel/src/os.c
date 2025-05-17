@@ -45,7 +45,6 @@ static void os_init() {
     // // printf("dev init success\n");
     // kmt->create(task_alloc(), "tty_reader", tty_reader, "tty1");
     // kmt->create(task_alloc(), "tty_reader", tty_reader, "tty2");
-
 }
 
 static void os_run() {

@@ -251,6 +251,7 @@ void *buddy_alloc(size_t size){
 }
 
 void *huge_alloc(size_t size) {
+    
     lock(&huge_lk);
     huge_block *block_ptr = (huge_block *)huge_list_start;
     huge_block *base = (huge_block *)huge_list_start;
