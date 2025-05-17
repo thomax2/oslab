@@ -294,26 +294,31 @@ void *huge_alloc(size_t size) {
     // 
     // printf("%p\n",block_ptr + 1);
 
-    for (int i = huge_list_cnt - 1; i >= block_cnt; i--) {
-        // base[i + 1] = base[i];
-        huge_block *ablock = base + i + 1;
-        huge_block *pblock = base + i;
+    // for (int i = huge_list_cnt - 1; i >= block_cnt; i--) {
+    //     // base[i + 1] = base[i];
+    //     huge_block *ablock = base + i + 1;
+    //     huge_block *pblock = base + i;
         
-        // huge_block *ablock = (huge_block *)(huge_list_start + sizeof(huge_block)*(i+1));
-        // huge_block *pblock = (huge_block *)(huge_list_start + sizeof(huge_block)*(i));
-        ablock->end = pblock->end;
-        ablock->is_used = pblock->is_used;
-        ablock->size = pblock->size;
-        ablock->start = pblock->start;
+    //     // huge_block *ablock = (huge_block *)(huge_list_start + sizeof(huge_block)*(i+1));
+    //     // huge_block *pblock = (huge_block *)(huge_list_start + sizeof(huge_block)*(i));
+    //     ablock->end = pblock->end;
+    //     ablock->is_used = pblock->is_used;
+    //     ablock->size = pblock->size;
+    //     ablock->start = pblock->start;
+    // }
+
+    for (int i = huge_list_cnt - 1; i >= block_cnt; i--) {
+        base[i + 1] = base[i];
     }
+
+
     // printf("aagg\n");
     size_t oldsize = block_ptr->size;
     block_ptr->size = size;
     block_ptr->end = block_ptr->start + size;
     block_ptr->is_used = HUGE_USED;
-    
+
     huge_block *new_block = block_ptr + 1;
-    // printf("ggd%p\n",new_block);
     new_block->start = block_ptr->end;
     new_block->size = oldsize - size;
     new_block->is_used = HUGE_UNUSED;
