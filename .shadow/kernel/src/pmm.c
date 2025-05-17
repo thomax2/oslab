@@ -257,7 +257,7 @@ void *huge_alloc(size_t size) {
     
     lock(&huge_lk);
     huge_block *block_ptr = (huge_block *)huge_list_start;
-    huge_block *base = (huge_block *)huge_list_start;
+    // huge_block *base = (huge_block *)huge_list_start;
     size_t block_cnt = 0;
     // printf("ddddddd:%d\n",size);
     // printf("ddddddd:%d\n",block_ptr->size);
@@ -281,8 +281,10 @@ void *huge_alloc(size_t size) {
 
     for (int i = huge_list_cnt - 1; i >= block_cnt; i--) {
         // base[i + 1] = base[i];
-        huge_block *ablock = base + i + 1;
-        huge_block *pblock = base + i;
+        // huge_block *ablock = base + i + 1;
+        // huge_block *pblock = base + i;
+        huge_block *ablock = (huge_block *)(huge_list_start + sizeof(huge_block)*(i+1));
+        huge_block *pblock = (huge_block *)(huge_list_start + sizeof(huge_block)*(i));
         ablock->end = pblock->end;
         ablock->is_used = pblock->is_used;
         ablock->size = pblock->size;
