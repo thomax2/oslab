@@ -263,7 +263,7 @@ void *huge_alloc(size_t size) {
     // printf("ddddddd:%d\n",block_ptr->size);
     while (block_ptr->is_used == HUGE_USED || block_ptr->is_used == HUGE_UNUSED)
     {
-        printf("ggggggggg:%d\n",block_ptr->is_used);
+        // printf("ggggggggg:%d\n",block_ptr->is_used);
         // printf("ggd%p\n",block_ptr);
         if(block_ptr->size >= size && block_ptr->is_used == HUGE_UNUSED)
         {
@@ -288,6 +288,7 @@ void *huge_alloc(size_t size) {
     block_ptr->is_used = HUGE_USED;
     
     huge_block *new_block = block_ptr + 1;
+    printf("ggd%p\n",new_block);
     new_block->start = block_ptr->end;
     new_block->size = new_block->size - size;
     new_block->is_used = HUGE_UNUSED;
