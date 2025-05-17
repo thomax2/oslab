@@ -88,7 +88,7 @@ static void kinit(void){
     }
 
     // 125MB - 0.5MB
-    huge_list_start = heapEndAddr - 500*1024;
+    huge_list_start = heapEndAddr - 800*1024;
     huge_list_cnt = 0;
 
     for(size_t cpu_num = 0; cpu_num < CPU_NUM; cpu_num++)
@@ -142,6 +142,8 @@ static void kinit(void){
     for (size_t i = 0; i < BUDDY_NUM; i++)
         lock_init(&(buddy_info.zone[i].buddy_lk));
 
+    huge_block *block_ptr = (huge_block *)huge_list_start;
+    printf("%d\n", block_ptr->is_used);
     lock_init(&huge_lk);
     return;
 }
