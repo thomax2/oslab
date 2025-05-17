@@ -307,22 +307,28 @@ void *huge_alloc(size_t size) {
     // }
 
     // printf("huge_l?ist_cnt%d\n",huge_list_cnt);
-
-    for (int i = (int)huge_list_cnt - 1; i >= (int)block_cnt; i--) {
-        base[i + 1] = base[i];
-    }
-    block_ptr = &base[block_cnt];
-    // assert( block_ptr == &base[block_cnt]);
-    // printf("aagg\n");
     size_t oldsize = block_ptr->size;
-    block_ptr->size = size;
-    block_ptr->end = block_ptr->start + size;
-    block_ptr->is_used = HUGE_USED;
+    if( oldsize -size > 1*1024*1024) {
 
-    huge_block *new_block = &base[block_cnt+1];
-    new_block->start = block_ptr->end;
-    new_block->size = oldsize - size;
-    new_block->is_used = HUGE_UNUSED;
+        for (int i = (int)huge_list_cnt - 1; i >= (int)block_cnt; i--) {
+            base[i + 1] = base[i];
+        }
+        // block_ptr = &base[block_cnt];
+        // assert( block_ptr == &base[block_cnt]);
+        // printf("aagg\n");
+        
+        block_ptr->size = size;
+        block_ptr->end = block_ptr->start + size;
+        block_ptr->is_used = HUGE_USED;
+
+        huge_block *new_block = &base[block_cnt+1];
+        new_block->start = block_ptr->end;
+        new_block->size = oldsize - size;
+        new_block->is_used = HUGE_UNUSED;    
+    } else {
+        block_ptr->is_used = HUGE_USED;
+    }
+
 
     // printf("block_ptr%p\n",block_ptr);
     // printf("new_block%p\n",new_block);
@@ -354,14 +360,6 @@ static void *kalloc(size_t size) {
         assert(0);
     return addr;
 }
-
-// void debug_dump_block_list() {
-    // huge_block *base = (huge_block *)huge_list_start;
-    // for (int i = 0; i < huge_list_cnt; i++) {
-    //     printf("block[%d]: start=%p size=%lu end=%p is_used=%d\n", 
-    //            i, base[i].start, base[i].size, base[i].end, base[i].is_used);
-    // }
-// }
 
 static void kfree(void *ptr) {
     // in slab
