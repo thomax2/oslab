@@ -273,8 +273,9 @@ void *huge_alloc(size_t size) {
         block_ptr += 1;
         block_cnt++;
     }
-    printf("hugecnt%d  block%d\n",huge_list_cnt, block_cnt);
+    // printf("hugecnt%d  block%d\n",huge_list_cnt, block_cnt);
 
+    assert(huge_list_cnt < 10);
     assert(block_ptr->is_used == HUGE_UNUSED);
 
     // 
