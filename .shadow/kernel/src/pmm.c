@@ -256,37 +256,37 @@ void *buddy_alloc(size_t size){
 void *huge_alloc(size_t size) {
     
     lock(&huge_lk);
-    huge_block *block_ptr = (huge_block *)huge_list_start;
+    // huge_block *block_ptr = (huge_block *)huge_list_start;
     huge_block *base = (huge_block *)huge_list_start;
     size_t block_cnt = 0;
     // printf("ddddddd:%d\n",size);
     // printf("ddddddd:%d\n",block_ptr->size);
-    while (block_ptr->is_used == HUGE_USED || block_ptr->is_used == HUGE_UNUSED)
+    while (base[block_cnt].is_used == HUGE_USED || base[block_cnt].is_used == HUGE_UNUSED)
     {
         // printf("ggggggggg:%d\n",block_ptr->is_used);
 
-        if(block_ptr->size >= size && block_ptr->is_used == HUGE_UNUSED)
+        if(base[block_cnt].size >= size && base[block_cnt].is_used == HUGE_UNUSED)
         {
             printf("wh%d\n",cpu_current());
             break;
         }
-        block_ptr += 1;
+        // block_ptr += 1;
         block_cnt++;
     }
     
-    assert(block_ptr->is_used == HUGE_UNUSED);
+    assert(base[block_cnt].is_used == HUGE_UNUSED);
 
     for (int i = huge_list_cnt - 1; i >= block_cnt; i--) {
         base[i + 1] = base[i];
     }
     
-    block_ptr->size = size;
-    block_ptr->end = block_ptr->start + size;
-    block_ptr->is_used = HUGE_USED;
+    base[block_cnt].size = size;
+    base[block_cnt].end = base[block_cnt].start + size;
+    base[block_cnt].is_used = HUGE_USED;
     
-    huge_block *new_block = block_ptr + 1;
+    huge_block *new_block = &base[block_cnt+1];
 
-    new_block->start = block_ptr->end;
+    new_block->start = base[block_cnt].end;
     new_block->size = new_block->size - size;
     new_block->is_used = HUGE_UNUSED;
 
@@ -295,7 +295,7 @@ void *huge_alloc(size_t size) {
     huge_list_cnt ++;
     
     unlock(&huge_lk);
-    return (void *)block_ptr->start;
+    return (void *)base[block_cnt].start;
 }
 
 static void *kalloc(size_t size) {
