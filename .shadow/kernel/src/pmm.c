@@ -15,6 +15,7 @@
 
 #define CPU_NUM 4
 
+#define HUGE_SIZE 87*1024*1024
 
 typedef struct slab_page
 {
@@ -48,9 +49,23 @@ struct Buddy_info{
     buddy_zone zone[BUDDY_NUM];
 }buddy_info;
 
+#define HUGE_USED   123456
+#define HUGE_UNUSED 456789
+typedef struct huge_block{
+    uintptr_t start;
+    uintptr_t end;
+    size_t is_used;
+    size_t size;
+}huge_block;
+
+
 lock_t huge_lk;
 
 size_t buddy_start;
+size_t huge_start;
+
+size_t huge_list_start;
+size_t huge_list_cnt;
 
 // typedef struct {
 //     unsigned int bits[BITMAP_SIZE / (sizeof(unsigned int) * 8)]; // 根据unsigned int的大小来计算数组大小
@@ -64,12 +79,18 @@ static void kinit(void){
     size_t heapStartAddr = (size_t) heap.start;
     size_t heapEndAddr = (size_t) heap.end;
     
+    // 125MB - 6KB
     for (size_t i = 0; i < CPU_NUM; i++){
         for (size_t j = 0; j < SLAB_NUM; j++){
             manager_slab_area[i].start[j] = (slab_page *)(heapEndAddr - 256 * SLAB_NUM * (CPU_NUM - 1 - i) - 256 * (SLAB_NUM - j));
             manager_slab_area[i].pos[j] = manager_slab_area[i].start[j];
         }
     }
+
+    // 125MB - 0.5MB
+    huge_list_start = heapEndAddr - 500*1024;
+    huge_list_cnt = 0;
+
     for(size_t cpu_num = 0; cpu_num < CPU_NUM; cpu_num++)
     {
         for(size_t i=0;i<SLAB_NUM;i++)
@@ -109,13 +130,19 @@ static void kinit(void){
         *(uintptr_t *)bpos = (uintptr_t)NULL;
     }
 
-    // huge_start = buddy_start + BUDDY_NUM * BUDDY_SIZE;
+    huge_start = buddy_start + BUDDY_NUM * BUDDY_SIZE; // 37MB ~ 124MB
+
+    huge_block *first_huge = (huge_block *)huge_list_start;
+    first_huge->start = huge_start;
+    first_huge->size = HUGE_SIZE;
+    first_huge->end = huge_start + HUGE_SIZE;
+    first_huge->is_used = HUGE_UNUSED;
+    huge_list_cnt ++;
 
     for (size_t i = 0; i < BUDDY_NUM; i++)
         lock_init(&(buddy_info.zone[i].buddy_lk));
 
     lock_init(&huge_lk);
-
     return;
 }
 
@@ -221,6 +248,38 @@ void *buddy_alloc(size_t size){
     return addr;
 }
 
+void *huge_alloc(size_t size) {
+    huge_block *block_ptr = (huge_block *)huge_list_start;
+    huge_block *base = (huge_block *)huge_list_start;
+    size_t block_cnt = 0;
+    while (block_ptr->is_used == HUGE_USED || block_ptr->is_used == HUGE_UNUSED)
+    {
+        if(block_ptr->size > size && block_ptr->is_used == HUGE_UNUSED)
+            break;
+        block_ptr += 1;
+        block_cnt++;
+    }
+    
+    assert(block_ptr->is_used == HUGE_UNUSED);
+
+    for (int i = huge_list_cnt - 1; i >= block_cnt; i--) {
+        base[i + 1] = base[i];
+    }
+    huge_list_cnt ++;
+    
+    block_ptr->size = size;
+    block_ptr->end = block_ptr->start + size;
+    block_ptr->is_used = HUGE_USED;
+    
+    huge_block *new_block = block_ptr + 1;
+
+    new_block->start = block_ptr->end;
+    new_block->size = new_block->size - size;
+    assert(new_block->is_used == HUGE_UNUSED);
+
+    return (void *)block_ptr->start;
+}
+
 static void *kalloc(size_t size) {
     // align size
     assert(size != 0);
@@ -234,7 +293,7 @@ static void *kalloc(size_t size) {
     else if( size < BUDDY_SIZE )
         addr = buddy_alloc(size);
     else if( size < 16*1024*1024)
-        {}// addr = huge_alloc(size);
+        addr = huge_alloc(size);
     else
         assert(0);
     return addr;
@@ -259,7 +318,7 @@ static void kfree(void *ptr) {
         page_ptr->head_free = (uintptr_t)ptr;
         assert(page_ptr->head_free != (uintptr_t)NULL);
     }
-    else { // in buddy
+    else if ((size_t)ptr < (size_t)huge_start) { // in buddy
         buddy_zone *zone_ptr = NULL;
         size_t i;
         for(i = 0; i < BUDDY_NUM; i++){
@@ -302,6 +361,44 @@ static void kfree(void *ptr) {
         *(uintptr_t *)ptr = zone_ptr->head_free;
         zone_ptr->head_free = (uintptr_t)ptr;
         unlock(&(zone_ptr->buddy_lk));
+    }
+    else {      // in huge
+        huge_block *block = (huge_block *)huge_list_start;
+        huge_block *base = (huge_block *)huge_list_start;
+        int block_cnt = 0;
+        while (block->is_used == HUGE_UNUSED || block->is_used == HUGE_USED) {
+            if((size_t)block->start == (size_t)ptr)
+                break;
+            block = block + 1;
+            block_cnt++;
+        }
+        assert(block->is_used == HUGE_USED);
+        block->is_used = HUGE_UNUSED;
+        // merge pre block
+        if(block_cnt > 0 && base[block_cnt-1].is_used ==HUGE_UNUSED) {
+            base[block_cnt-1].size += block->size;
+            base[block_cnt-1].end = block->end;
+
+            for (int i = block_cnt; i < huge_list_cnt - 1; i++) {
+                base[i] = base[i+1];
+            }
+            base[huge_list_cnt - 1].is_used = 0;
+            huge_list_cnt --;
+            block_cnt --;
+            block = &base[block_cnt];
+        }
+
+        if(block_cnt < huge_list_cnt-1 && base[block_cnt + 1].is_used == HUGE_UNUSED) {
+            block->size += base[block_cnt+1].size;
+            block->end = base[block_cnt+1].end;
+            
+            for (int i = block_cnt+1; i < huge_list_cnt - 1; i++) {
+                base[i] = base[i+1];
+            }
+            base[huge_list_cnt - 1].is_used = 0;
+            huge_list_cnt --;
+        }
+
     }
     return;
 }
