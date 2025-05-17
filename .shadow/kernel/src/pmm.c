@@ -91,7 +91,7 @@ static void kinit(void){
     huge_list_start = heapEndAddr - 800*1024;
     huge_list_cnt = 0;
     printf("huge_list_cnt::%p\n",&huge_list_cnt);
-    printf("buddy_start::%p\n",&buddy_start);
+    printf("buddy_start::%p\n",buddy_start);
     // printf("hugecnt2%d  \n",huge_list_cnt);
 
     for(size_t cpu_num = 0; cpu_num < CPU_NUM; cpu_num++)
