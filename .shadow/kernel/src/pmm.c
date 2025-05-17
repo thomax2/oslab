@@ -48,6 +48,8 @@ struct Buddy_info{
     buddy_zone zone[BUDDY_NUM];
 }buddy_info;
 
+lock_t huge_lk;
+
 size_t buddy_start;
 
 // typedef struct {
@@ -106,9 +108,13 @@ static void kinit(void){
         }
         *(uintptr_t *)bpos = (uintptr_t)NULL;
     }
-    
+
+    // huge_start = buddy_start + BUDDY_NUM * BUDDY_SIZE;
+
     for (size_t i = 0; i < BUDDY_NUM; i++)
         lock_init(&(buddy_info.zone[i].buddy_lk));
+
+    lock_init(&huge_lk);
 
     return;
 }
