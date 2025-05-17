@@ -442,8 +442,15 @@ static void kfree(void *ptr) {
             for (int i = block_cnt; i < (int)huge_list_cnt - 1; i++) {
                 base[i] = base[i+1];
             }
-            base[huge_list_cnt - 1].is_used = 0;
+            // base[huge_list_cnt - 1].is_used = 0;
             huge_list_cnt --;
+            if (huge_list_cnt > 0) {
+                base[huge_list_cnt].start = 0;
+                base[huge_list_cnt].end = 0;
+                base[huge_list_cnt].size = 0;
+                base[huge_list_cnt].is_used = 0;
+            }
+        
             assert(huge_list_cnt >= 0);
             // printf("hugecnt5%d  \n",huge_list_cnt);
 
@@ -460,6 +467,13 @@ static void kfree(void *ptr) {
             }
             base[huge_list_cnt - 1].is_used = 0;
             huge_list_cnt --;
+            if (huge_list_cnt > 0) {
+                base[huge_list_cnt].start = 0;
+                base[huge_list_cnt].end = 0;
+                base[huge_list_cnt].size = 0;
+                base[huge_list_cnt].is_used = 0;
+            }
+        
             assert(huge_list_cnt >= 0);
             // printf("hugecnt6%d  \n",huge_list_cnt);
         }
