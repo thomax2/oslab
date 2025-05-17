@@ -327,7 +327,7 @@ void *huge_alloc(size_t size) {
     // printf("%p\n",new_block->start);
     // assert(new_block->is_used == HUGE_UNUSED);
     huge_list_cnt ++;
-    printf("hugecnt4%d  \n",huge_list_cnt);
+    // printf("hugecnt4%d  \n",huge_list_cnt);
     
     unlock(&huge_lk);
     return (void *)block_ptr->start;
@@ -438,7 +438,7 @@ static void kfree(void *ptr) {
             }
             base[huge_list_cnt - 1].is_used = 0;
             huge_list_cnt --;
-            printf("hugecnt5%d  \n",huge_list_cnt);
+            // printf("hugecnt5%d  \n",huge_list_cnt);
 
             block_cnt --;
             block = &base[block_cnt];
@@ -453,7 +453,7 @@ static void kfree(void *ptr) {
             }
             base[huge_list_cnt - 1].is_used = 0;
             huge_list_cnt --;
-            printf("hugecnt6%d  \n",huge_list_cnt);
+            // printf("hugecnt6%d  \n",huge_list_cnt);
         }
         unlock(&huge_lk);
     }
