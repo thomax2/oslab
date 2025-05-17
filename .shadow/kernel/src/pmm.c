@@ -331,8 +331,8 @@ void *huge_alloc(size_t size) {
     // printf("hugecnt4%d  \n",huge_list_cnt);
     
     unlock(&huge_lk);
-    printf("[get] request=%p block=%p block->start=%p is_used=%d\n", 
-        (void *)block_ptr->start, block_ptr, block_ptr->start, block_ptr->is_used);
+    // printf("[get] request=%p block=%p block->start=%p is_used=%d\n", 
+        // (void *)block_ptr->start, block_ptr, block_ptr->start, block_ptr->is_used);
     return (void *)block_ptr->start;
 }
 
@@ -353,6 +353,14 @@ static void *kalloc(size_t size) {
     else
         assert(0);
     return addr;
+}
+
+void debug_dump_block_list() {
+    huge_block *base = (huge_block *)huge_list_start;
+    for (int i = 0; i < huge_list_cnt; i++) {
+        printf("block[%d]: start=%p size=%lu end=%p is_used=%d\n", 
+               i, base[i].start, base[i].size, base[i].end, base[i].is_used);
+    }
 }
 
 static void kfree(void *ptr) {
@@ -420,6 +428,9 @@ static void kfree(void *ptr) {
     }
     else {      // in huge
         lock(&huge_lk);
+        printf("=== BLOCK TABLE BEFORE ASSERT ===\n");
+        debug_dump_block_list();
+
         huge_block *block = (huge_block *)huge_list_start;
         huge_block *base = (huge_block *)huge_list_start;
         int block_cnt = 0;
@@ -435,8 +446,8 @@ static void kfree(void *ptr) {
             // return; // 未找到合适块
         }
         // printf("block->is_used%d\n",block->is_used);
-        printf("[free] request=%p block=%p block->start=%p is_used=%d\n", 
-            ptr, block, block->start, block->is_used);
+        // printf("[free] request=%p block=%p block->start=%p is_used=%d\n", 
+        //     ptr, block, block->start, block->is_used);
         assert(block->is_used == HUGE_USED);
         block->is_used = HUGE_UNUSED;
         // merge pre block
