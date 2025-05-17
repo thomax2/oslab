@@ -426,6 +426,11 @@ static void kfree(void *ptr) {
             block = block + 1;
             block_cnt++;
         }
+        if (block_cnt >= huge_list_cnt) {
+            unlock(&huge_lk);
+            assert(0);
+            // return; // 未找到合适块
+        }
         assert(block->is_used == HUGE_USED);
         block->is_used = HUGE_UNUSED;
         // merge pre block
