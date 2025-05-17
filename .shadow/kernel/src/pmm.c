@@ -270,13 +270,13 @@ void *huge_alloc(size_t size) {
         block_cnt++;
     }
     
-    assert(block_ptr->is_used == HUGE_UNUSED);
 
     for (int i = huge_list_cnt - 1; i >= block_cnt; i--) {
         base[i + 1] = base[i];
     }
     huge_list_cnt ++;
-    
+    assert(block_ptr->is_used == HUGE_UNUSED);
+
     block_ptr->size = size;
     block_ptr->end = block_ptr->start + size;
     block_ptr->is_used = HUGE_USED;
