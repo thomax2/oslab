@@ -307,7 +307,7 @@ void *huge_alloc(size_t size) {
     //     ablock->start = pblock->start;
     // }
 
-    printf("huge_list_cnt%d\n",huge_list_cnt);
+    // printf("huge_list_cnt%d\n",huge_list_cnt);
 
     for (int i = huge_list_cnt - 1; i >= block_cnt; i--) {
         base[i + 1] = base[i];
