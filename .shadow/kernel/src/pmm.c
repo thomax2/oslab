@@ -421,7 +421,7 @@ static void kfree(void *ptr) {
         huge_block *base = (huge_block *)huge_list_start;
         int block_cnt = 0;
         while (block_cnt < huge_list_cnt) {
-            if((size_t)block->start == (size_t)ptr)
+            if((size_t)block->start == (size_t)ptr || block->is_used == HUGE_USED)
                 break;
             block = block + 1;
             block_cnt++;
