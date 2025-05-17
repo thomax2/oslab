@@ -65,7 +65,7 @@ size_t buddy_start;
 size_t huge_start;
 
 size_t huge_list_start;
-size_t huge_list_cnt;
+int huge_list_cnt;
 
 // typedef struct {
 //     unsigned int bits[BITMAP_SIZE / (sizeof(unsigned int) * 8)]; // 根据unsigned int的大小来计算数组大小
