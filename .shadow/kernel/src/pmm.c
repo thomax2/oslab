@@ -90,6 +90,7 @@ static void kinit(void){
     // 125MB - 0.5MB
     huge_list_start = heapEndAddr - 800*1024;
     huge_list_cnt = 0;
+    printf("hugecnt2%d  \n",huge_list_cnt);
 
     for(size_t cpu_num = 0; cpu_num < CPU_NUM; cpu_num++)
     {
@@ -141,6 +142,7 @@ static void kinit(void){
     first_huge->end = huge_start + HUGE_SIZE;
     first_huge->is_used = HUGE_UNUSED;
     huge_list_cnt ++;
+    printf("hugecnt3%d  \n",huge_list_cnt);
     unlock(&huge_lk);
 
     for (size_t i = 0; i < BUDDY_NUM; i++)
@@ -273,7 +275,6 @@ void *huge_alloc(size_t size) {
         block_ptr += 1;
         block_cnt++;
     }
-    // printf("hugecnt%d  block%d\n",huge_list_cnt, block_cnt);
 
     assert(huge_list_cnt < 20);
     
@@ -308,7 +309,8 @@ void *huge_alloc(size_t size) {
     // printf("%p\n",new_block->start);
     // assert(new_block->is_used == HUGE_UNUSED);
     huge_list_cnt ++;
-    
+    printf("hugecnt4%d  \n",huge_list_cnt);
+
     unlock(&huge_lk);
     return (void *)block_ptr->start;
 }
@@ -418,6 +420,8 @@ static void kfree(void *ptr) {
             }
             base[huge_list_cnt - 1].is_used = 0;
             huge_list_cnt --;
+            printf("hugecnt5%d  \n",huge_list_cnt);
+
             block_cnt --;
             block = &base[block_cnt];
         }
@@ -431,6 +435,7 @@ static void kfree(void *ptr) {
             }
             base[huge_list_cnt - 1].is_used = 0;
             huge_list_cnt --;
+            printf("hugecnt6%d  \n",huge_list_cnt);
         }
         unlock(&huge_lk);
     }
