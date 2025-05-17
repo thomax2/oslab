@@ -276,7 +276,8 @@ void *huge_alloc(size_t size) {
         block_cnt++;
     }
 
-    assert(huge_list_cnt < 20);
+    // assert(huge_list_cnt < 20);
+    panic_on(huge_list_cnt > 20, "huge_list_cnt overflow" );
     
     assert(block_ptr->is_used == HUGE_UNUSED);
 
