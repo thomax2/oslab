@@ -277,7 +277,10 @@ void *huge_alloc(size_t size) {
     }
 
     // assert(huge_list_cnt < 20);
-    panic_on(huge_list_cnt > 20, "huge_list_cnt overflow" );
+    if (huge_list_cnt > 20) {
+        printf("huge_list_cnt overflow: %d", huge_list_cnt);
+        assert(0);
+    }
     
     assert(block_ptr->is_used == HUGE_UNUSED);
 
