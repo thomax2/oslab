@@ -440,6 +440,7 @@ static void kfree(void *ptr) {
         while(block_cnt > 0 && base[block_cnt-1].is_used ==HUGE_UNUSED) {
             base[block_cnt-1].size += block->size;
             base[block_cnt-1].end = block->end;
+            base[block_cnt-1].is_used = HUGE_UNUSED;
 
             for (int i = block_cnt; i < (int)huge_list_cnt - 1; i++) {
                 base[i] = base[i+1];
