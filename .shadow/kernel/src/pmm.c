@@ -90,6 +90,7 @@ static void kinit(void){
     // 125MB - 0.5MB
     huge_list_start = heapEndAddr - 800*1024;
     huge_list_cnt = 0;
+    printf("huge_list_cnt::%p\n",&huge_list_cnt);
     printf("hugecnt2%d  \n",huge_list_cnt);
 
     for(size_t cpu_num = 0; cpu_num < CPU_NUM; cpu_num++)
@@ -132,7 +133,7 @@ static void kinit(void){
     }
 
     huge_start = buddy_start + BUDDY_NUM * BUDDY_SIZE; // 37MB ~ 124MB
-    printf("huge_start::%p/n",huge_start);
+    printf("huge_start::%p\n",huge_start);
     lock_init(&huge_lk);
 
     lock(&huge_lk);
