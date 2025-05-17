@@ -257,7 +257,7 @@ void *huge_alloc(size_t size) {
     
     lock(&huge_lk);
     huge_block *block_ptr = (huge_block *)huge_list_start;
-    huge_block *base = (huge_block *)huge_list_start;
+    // huge_block *base = (huge_block *)huge_list_start;
     size_t block_cnt = 0;
     // printf("ddddddd:%d\n",size);
     // printf("ddddddd:%d\n",block_ptr->size);
@@ -279,10 +279,11 @@ void *huge_alloc(size_t size) {
     // 
     // printf("%p\n",block_ptr + 1);
 
-    for (int i = huge_list_cnt - 1; i >= block_cnt; i--) {
-        base[i + 1] = base[i];
-    }
-    printf("aagg\n");
+    // for (int i = huge_list_cnt - 1; i >= block_cnt; i--) {
+    //     base[i + 1] = base[i];
+    // }
+    // printf("aagg\n");
+    size_t oldsize = block_ptr->size;
     block_ptr->size = size;
     block_ptr->end = block_ptr->start + size;
     block_ptr->is_used = HUGE_USED;
@@ -290,11 +291,11 @@ void *huge_alloc(size_t size) {
     huge_block *new_block = block_ptr + 1;
     // printf("ggd%p\n",new_block);
     new_block->start = block_ptr->end;
-    new_block->size = new_block->size - size;
+    new_block->size = oldsize - size;
     new_block->is_used = HUGE_UNUSED;
 
     // printf("%p\n",new_block->start);
-    assert(new_block->is_used == HUGE_UNUSED);
+    // assert(new_block->is_used == HUGE_UNUSED);
     huge_list_cnt ++;
     
     unlock(&huge_lk);
