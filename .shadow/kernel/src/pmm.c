@@ -256,6 +256,7 @@ void *huge_alloc(size_t size) {
     huge_block *block_ptr = (huge_block *)huge_list_start;
     huge_block *base = (huge_block *)huge_list_start;
     size_t block_cnt = 0;
+    printf("aaaaaaaaaaaa%d\n",huge_list_cnt);
     // printf("ddddddd:%d\n",size);
     // printf("ddddddd:%d\n",block_ptr->size);
     while (block_ptr->is_used == HUGE_USED || block_ptr->is_used == HUGE_UNUSED)
