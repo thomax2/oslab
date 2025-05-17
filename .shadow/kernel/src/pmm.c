@@ -312,7 +312,7 @@ void *huge_alloc(size_t size) {
         base[i + 1] = base[i];
     }
 
-
+    assert( block_ptr == &base[block_cnt]);
     // printf("aagg\n");
     size_t oldsize = block_ptr->size;
     block_ptr->size = size;
