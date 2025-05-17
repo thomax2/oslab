@@ -308,7 +308,7 @@ void *huge_alloc(size_t size) {
 
     // printf("huge_l?ist_cnt%d\n",huge_list_cnt);
     size_t oldsize = block_ptr->size;
-    if( oldsize -size > 1*1024*1024) {
+    if( (int)oldsize - (int)size > 1*1024*1024) {
 
         for (int i = (int)huge_list_cnt - 1; i >= (int)block_cnt; i--) {
             base[i + 1] = base[i];
