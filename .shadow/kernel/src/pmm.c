@@ -290,7 +290,7 @@ void *huge_alloc(size_t size) {
         ablock->end = pblock->end;
         ablock->is_used = pblock->is_used;
         ablock->size = pblock->size;
-        ablock->start = pblock->size;
+        ablock->start = pblock->start;
     }
     // printf("aagg\n");
     size_t oldsize = block_ptr->size;
