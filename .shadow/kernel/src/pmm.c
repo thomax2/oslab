@@ -261,14 +261,14 @@ void *huge_alloc(size_t size) {
 
         if(block_ptr->size >= size && block_ptr->is_used == HUGE_UNUSED)
         {
-            printf("whyyyyyyyy\n");
+            // printf("whyyyyyyyy\n");
             break;
         }
         block_ptr += 1;
         block_cnt++;
     }
     
-    // assert(block_ptr->is_used == HUGE_UNUSED);
+    assert(block_ptr->is_used == HUGE_UNUSED);
 
     for (int i = huge_list_cnt - 1; i >= block_cnt; i--) {
         base[i + 1] = base[i];
