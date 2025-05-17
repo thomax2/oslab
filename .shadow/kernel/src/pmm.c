@@ -65,7 +65,7 @@ size_t buddy_start;
 size_t huge_start;
 
 size_t huge_list_start;
-size_t huge_list_cnt_addr;
+size_t huge_list_cnt;
 
 // typedef struct {
 //     unsigned int bits[BITMAP_SIZE / (sizeof(unsigned int) * 8)]; // 根据unsigned int的大小来计算数组大小
@@ -88,11 +88,9 @@ static void kinit(void){
     }
 
     // 125MB - 0.5MB
-    huge_list_start = heapEndAddr - 700*1024;
-    huge_list_cnt_addr = heapEndAddr - 800*1024;
-    
-    *(size_t *)huge_list_cnt_addr = 0;
-    // printf("hugecnt2%d  \n",huge_list_cnt);
+    huge_list_start = heapEndAddr - 800*1024;
+    huge_list_cnt = 0;
+    printf("hugecnt2%d  \n",huge_list_cnt);
 
     for(size_t cpu_num = 0; cpu_num < CPU_NUM; cpu_num++)
     {
@@ -143,9 +141,8 @@ static void kinit(void){
     first_huge->size = HUGE_SIZE;
     first_huge->end = huge_start + HUGE_SIZE;
     first_huge->is_used = HUGE_UNUSED;
-    // huge_list_cnt ++;
-    *(size_t *)huge_list_cnt_addr = *(size_t *)huge_list_cnt_addr + 1;
-    // printf("hugecnt3%d  \n",huge_list_cnt);
+    huge_list_cnt ++;
+    printf("hugecnt3%d  \n",huge_list_cnt);
     unlock(&huge_lk);
 
     for (size_t i = 0; i < BUDDY_NUM; i++)
@@ -280,14 +277,14 @@ void *huge_alloc(size_t size) {
     }
 
     // assert(huge_list_cnt < 20);
-    panic_on(*(size_t *)huge_list_cnt_addr > 20, "huge_list_cnt overflow" );
+    panic_on(huge_list_cnt > 20, "huge_list_cnt overflow" );
     
     assert(block_ptr->is_used == HUGE_UNUSED);
 
     // 
     // printf("%p\n",block_ptr + 1);
 
-    for (int i = *(size_t *)huge_list_cnt_addr - 1; i >= block_cnt; i--) {
+    for (int i = huge_list_cnt - 1; i >= block_cnt; i--) {
         // base[i + 1] = base[i];
         huge_block *ablock = base + i + 1;
         huge_block *pblock = base + i;
@@ -312,8 +309,8 @@ void *huge_alloc(size_t size) {
 
     // printf("%p\n",new_block->start);
     // assert(new_block->is_used == HUGE_UNUSED);
-    *(size_t *)huge_list_cnt_addr = *(size_t *)huge_list_cnt_addr + 1;
-    // printf("hugecnt4%d  \n",huge_list_cnt);
+    huge_list_cnt ++;
+    printf("hugecnt4%d  \n",huge_list_cnt);
 
     unlock(&huge_lk);
     return (void *)block_ptr->start;
@@ -419,27 +416,27 @@ static void kfree(void *ptr) {
             base[block_cnt-1].size += block->size;
             base[block_cnt-1].end = block->end;
 
-            for (int i = block_cnt; i < *(size_t *)huge_list_cnt_addr - 1; i++) {
+            for (int i = block_cnt; i < huge_list_cnt - 1; i++) {
                 base[i] = base[i+1];
             }
-            base[*(size_t *)huge_list_cnt_addr - 1].is_used = 0;
-            *(size_t *)huge_list_cnt_addr = *(size_t *)huge_list_cnt_addr - 1;
-            // printf("hugecnt5%d  \n",*(size_t *)huge_list_cnt_addr);
+            base[huge_list_cnt - 1].is_used = 0;
+            huge_list_cnt --;
+            printf("hugecnt5%d  \n",huge_list_cnt);
 
             block_cnt --;
             block = &base[block_cnt];
         }
 
-        if(block_cnt < *(size_t *)huge_list_cnt_addr-1 && base[block_cnt + 1].is_used == HUGE_UNUSED) {
+        if(block_cnt < huge_list_cnt-1 && base[block_cnt + 1].is_used == HUGE_UNUSED) {
             block->size += base[block_cnt+1].size;
             block->end = base[block_cnt+1].end;
             
-            for (int i = block_cnt+1; i < *(size_t *)huge_list_cnt_addr - 1; i++) {
+            for (int i = block_cnt+1; i < huge_list_cnt - 1; i++) {
                 base[i] = base[i+1];
             }
-            base[*(size_t *)huge_list_cnt_addr - 1].is_used = 0;
-            *(size_t *)huge_list_cnt_addr = *(size_t *)huge_list_cnt_addr - 1;
-            // printf("hugecnt6%d  \n",huge_list_cnt);
+            base[huge_list_cnt - 1].is_used = 0;
+            huge_list_cnt --;
+            printf("hugecnt6%d  \n",huge_list_cnt);
         }
         unlock(&huge_lk);
     }
@@ -464,29 +461,29 @@ static void pmm_init() {
     
 }
 
-static void *kalloc_irq(size_t size)
-{
-    int i = ienabled();
-    iset(false);
-    void *ret = kalloc(size);
-    if(i) iset(true);
-    return ret;
-}
+// static void *kalloc_irq(size_t size)
+// {
+//     int i = ienabled();
+//     iset(false);
+//     void *ret = kalloc(size);
+//     if(i) iset(true);
+//     return ret;
+// }
 
 
-static void kfree_irq(void *ptr)
-{
-    int i = ienabled();
-    iset(false);
-    kfree(ptr);
-    if(i) iset(true);
-    return;
-}
+// static void kfree_irq(void *ptr)
+// {
+//     int i = ienabled();
+//     iset(false);
+//     kfree(ptr);
+//     if(i) iset(true);
+//     return;
+// }
 
 MODULE_DEF(pmm) = {
     .init  = pmm_init,
-    // .alloc = kalloc,
-    // .free  = kfree,
-    .alloc = kalloc_irq,
-    .free  = kfree_irq,
+    .alloc = kalloc,
+    .free  = kfree,
+    // .alloc = kalloc_irq,
+    // .free  = kfree_irq,
 };
