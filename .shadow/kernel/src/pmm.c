@@ -221,7 +221,7 @@ static void *kalloc(size_t size) {
     void *addr = NULL;
 
     size = align_size(size);
-    printf("pmm size:%d",size);
+    printf("pmm size:%d\n",size);
     assert(size >= 64);
     if(size < SLAB_SIZE)
         addr = slab_alloc(size);
