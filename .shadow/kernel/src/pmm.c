@@ -432,7 +432,9 @@ static void kfree(void *ptr) {
             assert(0);
             // return; // 未找到合适块
         }
-        printf("block->is_used%d\n",block->is_used);
+        // printf("block->is_used%d\n",block->is_used);
+        printf("[free] request=%p block=%p block->start=%p is_used=%d\n", 
+            ptr, block, block->start, block->is_used);
         assert(block->is_used == HUGE_USED);
         block->is_used = HUGE_UNUSED;
         // merge pre block
@@ -440,7 +442,6 @@ static void kfree(void *ptr) {
         while(block_cnt > 0 && base[block_cnt-1].is_used ==HUGE_UNUSED) {
             base[block_cnt-1].size += block->size;
             base[block_cnt-1].end = block->end;
-            base[block_cnt-1].is_used = HUGE_UNUSED;
 
             for (int i = block_cnt; i < (int)huge_list_cnt - 1; i++) {
                 base[i] = base[i+1];
