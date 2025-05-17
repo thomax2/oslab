@@ -85,19 +85,25 @@ static Context *kmt_context_save(Event ev, Context *ctx)
 // no choose blocked
 static Context *kmt_schedule(Event ev, Context *ctx)
 {
+    int task_cnt = 0;
     int able_cnt = 0;
-    for (size_t i = 0; i < tid_cnt; i++) {
-        if(task_lib[i]->status == RUNNABLE)
-            able_cnt++;
+    for (size_t i = 0; task_cnt < tid_cnt; i++) {
+        if(task_lib[i] != NULL) {
+            task_cnt ++;
+            if(task_lib[i]->status == RUNNABLE)
+                able_cnt++;
+        }
     }
     int c = rand()%able_cnt + 1;
-    for (size_t i = 0; i < tid_cnt; i++) {
-        if(task_lib[i]->status == RUNNABLE) {
-            c--;
-            if(c == 0) {
-                task_lib[i]->status = RUNNING;
-                task_current[cpu_current()] = task_lib[i];
-                return &task_lib[i]->context;
+    for (size_t i = 0; i < TASK_NUM_MAX; i++) {
+        if(task_lib[i] != NULL) {
+            if(task_lib[i]->status == RUNNABLE) {
+                c--;
+                if(c == 0) {
+                    task_lib[i]->status = RUNNING;
+                    task_current[cpu_current()] = task_lib[i];
+                    return &task_lib[i]->context;
+                }
             }
         }
     }
@@ -110,7 +116,24 @@ task_t idle_task;
 
 void idle_func(void *arg)
 {
-    
+    while (1) {
+        for (size_t i = 0; i < tid_cnt; i++) {
+            if(task_lib[i]->status == DEAD) {
+                bool flag_use = false;
+                for (size_t j = 0; j < CPU_NUM_MAX; j++)
+                {
+                    if(task_current[j] == task_lib[i])
+                        flag_use = true;
+                }
+                if(flag_use == false) {
+                    pmm->free(task_lib[i]);
+                    task_lib[i] = NULL;
+                    tid_cnt--;
+                }
+            }
+        }
+        yield();
+    }
 }
 
 static void kmt_init(void)
@@ -142,19 +165,26 @@ static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), 
 
 static void kmt_teardown(task_t *task)
 {
-    task_lib[task->tid] = NULL;
+    // task_lib[task->tid] = NULL;
     task->status = DEAD;
     for (size_t i = 0; i < CPU_NUM_MAX; i++)
     {
         // running in cpu
-        if(task_current[i] != NULL || task->tid == task_current[i]->tid)
+        if(task_current[i] != NULL && task->tid == task_current[i]->tid)
         {
+            // running in teardown cpu
+            if(i == cpu_current())
+            {
+                yield();
+            }
             return;
         }
     }
 
     // dont running 
+    task_lib[task->tid] = NULL;
     pmm->free(task);
+    tid_cnt--;
     return;
 }
 
