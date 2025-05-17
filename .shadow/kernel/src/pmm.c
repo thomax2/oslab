@@ -255,7 +255,7 @@ void *huge_alloc(size_t size) {
     size_t block_cnt = 0;
     while (block_ptr->is_used == HUGE_USED || block_ptr->is_used == HUGE_UNUSED)
     {
-        if(block_ptr->size > size && block_ptr->is_used == HUGE_UNUSED)
+        if(block_ptr->size >= size && block_ptr->is_used == HUGE_UNUSED)
             break;
         block_ptr += 1;
         block_cnt++;
