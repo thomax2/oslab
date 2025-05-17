@@ -263,7 +263,7 @@ void *huge_alloc(size_t size) {
 
         if(block_ptr->size >= size && block_ptr->is_used == HUGE_UNUSED)
         {
-            printf("wh\n");
+            printf("wh%d\n",cpu_current());
             break;
         }
         block_ptr += 1;
