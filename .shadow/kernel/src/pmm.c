@@ -142,7 +142,7 @@ static void kinit(void){
     first_huge->end = huge_start + HUGE_SIZE;
     first_huge->is_used = HUGE_UNUSED;
     huge_list_cnt ++;
-    printf("hugecnt3%d  \n",huge_list_cnt);
+    printf("first_huge->end::%p  \n",first_huge->end);
     unlock(&huge_lk);
 
     for (size_t i = 0; i < BUDDY_NUM; i++)
