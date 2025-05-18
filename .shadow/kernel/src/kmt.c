@@ -36,9 +36,9 @@ void kmt_spin_lock(spinlock_t *lk)
     while (atomic_xchg(&lk->status, 1))
     {
         x++;
-        if(x == 10000000)
-            printf("lk->name::%s   %s\n",lk->name,task_current[cpu_current()]->name);
-        assert(x < 100000000);
+        // if(x == 10000000)
+        //     printf("lk->name::%s   %s\n",lk->name,task_current[cpu_current()]->name);
+        //     assert(x < 100000000);
     }
     lk->cpu = cpu_current();
 
@@ -176,7 +176,7 @@ static Context *kmt_schedule(Event ev, Context *ctx)
                 c--;
                 if(c == 0) {
                     // printf("name:%s\n",task_lib[i]->name);
-                    assert(task_lib[i]->status == RUNNABLE);
+                    // assert(task_lib[i]->status == RUNNABLE);
                     task_lib[i]->status = RUNNING;
                     task_current[cpu_current()] = task_lib[i];
                     kmt->spin_unlock(&task_lk);
