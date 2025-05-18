@@ -69,9 +69,10 @@ void kmt_sem_wait(sem_t *sem)
 {
     kmt->spin_lock(&sem->lk); // 获得自旋锁
     sem->value--; // 自旋锁保证原子性
+    printf("innnnn %d %d\n",sem->value,cpu_current());
     if (sem->value < 0) {
         // printf("innnn\n");
-        // printf("innnnn %d %d\n",sem->value,cpu_current());
+
         task_t *curr = task_current[cpu_current()];
         sem->queue[sem->queue_cnt++] = curr;
         curr->status = BLOCKED;
@@ -90,7 +91,7 @@ void kmt_sem_signal(sem_t *sem)
     if(sem->queue_cnt > 0) { // have waited queue
         assert(sem->queue[0] != NULL);
         assert(sem->queue[0]->status == BLOCKED);
-        // sem->queue[0]->status = RUNNABLE;
+        sem->queue[0]->status = RUNNABLE;
         size_t i = 0;
         for (; i < sem->queue_cnt - 1; i++) {
             sem->queue[i] = sem->queue[i+1];
