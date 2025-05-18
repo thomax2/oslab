@@ -119,7 +119,6 @@ static Context *kmt_schedule(Event ev, Context *ctx)
     }
     assert(0);
     return NULL;
-    
 }
 
 task_t idle_task;
