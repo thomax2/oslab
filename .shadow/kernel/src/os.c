@@ -55,7 +55,7 @@ static void os_run() {
     iset(true);
     while (1)
     {
-        yield();
+        // yield();
     }
     
     // while (1)

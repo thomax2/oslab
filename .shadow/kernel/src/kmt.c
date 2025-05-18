@@ -20,7 +20,12 @@ void kmt_spin_init(spinlock_t *lk, const char *name)
 
 void kmt_spin_lock(spinlock_t *lk)
 {
-    while (atomic_xchg(&lk->status, 1));
+    size_t x= 0;
+    while (atomic_xchg(&lk->status, 1))
+    {
+        x++;
+        assert(x < 100000000);
+    }
     return;
 }
 
@@ -158,7 +163,7 @@ static void kmt_init(void)
             continue;
         }
         task_t *t = pmm->alloc(sizeof(task_t));
-        kmt->create(t,"-",NULL,NULL);
+        kmt->create(t,"_",NULL,NULL);
         task_current[i] = t;
         t->status = RUNNING;
     }
