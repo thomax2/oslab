@@ -197,7 +197,8 @@ static void kmt_init(void)
             continue;
         }
         task_t *t = pmm->alloc(sizeof(task_t));
-        kmt->create(t,"_",NULL,NULL);
+        assert(t != NULL);
+        kmt->create(t,"_",NULL,(void *)i);
         task_current[i] = t;
         t->status = RUNNING;
     }
