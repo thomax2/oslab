@@ -25,11 +25,6 @@ void kmt_spin_init(spinlock_t *lk, const char *name)
 
 void kmt_spin_lock(spinlock_t *lk)
 {
-    if(irq_dis_depth[cpu_current()] == 0) {
-        irq_enble[cpu_current()] = ienabled();
-        iset(false);
-    }
-    irq_dis_depth[cpu_current()] ++;
 
     size_t x= 0;
     while (atomic_xchg(&lk->status, 1))
@@ -38,6 +33,11 @@ void kmt_spin_lock(spinlock_t *lk)
         assert(x < 100000000);
     }
     lk->cpu = cpu_current();
+    if(irq_dis_depth[cpu_current()] == 0) {
+        irq_enble[cpu_current()] = ienabled();
+        iset(false);
+    }
+    irq_dis_depth[cpu_current()] ++;
 
     return;
 }
