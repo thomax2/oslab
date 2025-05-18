@@ -111,6 +111,7 @@ static Context *kmt_context_save(Event ev, Context *ctx)
 // no choose blocked
 static Context *kmt_schedule(Event ev, Context *ctx)
 {
+    printf("sec\n");
     kmt->spin_lock(&task_lk);
     int task_cnt = 0;
     int able_cnt = 0;
