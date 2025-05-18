@@ -210,7 +210,7 @@ static Context *kmt_schedule(Event ev, Context *ctx)
     kmt->spin_lock(&task_lk);
     int task_cnt = 0;
     int able_cnt = 0;
-    for (size_t i = 0; task_cnt < tid_cnt; i++) {
+    for (size_t i = 0; i < TASK_NUM_MAX && task_cnt < tid_cnt; i++) {
         if(task_lib[i] != NULL) {
             task_cnt ++;
             if(task_lib[i]->status == RUNNABLE)
@@ -219,6 +219,7 @@ static Context *kmt_schedule(Event ev, Context *ctx)
     }
     // printf("task_cnt::%d\n",task_cnt);
     // printf("able_cnt::%d\n",able_cnt);
+    assert(able_cnt != 0);
     int c = rand()%able_cnt + 1;
     printf("chose%d\n", c);
     for (size_t i = 0; i < TASK_NUM_MAX; i++) {
