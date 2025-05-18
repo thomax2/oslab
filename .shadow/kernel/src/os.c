@@ -81,7 +81,7 @@ static Context *os_trap(Event ev, Context *context)
     Context *ret_ctx = NULL;    
     irq_handler_list *list = &irq_table;
     int cnt = list->cnt;
-    printf("ev.event::%d\n",ev.event);
+    printf("ev.event::%s\n",ev.msg);
     // only one handler return a context
     for (int i = 0; i < cnt; i++) {
         irq_handler h = list->handlers[i];
