@@ -39,9 +39,8 @@ struct task
 
 struct spinlock
 {
-    int lock;
-    int cpu;
-    char name[20];
+    const char* name;
+    int status;
 };
 
 struct semaphore
