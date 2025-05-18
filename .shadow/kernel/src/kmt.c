@@ -125,8 +125,8 @@ void kmt_sem_init(sem_t *sem, const char *name, int value)
 
 void kmt_sem_wait(sem_t *sem)
 {
-    kmt->spin_lock(&sem->lk); // 获得自旋锁
-    sem->value--; // 自旋锁保证原子性
+    kmt->spin_lock(&sem->lk);
+    sem->value--;
     if (sem->value < 0) {
         task_t *curr = task_current[cpu_current()];
         sem->queue[sem->queue_cnt++] = curr;
@@ -136,6 +136,7 @@ void kmt_sem_wait(sem_t *sem)
     } else {
         kmt->spin_unlock(&sem->lk);
     }
+
 }
 
 void kmt_sem_signal(sem_t *sem)
