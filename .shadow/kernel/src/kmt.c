@@ -167,6 +167,7 @@ static Context *kmt_schedule(Event ev, Context *ctx)
             if(task_lib[i]->status == RUNNABLE) {
                 c--;
                 if(c == 0) {
+                    // task_lib[i]->name)
                     task_lib[i]->status = RUNNING;
                     task_current[cpu_current()] = task_lib[i];
                     kmt->spin_unlock(&task_lk);
@@ -207,7 +208,15 @@ void idle_clean_func(void *arg)
             }
         }
         kmt->spin_unlock(&task_lk);
-        yield();
+        // yield();
+    }
+}
+
+void idle_func(void *arg)
+{
+    while (1)
+    {
+        
     }
 }
 
@@ -235,7 +244,7 @@ static void kmt_init(void)
         }
         task_t *t = pmm->alloc(sizeof(task_t));
         assert(t != NULL);
-        kmt->create(t,"_",NULL,(void *)i);
+        kmt->create(t,"_",idle_func,(void *)i);
         task_current[i] = t;
         t->status = RUNNING;
     }
