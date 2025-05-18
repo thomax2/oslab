@@ -58,6 +58,7 @@ static void os_run() {
     while (1)
     {
         // yield();
+        printf("?\n");
     }
     
     // while (1)
