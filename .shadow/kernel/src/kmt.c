@@ -320,7 +320,7 @@ static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), 
     task->name = name;
     task->status = RUNNABLE;
     Area tstack = { .start = task->stack, .end = task + 1};
-    kcontext(tstack, entry, arg);
+    task->context = *kcontext(tstack, entry, arg);
     kmt->spin_lock(&task_lk);
     for (size_t i = 0; i < TASK_NUM_MAX; i++)
     {
