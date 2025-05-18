@@ -231,7 +231,7 @@ static Context *kmt_schedule(Event ev, Context *ctx)
                     task_lib[i]->status = RUNNING;
                     task_current[cpu_current()] = task_lib[i];
                     kmt->spin_unlock(&task_lk);
-                    return &task_lib[i]->context;
+                    return &(task_lib[i]->context);
                 }
             }
         }
