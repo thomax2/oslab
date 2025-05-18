@@ -131,7 +131,7 @@ static void kinit(void){
     }
 
     huge_start = buddy_start + BUDDY_NUM * BUDDY_SIZE; // 37MB ~ 124MB
-    printf("huge_start::%p\n",huge_start);
+    // printf("huge_start::%p\n",huge_start);
     lock_init(&huge_lk);
 
     lock(&huge_lk);
@@ -141,7 +141,7 @@ static void kinit(void){
     first_huge->end = huge_start + HUGE_SIZE;
     first_huge->is_used = HUGE_UNUSED;
     huge_list_cnt ++;
-    printf("first_huge->end::%p  \n",first_huge->end);
+    // printf("first_huge->end::%p  \n",first_huge->end);
     unlock(&huge_lk);
 
     for (size_t i = 0; i < BUDDY_NUM; i++)
