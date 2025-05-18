@@ -148,18 +148,23 @@ void idle_clean_func(void *arg)
 {
     while (1) {
         kmt->spin_lock(&task_lk);
-        for (size_t i = 0; i < tid_cnt; i++) {
-            if(task_lib[i]->status == DEAD) {
-                bool flag_use = false;
-                for (size_t j = 0; j < CPU_NUM_MAX; j++)
-                {
-                    if(task_current[i] != NULL && task_current[j] == task_lib[i])
-                        flag_use = true;
-                }
-                if(flag_use == false) {
-                    pmm->free(task_lib[i]);
-                    task_lib[i] = NULL;
-                    tid_cnt--;
+        int task_cnt = 0;
+        for (size_t i = 0; task_cnt < tid_cnt; i++) {
+            // assert(task_lib[i] != NULL);
+            if(task_lib[i] != NULL) {
+                task_cnt ++;
+                if(task_lib[i]->status == DEAD) {
+                    bool flag_use = false;
+                    for (size_t j = 0; j < CPU_NUM_MAX; j++)
+                    {
+                        if(task_current[i] != NULL && task_current[j] == task_lib[i])
+                            flag_use = true;
+                    }
+                    if(flag_use == false) {
+                        pmm->free(task_lib[i]);
+                        task_lib[i] = NULL;
+                        tid_cnt--;
+                    }
                 }
             }
         }
@@ -174,9 +179,9 @@ static void kmt_init(void)
     kmt->spin_init(&task_lk, "task_lk");
     kmt->spin_init(&trap_lk, "trap_lk");
 
-    for (int i = 0; i < CPU_NUM_MAX; i++) {
+    // for (int i = 0; i < CPU_NUM_MAX; i++) {
         
-    }
+    // }
     
 
     // idle task
@@ -203,6 +208,7 @@ static void kmt_init(void)
 
 static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg)
 {
+    assert(task != NULL);
     task->name = name;
     task->status = RUNNABLE;
     Area tstack = { .start = task->stack, .end = task + 1};
