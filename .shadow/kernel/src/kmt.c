@@ -77,7 +77,7 @@ void kmt_sem_wait(sem_t *sem)
 {
     kmt->spin_lock(&sem->lk); // 获得自旋锁
     sem->value--; // 自旋锁保证原子性
-    printf("innnnn %d %s\n",sem->value,sem->name);
+    // printf("innnnn %d %s\n",sem->value,sem->name);
     if (sem->value < 0) {
         // printf("innnn\n");
 
