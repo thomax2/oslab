@@ -46,20 +46,20 @@ struct spinlock
     // bool irq_enble;          // origin int is enable?
 };
 
-typedef struct semaphore
-{
-    int count;
-    char name[20];
-    struct spinlock lock;
-    // task_t* pool[64];//等待队列线程池
-    int l;//等待队列头
-    int r;//等待队列尾
-}semaphore;
+// typedef struct semaphore
+// {
+//     int count;
+//     char name[20];
+//     struct spinlock lock;
+//     // task_t* pool[64];//等待队列线程池
+//     int l;//等待队列头
+//     int r;//等待队列尾
+// }semaphore;
 
-// struct semaphore {
-//     const char *name;
-//     int value;
-//     int queue_cnt;
-//     struct spinlock lk;
-//     struct task *queue[SEM_QUEUE_MAX];
-// };
+struct semaphore {
+    const char *name;
+    int value;
+    int queue_cnt;
+    struct spinlock lk;
+    struct task *queue[SEM_QUEUE_MAX];
+};
