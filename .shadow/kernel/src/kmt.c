@@ -172,10 +172,10 @@ static Context *kmt_schedule(Event ev, Context *ctx)
                 c--;
                 if(c == 0) {
                     // printf("name:%s\n",task_lib[i]->name);
+                    assert(task_lib[i]->status == RUNNABLE);
                     task_lib[i]->status = RUNNING;
                     task_current[cpu_current()] = task_lib[i];
                     kmt->spin_unlock(&task_lk);
-                    assert(task_lib[i]->status == RUNNABLE);
                     return &(task_lib[i]->context);
                 }
             }
