@@ -90,9 +90,6 @@ static void kinit(void){
     // 125MB - 0.5MB
     huge_list_start = heapEndAddr - 800*1024;
     huge_list_cnt = 0;
-    // printf("huge_list_cnt::%p\n",&huge_list_cnt);
-    // printf("buddy_start::%p\n",&buddy_start);
-    // printf("hugecnt2%d  \n",huge_list_cnt);
 
     for(size_t cpu_num = 0; cpu_num < CPU_NUM; cpu_num++)
     {
@@ -132,7 +129,6 @@ static void kinit(void){
         }
         *(uintptr_t *)bpos = (uintptr_t)NULL;
     }
-    // printf("buddy_start::%p\n",buddy_start);
 
     huge_start = buddy_start + BUDDY_NUM * BUDDY_SIZE; // 37MB ~ 124MB
     printf("huge_start::%p\n",huge_start);
@@ -151,8 +147,6 @@ static void kinit(void){
     for (size_t i = 0; i < BUDDY_NUM; i++)
         lock_init(&(buddy_info.zone[i].buddy_lk));
 
-    // huge_block *block_ptr = (huge_block *)huge_list_start;
-    // printf("%d\n", block_ptr->is_used);
     return;
 }
 
@@ -264,15 +258,10 @@ void *huge_alloc(size_t size) {
     huge_block *base = (huge_block *)huge_list_start;
     size_t block_cnt = 0;
     huge_block *block_ptr = base;
-    // printf("ddddddd:%d\n",size);
-    // printf("ddddddd:%d\n",block_ptr->size);
     while (block_cnt < huge_list_cnt)
     {
-        // printf("ggggggggg:%d\n",block_ptr->is_used);
-        // printf("ggd%p\n",block_ptr);
         if(block_ptr->is_used == HUGE_UNUSED && block_ptr->size >= size)
         {
-            // printf("wh%d\n",cpu_current());
             break;
         }
         block_ptr += 1;
@@ -283,39 +272,16 @@ void *huge_alloc(size_t size) {
         assert(0);
         return NULL; // 未找到合适块
     }
-    // assert(huge_list_cnt < 20);
-    if (huge_list_cnt > 20) {
-        printf("huge_list_cnt overflow: %d", huge_list_cnt);
-        assert(0);
-    }
+    assert(huge_list_cnt < 80);
     
     assert(block_ptr->is_used == HUGE_UNUSED);
 
-    // printf("%p\n",block_ptr + 1);
-
-    // for (int i = (int)huge_list_cnt - 1; i >= (int)block_cnt; i--) {
-    //     // base[i + 1] = base[i];
-    //     huge_block *ablock = base + i + 1;
-    //     huge_block *pblock = base + i;
-        
-    //     // huge_block *ablock = (huge_block *)(huge_list_start + sizeof(huge_block)*(i+1));
-    //     // huge_block *pblock = (huge_block *)(huge_list_start + sizeof(huge_block)*(i));
-    //     ablock->end = pblock->end;
-    //     ablock->is_used = pblock->is_used;
-    //     ablock->size = pblock->size;
-    //     ablock->start = pblock->start;
-    // }
-
-    // printf("huge_l?ist_cnt%d\n",huge_list_cnt);
     size_t oldsize = block_ptr->size;
     if( (int)oldsize - (int)size > 1*1024*1024) {
 
         for (int i = (int)huge_list_cnt - 1; i >= (int)block_cnt; i--) {
             base[i + 1] = base[i];
         }
-        // block_ptr = &base[block_cnt];
-        // assert( block_ptr == &base[block_cnt]);
-        // printf("aagg\n");
         
         block_ptr->size = size;
         block_ptr->end = block_ptr->start + size;
@@ -329,16 +295,8 @@ void *huge_alloc(size_t size) {
     } else {
         block_ptr->is_used = HUGE_USED;
     }
-
-
-    // printf("block_ptr%p\n",block_ptr);
-    // printf("new_block%p\n",new_block);
-    // assert(new_block->is_used == HUGE_UNUSED);
-    // printf("hugecnt4%d  \n",huge_list_cnt);
     
     unlock(&huge_lk);
-    // printf("[get] request=%p block=%p block->start=%p is_used=%d\n", 
-        // (void *)block_ptr->start, block_ptr, block_ptr->start, block_ptr->is_used);
     return (void *)block_ptr->start;
 }
 
@@ -427,15 +385,14 @@ static void kfree(void *ptr) {
     else {      // in huge
         lock(&huge_lk);
         printf("=== BLOCK TABLE BEFORE ASSERT ===\n");
-        // debug_dump_block_list();
+        // // debug_dump_block_list();
         huge_block *base = (huge_block *)huge_list_start;
-        for (int i = 0; i < huge_list_cnt; i++) {
-            printf("block[%d]: start=%p size=%d end=%p is_used=%d\n", 
-                i, base[i].start, base[i].size, base[i].end, base[i].is_used);
-        }
+        // for (int i = 0; i < huge_list_cnt; i++) {
+        //     printf("block[%d]: start=%p size=%d end=%p is_used=%d\n", 
+        //         i, base[i].start, base[i].size, base[i].end, base[i].is_used);
+        // }
 
         huge_block *block = (huge_block *)huge_list_start;
-        // huge_block *base = (huge_block *)huge_list_start;
         int block_cnt = 0;
         while (block_cnt < huge_list_cnt) {
             if((size_t)block->start == (size_t)ptr)
@@ -448,9 +405,6 @@ static void kfree(void *ptr) {
             assert(0);
             // return; // 未找到合适块
         }
-        // printf("block->is_used%d\n",block->is_used);
-        // printf("[free] request=%p block=%p block->start=%p is_used=%d\n", 
-        //     ptr, block, block->start, block->is_used);
         assert(block->is_used == HUGE_USED);
         block->is_used = HUGE_UNUSED;
         // merge pre block
@@ -462,17 +416,15 @@ static void kfree(void *ptr) {
             for (int i = block_cnt; i < (int)huge_list_cnt - 1; i++) {
                 base[i] = base[i+1];
             }
-            // base[huge_list_cnt - 1].is_used = 0;
             huge_list_cnt --;
             if (huge_list_cnt > 0) {
-                base[huge_list_cnt].start = 0;
-                base[huge_list_cnt].end = 0;
+                // base[huge_list_cnt].start = 0;
+                // base[huge_list_cnt].end = 0;
                 base[huge_list_cnt].size = 0;
-                base[huge_list_cnt].is_used = 0;
+                // base[huge_list_cnt].is_used = 0;
             }
         
             assert(huge_list_cnt >= 0);
-            // printf("hugecnt5%d  \n",huge_list_cnt);
 
             block_cnt --;
             block = &base[block_cnt];
@@ -488,14 +440,13 @@ static void kfree(void *ptr) {
             base[huge_list_cnt - 1].is_used = 0;
             huge_list_cnt --;
             if (huge_list_cnt > 0) {
-                base[huge_list_cnt].start = 0;
-                base[huge_list_cnt].end = 0;
+                // base[huge_list_cnt].start = 0;
+                // base[huge_list_cnt].end = 0;
                 base[huge_list_cnt].size = 0;
-                base[huge_list_cnt].is_used = 0;
+                // base[huge_list_cnt].is_used = 0;
             }
         
             assert(huge_list_cnt >= 0);
-            // printf("hugecnt6%d  \n",huge_list_cnt);
         }
         unlock(&huge_lk);
     }
