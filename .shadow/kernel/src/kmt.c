@@ -12,63 +12,48 @@ task_t *task_current[CPU_NUM_MAX];
 spinlock_t task_lk;
 spinlock_t trap_lk;
 
-typedef struct CPU
+int irq_dis_depth[CPU_NUM_MAX];
+bool irq_enble[CPU_NUM_MAX];
+
+void kmt_spin_init(spinlock_t *lk, const char *name)
 {
-    int intena; //中断信息
-    int noff;   //递归深度
-} CPU;
-CPU cpus[4];
-static void push_off()
-{
-    int i = ienabled();
-    iset(false);
-    int c = cpu_current();
-    if (cpus[c].noff == 0)
-        cpus[c].intena = i;
-    cpus[c].noff++;
-}
-static void pop_off()
-{
-    int c = cpu_current();
-    assert(cpus[c].noff >= 1);
-    cpus[c].noff--;
-    if (cpus[c].noff == 0 && cpus[c].intena == true)
-    {
-        iset(true);
-    }
-}
-static void spin_init(spinlock_t *lk, const char *name)
-{
-    lk->lock = 0;
     lk->cpu = -1;
-    strcpy(lk->name, name);
-}
-static void spin_lock(spinlock_t *lk)
-{
-    while (atomic_xchg(&lk->lock, 1) != 0)
-    {
-        if(ienabled())
-            yield();
-    }
-    for(volatile int i=0;i<10000;++i);
-    push_off(); // disable interrupts to avoid deadlock.
-    #ifdef delock
-    //printf("thread %s : %s , cpu's intena:%d  \n",_current->name ,lk->name,cpus[cpu_current()].intena);
-    //printf("thread %s : %s \n",_current->name ,lk->name);
-    #endif
-    lk->cpu = cpu_current();
-}
-static void spin_unlock(spinlock_t *lk)
-{
-    assert(lk->cpu == cpu_current());
-    atomic_xchg(&lk->lock, 0);
-    lk->cpu=-1;
-    #ifdef delock
-    //printf("%s  unlock\n", lk->name);
-    #endif
-    pop_off();
+    lk->name = name;
+    lk->status = 0;
+    return;
 }
 
+void kmt_spin_lock(spinlock_t *lk)
+{
+    if(irq_dis_depth[cpu_current()] == 0) {
+        irq_enble[cpu_current()] = ienabled();
+        iset(false);
+    }
+    irq_dis_depth[cpu_current()] ++;
+
+    size_t x= 0;
+    while (atomic_xchg(&lk->status, 1))
+    {
+        x++;
+        assert(x < 100000000);
+    }
+    lk->cpu = cpu_current();
+
+    return;
+}
+
+void kmt_spin_unlock(spinlock_t *lk)
+{
+    assert(lk->status == 1);
+    assert(lk->cpu == cpu_current());
+    atomic_xchg(&lk->status,0);
+    irq_dis_depth[cpu_current()] --;
+    if(irq_dis_depth[cpu_current()] == 0 && irq_enble[cpu_current()]) {
+        iset(true);
+    }
+
+    return;
+}
 
 void kmt_sem_init(sem_t *sem, const char *name, int value)
 {
@@ -262,9 +247,9 @@ MODULE_DEF(kmt) = {
     .init = kmt_init,
     .create  = kmt_create,
     .teardown  = kmt_teardown,
-    .spin_init  = spin_init,
-    .spin_lock  = spin_lock,
-    .spin_unlock  = spin_unlock,
+    .spin_init  = kmt_spin_init,
+    .spin_lock  = kmt_spin_lock,
+    .spin_unlock  = kmt_spin_unlock,
     .sem_init  = kmt_sem_init,
     .sem_wait  = kmt_sem_wait,
     .sem_signal  = kmt_sem_signal,
