@@ -161,6 +161,7 @@ static Context *kmt_schedule(Event ev, Context *ctx)
     // printf("task_cnt::%d\n",task_cnt);
     // printf("able_cnt::%d\n",able_cnt);
     int c = rand()%able_cnt + 1;
+    printf("chose%d\n", c);
     for (size_t i = 0; i < TASK_NUM_MAX; i++) {
         if(task_lib[i] != NULL) {
             if(task_lib[i]->status == RUNNABLE) {
