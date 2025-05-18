@@ -308,24 +308,24 @@ void *huge_alloc(size_t size) {
 
     // printf("huge_l?ist_cnt%d\n",huge_list_cnt);
     size_t oldsize = block_ptr->size;
-    if( (int)oldsize - (int)size > 1*1024*1024) {
-
+    if ((int)oldsize - (int)size > 1 * 1024 * 1024) {
         for (int i = (int)huge_list_cnt - 1; i >= (int)block_cnt; i--) {
             base[i + 1] = base[i];
         }
-        // block_ptr = &base[block_cnt];
-        // assert( block_ptr == &base[block_cnt]);
-        // printf("aagg\n");
-        
+    
+        block_ptr = &base[block_cnt];  // 必须更新，确保写到正确位置
+    
         block_ptr->size = size;
         block_ptr->end = block_ptr->start + size;
         block_ptr->is_used = HUGE_USED;
-
-        huge_block *new_block = &base[block_cnt+1];
+    
+        huge_block *new_block = &base[block_cnt + 1];
         new_block->start = block_ptr->end;
         new_block->size = oldsize - size;
+        new_block->end = new_block->start + new_block->size;  // 也别忘了 end 字段
         new_block->is_used = HUGE_UNUSED;
-        huge_list_cnt ++; 
+    
+        huge_list_cnt++;
     } else {
         block_ptr->is_used = HUGE_USED;
     }
