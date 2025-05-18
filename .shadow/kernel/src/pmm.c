@@ -426,13 +426,13 @@ static void kfree(void *ptr) {
     }
     else {      // in huge
         lock(&huge_lk);
-        // printf("=== BLOCK TABLE BEFORE ASSERT ===\n");
+        printf("=== BLOCK TABLE BEFORE ASSERT ===\n");
         // debug_dump_block_list();
         huge_block *base = (huge_block *)huge_list_start;
-        // for (int i = 0; i < huge_list_cnt; i++) {
-        //     printf("block[%d]: start=%p size=%d end=%p is_used=%d\n", 
-        //         i, base[i].start, base[i].size, base[i].end, base[i].is_used);
-        // }
+        for (int i = 0; i < huge_list_cnt; i++) {
+            printf("block[%d]: start=%p size=%d end=%p is_used=%d\n", 
+                i, base[i].start, base[i].size, base[i].end, base[i].is_used);
+        }
 
         huge_block *block = (huge_block *)huge_list_start;
         // huge_block *base = (huge_block *)huge_list_start;
