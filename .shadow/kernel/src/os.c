@@ -20,18 +20,18 @@ irq_handler_list irq_table;
 
 extern task_t *task_current[CPU_NUM_MAX];
 
-// static void tty_reader(void *arg) {
-//     device_t *tty = dev->lookup(arg);
-//     char cmd[128], resp[128], ps[16];
-//     snprintf(ps, 16, "(%s) $ ", arg);
-//     while (1) {
-//         tty->ops->write(tty, 0, ps, strlen(ps));
-//         int nread = tty->ops->read(tty, 0, cmd, sizeof(cmd) - 1);
-//         cmd[nread] = '\0';
-//         sprintf(resp, "tty reader task: got %d character(s).\n", strlen(cmd));
-//         tty->ops->write(tty, 0, resp, strlen(resp));
-//     }
-// }
+static void tty_reader(void *arg) {
+    device_t *tty = dev->lookup(arg);
+    char cmd[128], resp[128], ps[16];
+    snprintf(ps, 16, "(%s) $ ", arg);
+    while (1) {
+        tty->ops->write(tty, 0, ps, strlen(ps));
+        int nread = tty->ops->read(tty, 0, cmd, sizeof(cmd) - 1);
+        cmd[nread] = '\0';
+        sprintf(resp, "tty reader task: got %d character(s).\n", strlen(cmd));
+        tty->ops->write(tty, 0, resp, strlen(resp));
+    }
+}
 
 static inline task_t *task_alloc() {
     return pmm->alloc(sizeof(task_t));
@@ -39,12 +39,12 @@ static inline task_t *task_alloc() {
 
 static void os_init() {
     pmm->init();
-    // kmt->init();    
-    // printf("kmt init success\n");
-    // dev->init();
-    // // printf("dev init success\n");
-    // kmt->create(task_alloc(), "tty_reader", tty_reader, "tty1");
-    // kmt->create(task_alloc(), "tty_reader", tty_reader, "tty2");
+    kmt->init();    
+    printf("kmt init success\n");
+    dev->init();
+    // printf("dev init success\n");
+    kmt->create(task_alloc(), "tty_reader", tty_reader, "tty1");
+    kmt->create(task_alloc(), "tty_reader", tty_reader, "tty2");
 }
 
 static void os_run() {
@@ -52,24 +52,24 @@ static void os_run() {
         putch(*s == '*' ? '0' + cpu_current() : *s);
     }
 
-    // iset(true);
-    // while (1)
-    // {
-        
-    // }
-    
+    iset(true);
     while (1)
     {
-        // test0();
-        // test_repeated_alloc(64,64*3);
-        // test_repeated_alloc(512,8*3);
-        // test_repeated_alloc(4096,80);
-        test_repeated_alloc(8*1024*1024,1);
-        test_repeated_alloc(4*1024*1024,1);
-        test_repeated_alloc(2*1024*1024,4);
-		// test1();
-		// test2();
+        
     }
+    
+    // while (1)
+    // {
+    //     // test0();
+    //     // test_repeated_alloc(64,64*3);
+    //     // test_repeated_alloc(512,8*3);
+    //     // test_repeated_alloc(4096,80);
+    //     test_repeated_alloc(8*1024*1024,1);
+    //     test_repeated_alloc(4*1024*1024,1);
+    //     test_repeated_alloc(2*1024*1024,4);
+	// 	// test1();
+	// 	// test2();
+    // }
 }
 
 static Context *os_trap(Event ev, Context *context)
