@@ -55,64 +55,6 @@ void kmt_spin_unlock(spinlock_t *lk)
     return;
 }
 
-// typedef struct CPU
-// {
-//     int intena; //中断信息
-//     int noff;   //递归深度
-// } CPU;
-// CPU cpus[4];
-// static void push_off()
-// {
-//     int i = ienabled();
-//     iset(false);
-//     int c = cpu_current();
-//     if (cpus[c].noff == 0)
-//         cpus[c].intena = i;
-//     cpus[c].noff++;
-// }
-// static void pop_off()
-// {
-//     int c = cpu_current();
-//     assert(cpus[c].noff >= 1);
-//     cpus[c].noff--;
-//     if (cpus[c].noff == 0 && cpus[c].intena == true)
-//     {
-//         iset(true);
-//     }
-// }
-// static void kmt_spin_init(spinlock_t *lk, const char *name)
-// {
-//     lk->lock = 0;
-//     lk->cpu = -1;
-//     strcpy(lk->name, name);
-// }
-// static void kmt_spin_lock(spinlock_t *lk)
-// {
-//     while (atomic_xchg(&lk->lock, 1) != 0)
-//     {
-//         if(ienabled())
-//             yield();
-//     }
-//     for(volatile int i=0;i<10000;++i);
-//     push_off(); // disable interrupts to avoid deadlock.
-//     #ifdef delock
-//     //printf("thread %s : %s , cpu's intena:%d  \n",_current->name ,lk->name,cpus[cpu_current()].intena);
-//     //printf("thread %s : %s \n",_current->name ,lk->name);
-//     #endif
-//     lk->cpu = cpu_current();
-// }
-// static void kmt_spin_unlock(spinlock_t *lk)
-// {
-//     assert(lk->cpu == cpu_current());
-//     atomic_xchg(&lk->lock, 0);
-//     lk->cpu=-1;
-//     #ifdef delock
-//     //printf("%s  unlock\n", lk->name);
-//     #endif
-//     pop_off();
-// }
-
-
 
 void kmt_sem_init(sem_t *sem, const char *name, int value)
 {
@@ -127,7 +69,7 @@ void kmt_sem_wait(sem_t *sem)
 {
     kmt->spin_lock(&sem->lk); // 获得自旋锁
     sem->value--; // 自旋锁保证原子性
-    if (sem->value <= 0) {
+    if (sem->value < 0) {
         task_t *curr = task_current[cpu_current()];
         sem->queue[sem->queue_cnt++] = curr;
         curr->status = BLOCKED;

@@ -16,7 +16,7 @@
 
 #define MAX_HANDLERS_PER_EVENT  256
 
-#define INT_MIN 0
+#define INT_MIN -1
 #define INT_MAX MAX_HANDLERS_PER_EVENT
 
 #define SEM_QUEUE_MAX 5
