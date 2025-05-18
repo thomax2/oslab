@@ -20,8 +20,6 @@ static device_t *dev_lookup(const char *name) {
 }
 
 static device_t *dev_create(int size, const char* name, int id, devops_t *ops) {
-  printf("%d\n",size);
-
   device_t *dev = pmm->alloc(sizeof(device_t));
   *dev = (device_t) {
     .name = name,
@@ -29,9 +27,6 @@ static device_t *dev_create(int size, const char* name, int id, devops_t *ops) {
     .id   = id,
     .ops  = ops,
   };
-  // printf("%d\n",sizeof(device_t));
-  assert(dev != NULL);
-
   return dev;
 }
 
@@ -44,6 +39,7 @@ static void dev_init() {
   devices[id]->ops->init(devices[id]);
 
   DEVICES(INIT);
+  
   kmt->create(pmm->alloc(sizeof(task_t)), "input-task", dev_input_task, NULL);
   kmt->create(pmm->alloc(sizeof(task_t)), "tty-task",   dev_tty_task,   NULL);
 }

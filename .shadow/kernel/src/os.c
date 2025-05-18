@@ -40,7 +40,7 @@ static inline task_t *task_alloc() {
 static void os_init() {
     pmm->init();
     kmt->init();    
-    printf("kmt init success\n");
+    // printf("kmt init success\n");
     dev->init();
     // printf("dev init success\n");
     kmt->create(task_alloc(), "tty_reader", tty_reader, "tty1");
