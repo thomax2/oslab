@@ -87,7 +87,13 @@ static Context *os_trap(Event ev, Context *context)
         irq_handler h = list->handlers[i];
         if(h.event == EVENT_NULL || h.event == ev.event) {
             Context *r = h.handler(ev, context);
-            panic_on(r && ret_ctx, "return to multiple contexts");
+            // panic_on(r && ret_ctx, "return to multiple contexts");
+            if (r && ret_ctx) {
+                printf("os_trap: multiple handlers returned context!\n");
+                printf("  Event: (event=%d)\n", ev.event);
+                printf("  cause=0x%p, ref=0x%p, msg=%s\n", ev.cause, ev.ref, ev.msg ? ev.msg : "(null)");
+                panic("return to multiple contexts");
+            }
             if (r) ret_ctx = r;
         }
     }
