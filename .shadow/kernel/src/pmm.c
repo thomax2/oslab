@@ -418,13 +418,8 @@ static void kfree(void *ptr) {
     }
     else {      // in huge
         lock(&huge_lk);
-        // printf("=== BLOCK TABLE BEFORE ASSERT ===\n");
         // debug_dump_block_list();
         huge_block *base = (huge_block *)huge_list_start;
-        // for (int i = 0; i < huge_list_cnt; i++) {
-        //     printf("block[%d]: start=%p size=%d end=%p is_used=%d\n", 
-        //         i, base[i].start, base[i].size, base[i].end, base[i].is_used);
-        // }
 
         huge_block *block = (huge_block *)huge_list_start;
         // huge_block *base = (huge_block *)huge_list_start;
@@ -440,13 +435,11 @@ static void kfree(void *ptr) {
             assert(0);
             // return; // 未找到合适块
         }
-        // printf("block->is_used%d\n",block->is_used);
-        // printf("[free] request=%p block=%p block->start=%p is_used=%d\n", 
-        //     ptr, block, block->start, block->is_used);
+
         assert(block->is_used == HUGE_USED);
         block->is_used = HUGE_UNUSED;
         // merge pre block
-        // printf("hugecnt6 %d\n",huge_list_cnt);
+
         while(block_cnt > 0 && base[block_cnt-1].is_used ==HUGE_UNUSED) {
             base[block_cnt-1].size += block->size;
             base[block_cnt-1].end = block->end;
@@ -454,15 +447,10 @@ static void kfree(void *ptr) {
             for (int i = block_cnt; i < (int)huge_list_cnt - 1; i++) {
                 base[i] = base[i+1];
             }
-            
+
             base[huge_list_cnt - 1].is_used = 0;
             huge_list_cnt --;
-            // if (huge_list_cnt > 0) {
-            //     // base[huge_list_cnt].start = 0;
-            //     // base[huge_list_cnt].end = 0;
-            //     // base[huge_list_cnt].size = 0;
-            //     base[huge_list_cnt].is_used = 0;
-            // }
+
             assert(huge_list_cnt >= 0);
 
             block_cnt --;
@@ -478,20 +466,13 @@ static void kfree(void *ptr) {
             }
             base[huge_list_cnt - 1].is_used = 0;
             huge_list_cnt --;
-            // if (huge_list_cnt > 0) {
-            //     // base[huge_list_cnt].start = 0;
-            //     // base[huge_list_cnt].end = 0;
-            //     // base[huge_list_cnt].size = 0;
-            //     base[huge_list_cnt].is_used = 0;
-            // }
+
             assert(huge_list_cnt >= 0);
         }
         unlock(&huge_lk);
     }
     return;
 }
-
-
 
 static void pmm_init() {
     uintptr_t pmsize = (
@@ -509,29 +490,29 @@ static void pmm_init() {
     
 }
 
-// static void *kalloc_irq(size_t size)
-// {
-//     int i = ienabled();
-//     iset(false);
-//     void *ret = kalloc(size);
-//     if(i) iset(true);
-//     return ret;
-// }
+static void *kalloc_irq(size_t size)
+{
+    int i = ienabled();
+    iset(false);
+    void *ret = kalloc(size);
+    if(i) iset(true);
+    return ret;
+}
 
 
-// static void kfree_irq(void *ptr)
-// {
-//     int i = ienabled();
-//     iset(false);
-//     kfree(ptr);
-//     if(i) iset(true);
-//     return;
-// }
+static void kfree_irq(void *ptr)
+{
+    int i = ienabled();
+    iset(false);
+    kfree(ptr);
+    if(i) iset(true);
+    return;
+}
 
 MODULE_DEF(pmm) = {
     .init  = pmm_init,
-    .alloc = kalloc,
-    .free  = kfree,
-    // .alloc = kalloc_irq,
-    // .free  = kfree_irq,
+    // .alloc = kalloc,
+    // .free  = kfree,
+    .alloc = kalloc_irq,
+    .free  = kfree_irq,
 };
