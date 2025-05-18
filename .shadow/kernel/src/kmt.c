@@ -7,6 +7,7 @@ uint16_t tid_cnt = 0;
 
 task_t *task_lib[TASK_NUM_MAX];
 task_t *task_current[CPU_NUM_MAX];
+spinlock_t task_curr_lk[CPU_NUM_MAX];
 
 // use when w/r task_lib/tid_cnt
 spinlock_t task_lk;
@@ -74,19 +75,7 @@ void kmt_sem_wait(sem_t *sem)
         // printf("innnn\n");
 
         task_t *curr = task_current[cpu_current()];
-        // sem->queue[sem->queue_cnt++] = curr;
-
-        bool already_waiting = false;
-        for (int i = 0; i < sem->queue_cnt; i++) {
-            if (sem->queue[i] == curr) {
-                already_waiting = true;
-                break;
-            }
-        }
-        if (!already_waiting) {
-            sem->queue[sem->queue_cnt++] = curr;
-        }
-
+        sem->queue[sem->queue_cnt++] = curr;
         curr->status = BLOCKED;
         kmt->spin_unlock(&sem->lk);
         assert( ienabled() == true);
@@ -154,7 +143,8 @@ void kmt_sem_signal(sem_t *sem)
 static Context *kmt_context_save(Event ev, Context *ctx)
 {
     task_current[cpu_current()]->context = *ctx;
-    task_current[cpu_current()]->status = RUNNABLE;
+    if(task_current[cpu_current()]->status == RUNNING)
+        task_current[cpu_current()]->status = RUNNABLE;
     return NULL;
 }
 
@@ -265,6 +255,12 @@ static void kmt_init(void)
         task_current[i] = t;
         t->status = RUNNING;
     }
+
+    for (size_t i = 0; i < CPU_NUM_MAX; i++)
+    {
+        kmt->spin_init(&task_curr_lk[i],"task_curr_lk_");
+    }
+    
 
     os->on_irq(INT_MIN, EVENT_NULL, kmt_context_save);
     os->on_irq(INT_MAX, EVENT_NULL, kmt_schedule);
