@@ -37,7 +37,7 @@ void kmt_spin_lock(spinlock_t *lk)
     {
         x++;
         if(x == 10000000)
-            printf("lk->name::%s\n",lk->name);
+            printf("lk->name::%s   %s\n",lk->name,task_current[cpu_current()]->name);
         assert(x < 100000000);
     }
     lk->cpu = cpu_current();
@@ -194,30 +194,30 @@ task_t idle_task;
 void idle_clean_func(void *arg)
 {
     while (1) {
-        // printf("idle\n");
-        // kmt->spin_lock(&task_lk);
-        // // int task_cnt = 0;
-        // for (size_t i = 0; i < TASK_NUM_MAX; i++) {
-        //     // assert(task_lib[i] != NULL);
-        //     if(task_lib[i] != NULL) {
-        //         // task_cnt ++;
-        //         if(task_lib[i]->status == DEAD) {
-        //             bool flag_use = false;
-        //             for (size_t j = 0; j < CPU_NUM_MAX; j++)
-        //             {
-        //                 if (task_current[j] != NULL && task_current[j] == task_lib[i])
-        //                     flag_use = true;
-        //             }
-        //             if(flag_use == false) {
-        //                 pmm->free(task_lib[i]);
-        //                 task_lib[i] = NULL;
-        //                 tid_cnt--;
-        //             }
-        //         }
-        //     }
-        // }
-        // kmt->spin_unlock(&task_lk);
-        // yield();
+        printf("idle\n");
+        kmt->spin_lock(&task_lk);
+        // int task_cnt = 0;
+        for (size_t i = 0; i < TASK_NUM_MAX; i++) {
+            // assert(task_lib[i] != NULL);
+            if(task_lib[i] != NULL) {
+                // task_cnt ++;
+                if(task_lib[i]->status == DEAD) {
+                    bool flag_use = false;
+                    for (size_t j = 0; j < CPU_NUM_MAX; j++)
+                    {
+                        if (task_current[j] != NULL && task_current[j] == task_lib[i])
+                            flag_use = true;
+                    }
+                    if(flag_use == false) {
+                        pmm->free(task_lib[i]);
+                        task_lib[i] = NULL;
+                        tid_cnt--;
+                    }
+                }
+            }
+        }
+        kmt->spin_unlock(&task_lk);
+        yield();
     }
 }
 
