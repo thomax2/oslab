@@ -90,7 +90,7 @@ void kmt_sem_signal(sem_t *sem)
     if(sem->queue_cnt > 0) { // have waited queue
         assert(sem->queue[0] != NULL);
         assert(sem->queue[0]->status == BLOCKED);
-        sem->queue[0]->status = RUNNABLE;
+        // sem->queue[0]->status = RUNNABLE;
         size_t i = 0;
         for (; i < sem->queue_cnt - 1; i++) {
             sem->queue[i] = sem->queue[i+1];
