@@ -245,18 +245,18 @@ task_t idle_task;
 void idle_clean_func(void *arg)
 {
     while (1) {
-        printf("idle\n");
+        // printf("idle\n");
         kmt->spin_lock(&task_lk);
-        int task_cnt = 0;
-        for (size_t i = 0; task_cnt < tid_cnt; i++) {
+        // int task_cnt = 0;
+        for (size_t i = 0; i < TASK_NUM_MAX; i++) {
             // assert(task_lib[i] != NULL);
             if(task_lib[i] != NULL) {
-                task_cnt ++;
+                // task_cnt ++;
                 if(task_lib[i]->status == DEAD) {
                     bool flag_use = false;
                     for (size_t j = 0; j < CPU_NUM_MAX; j++)
                     {
-                        if(task_current[i] != NULL && task_current[j] == task_lib[i])
+                        if (task_current[j] != NULL && task_current[j] == task_lib[i])
                             flag_use = true;
                     }
                     if(flag_use == false) {
