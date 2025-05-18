@@ -10,6 +10,7 @@ task_t *task_current[CPU_NUM_MAX];
 
 // use when w/r task_lib/tid_cnt
 spinlock_t task_lk;
+spinlock_t trap_lk;
 
 void kmt_spin_init(spinlock_t *lk, const char *name)
 {
@@ -150,6 +151,7 @@ void idle_clean_func(void *arg)
 static void kmt_init(void)
 {
     kmt->spin_init(&task_lk, "task_lk");
+    kmt->spin_init(&trap_lk, "trap_lk");
 
     // idle task
     kmt->create(&idle_task, "idle", idle_clean_func, NULL);

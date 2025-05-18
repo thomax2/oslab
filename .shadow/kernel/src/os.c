@@ -1,6 +1,7 @@
 // #include <common.h>
 #include "os.h"
 #include <devices.h>
+// #include <kernel.h>
 
 // seq in all event
 typedef struct 
@@ -19,6 +20,7 @@ typedef struct
 irq_handler_list irq_table;
 
 extern task_t *task_current[CPU_NUM_MAX];
+extern spinlock_t trap_lk;
 
 static void tty_reader(void *arg) {
     device_t *tty = dev->lookup(arg);
@@ -74,6 +76,7 @@ static void os_run() {
 
 static Context *os_trap(Event ev, Context *context)
 {
+    kmt->spin_lock(&trap_lk);
     Context *ret_ctx = NULL;    
     irq_handler_list *list = &irq_table;
     int cnt = list->cnt;
@@ -88,7 +91,7 @@ static Context *os_trap(Event ev, Context *context)
         }
     }
     panic_on(!ret_ctx, "return to NULL context");
-
+    kmt->spin_unlock(&trap_lk);
     return ret_ctx;
 }
 
