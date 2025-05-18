@@ -84,7 +84,7 @@ static Context *os_trap(Event ev, Context *context)
     printf("GP Fault: cause=0x%x, ref=0x%x, msg=%s\n", ev.cause, ev.ref, ev.msg);
     for (size_t i = 0; i < cnt; i++)
     {
-        printf("list->handlers[i].seq::%s\n",list->handlers[i].seq);
+        printf("list->handlers[i].seq::%d\n",list->handlers[i].seq);
     }
     
     // only one handler return a context
