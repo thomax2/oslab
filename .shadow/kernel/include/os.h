@@ -39,12 +39,17 @@ struct task
 
 struct spinlock
 {
-    int status;
+    int lock;
     int cpu;
-    const char *name;
-    // int irq_dis_depth;      // disable int cnt
-    // bool irq_enble;          // origin int is enable?
+    char name[20];
 };
+
+// struct spinlock
+// {
+//     int status;
+//     int cpu;
+//     const char *name;
+// };
 
 // typedef struct semaphore
 // {
