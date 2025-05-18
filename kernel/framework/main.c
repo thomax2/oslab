@@ -10,3 +10,9 @@ int main() {
     mpe_init(os->run);
     return 1;
 }
+
+// int main() {
+//     os->init();
+//     mpe_init(os->run);
+//     return 1;
+// }

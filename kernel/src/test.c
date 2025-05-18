@@ -121,6 +121,7 @@ void test_repeated_alloc(size_t size, size_t times) {
     for (int i = 0; i < MAX_ALLOC_TIMES; i++) {
         // 分配内存
         alloc_ptrs[i] = pmm->alloc(ALLOC_SIZE);
+		// printf("%p\n",alloc_ptrs[i]);
         assert(alloc_ptrs[i] != NULL);
 
         // 填充模式：前 4 字节写入序号 i，最后 4 字节写入 ~i（按位取反）
