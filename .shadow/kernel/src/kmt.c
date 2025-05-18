@@ -25,6 +25,11 @@ void kmt_spin_init(spinlock_t *lk, const char *name)
 
 void kmt_spin_lock(spinlock_t *lk)
 {
+    if(irq_dis_depth[cpu_current()] == 0) {
+        irq_enble[cpu_current()] = ienabled();
+        iset(false);
+    }
+    irq_dis_depth[cpu_current()] ++;
 
     size_t x= 0;
     while (atomic_xchg(&lk->status, 1))
@@ -33,11 +38,6 @@ void kmt_spin_lock(spinlock_t *lk)
         assert(x < 100000000);
     }
     lk->cpu = cpu_current();
-    if(irq_dis_depth[cpu_current()] == 0) {
-        irq_enble[cpu_current()] = ienabled();
-        iset(false);
-    }
-    irq_dis_depth[cpu_current()] ++;
 
     return;
 }
@@ -127,7 +127,7 @@ void kmt_sem_wait(sem_t *sem)
 {
     kmt->spin_lock(&sem->lk); // 获得自旋锁
     sem->value--; // 自旋锁保证原子性
-    if (sem->value < 0) {
+    if (sem->value <= 0) {
         task_t *curr = task_current[cpu_current()];
         sem->queue[sem->queue_cnt++] = curr;
         curr->status = BLOCKED;
