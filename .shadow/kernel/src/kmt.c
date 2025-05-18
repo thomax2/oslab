@@ -103,8 +103,8 @@ static Context *kmt_schedule(Event ev, Context *ctx)
                 able_cnt++;
         }
     }
-    printf("task_cnt::%d\n",task_cnt);
-    printf("able_cnt::%d\n",able_cnt);
+    // printf("task_cnt::%d\n",task_cnt);
+    // printf("able_cnt::%d\n",able_cnt);
     int c = rand()%able_cnt + 1;
     for (size_t i = 0; i < TASK_NUM_MAX; i++) {
         if(task_lib[i] != NULL) {
@@ -179,7 +179,7 @@ static void kmt_init(void)
 static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg)
 {
     task->name = name;
-    task->status = RUNNING;
+    task->status = RUNNABLE;
     Area tstack = { .start = task->stack, .end = task + 1};
     kcontext(tstack, entry, arg);
     kmt->spin_lock(&task_lk);
