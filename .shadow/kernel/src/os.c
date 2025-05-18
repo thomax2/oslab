@@ -57,8 +57,8 @@ static void os_run() {
     iset(true);
     while (1)
     {
-        // yield();
-        printf("?\n");
+        yield();
+        // printf("?\n");
     }
     
     // while (1)
