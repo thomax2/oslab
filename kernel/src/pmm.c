@@ -15,6 +15,7 @@
 
 #define CPU_NUM 4
 
+#define HUGE_SIZE 87*1024*1024
 
 typedef struct slab_page
 {
@@ -48,7 +49,23 @@ struct Buddy_info{
     buddy_zone zone[BUDDY_NUM];
 }buddy_info;
 
+#define HUGE_USED   123456
+#define HUGE_UNUSED 456789
+typedef struct huge_block{
+    uintptr_t start;
+    uintptr_t end;
+    size_t is_used;
+    size_t size;
+}huge_block;
+
+
+lock_t huge_lk;
+
 size_t buddy_start;
+size_t huge_start;
+
+size_t huge_list_start;
+int huge_list_cnt;
 
 // typedef struct {
 //     unsigned int bits[BITMAP_SIZE / (sizeof(unsigned int) * 8)]; // 根据unsigned int的大小来计算数组大小
@@ -62,12 +79,21 @@ static void kinit(void){
     size_t heapStartAddr = (size_t) heap.start;
     size_t heapEndAddr = (size_t) heap.end;
     
+    // 125MB - 6KB
     for (size_t i = 0; i < CPU_NUM; i++){
         for (size_t j = 0; j < SLAB_NUM; j++){
             manager_slab_area[i].start[j] = (slab_page *)(heapEndAddr - 256 * SLAB_NUM * (CPU_NUM - 1 - i) - 256 * (SLAB_NUM - j));
             manager_slab_area[i].pos[j] = manager_slab_area[i].start[j];
         }
     }
+
+    // 125MB - 0.5MB
+    huge_list_start = heapEndAddr - 800*1024;
+    huge_list_cnt = 0;
+    // printf("huge_list_cnt::%p\n",&huge_list_cnt);
+    // printf("buddy_start::%p\n",&buddy_start);
+    // printf("hugecnt2%d  \n",huge_list_cnt);
+
     for(size_t cpu_num = 0; cpu_num < CPU_NUM; cpu_num++)
     {
         for(size_t i=0;i<SLAB_NUM;i++)
@@ -106,10 +132,27 @@ static void kinit(void){
         }
         *(uintptr_t *)bpos = (uintptr_t)NULL;
     }
-    
+    // printf("buddy_start::%p\n",buddy_start);
+
+    huge_start = buddy_start + BUDDY_NUM * BUDDY_SIZE; // 37MB ~ 124MB
+    printf("huge_start::%p\n",huge_start);
+    lock_init(&huge_lk);
+
+    lock(&huge_lk);
+    huge_block *first_huge = (huge_block *)huge_list_start;
+    first_huge->start = huge_start;
+    first_huge->size = HUGE_SIZE;
+    first_huge->end = huge_start + HUGE_SIZE;
+    first_huge->is_used = HUGE_UNUSED;
+    huge_list_cnt ++;
+    printf("first_huge->end::%p  \n",first_huge->end);
+    unlock(&huge_lk);
+
     for (size_t i = 0; i < BUDDY_NUM; i++)
         lock_init(&(buddy_info.zone[i].buddy_lk));
 
+    // huge_block *block_ptr = (huge_block *)huge_list_start;
+    // printf("%d\n", block_ptr->is_used);
     return;
 }
 
@@ -215,19 +258,96 @@ void *buddy_alloc(size_t size){
     return addr;
 }
 
+void *huge_alloc(size_t size) {
+    
+    lock(&huge_lk);
+    huge_block *base = (huge_block *)huge_list_start;
+    int block_cnt = 0;
+    huge_block *block_ptr = base;
+    while (block_cnt < huge_list_cnt)
+    {
+        if(block_ptr->is_used == HUGE_UNUSED && block_ptr->size >= size)
+        {
+            // printf("wh%d\n",cpu_current());
+            break;
+        }
+        block_ptr += 1;
+        block_cnt++;
+    }
+    if (block_cnt >= huge_list_cnt) {
+        unlock(&huge_lk);
+        assert(0);
+        return NULL; // 未找到合适块
+    }
+    // assert(huge_list_cnt < 20);
+    // if (huge_list_cnt > 20) {
+    //     printf("huge_list_cnt overflow: %d", huge_list_cnt);
+    //     assert(0);
+    // }
+    
+    assert(block_ptr->is_used == HUGE_UNUSED);
+    assert(block_ptr->size >= size);
+
+    // printf("%p\n",block_ptr + 1);
+
+    // for (int i = (int)huge_list_cnt - 1; i >= (int)block_cnt; i--) {
+    //     // base[i + 1] = base[i];
+    //     huge_block *ablock = base + i + 1;
+    //     huge_block *pblock = base + i;
+        
+    //     // huge_block *ablock = (huge_block *)(huge_list_start + sizeof(huge_block)*(i+1));
+    //     // huge_block *pblock = (huge_block *)(huge_list_start + sizeof(huge_block)*(i));
+    //     ablock->end = pblock->end;
+    //     ablock->is_used = pblock->is_used;
+    //     ablock->size = pblock->size;
+    //     ablock->start = pblock->start;
+    // }
+
+    // printf("huge_l?ist_cnt%d\n",huge_list_cnt);
+    size_t oldsize = block_ptr->size;
+    if( (int)oldsize - (int)size > 1*1024*1024 ) {
+
+        for (int i = (int)huge_list_cnt - 1; i >= (int)block_cnt; i--) {
+            base[i + 1] = base[i];
+        }
+        // block_ptr = &base[block_cnt];
+        // assert( block_ptr == &base[block_cnt]);
+        // printf("aagg\n");
+        
+        block_ptr->size = size;
+        block_ptr->end = block_ptr->start + size;
+        block_ptr->is_used = HUGE_USED;
+
+        huge_block *new_block = &base[block_cnt+1];
+        new_block->start = block_ptr->end;
+        new_block->size = oldsize - size;
+        new_block->is_used = HUGE_UNUSED;
+        huge_list_cnt ++; 
+    } else {
+        block_ptr->is_used = HUGE_USED;
+    }
+
+    
+    unlock(&huge_lk);
+    // printf("[get] request=%p block=%p block->start=%p is_used=%d\n", 
+        // (void *)block_ptr->start, block_ptr, block_ptr->start, block_ptr->is_used);
+    return (void *)block_ptr->start;
+}
+
 static void *kalloc(size_t size) {
     // align size
     assert(size != 0);
     void *addr = NULL;
 
     size = align_size(size);
+    // printf("pmm size:%d\n",size);
     assert(size >= 64);
     if(size < SLAB_SIZE)
         addr = slab_alloc(size);
-    else if( size < BUDDY_SIZE )
+    else if( size < BUDDY_SIZE/2 )
         addr = buddy_alloc(size);
     else if( size < 16*1024*1024)
-        {}// addr = huge_alloc(size);
+        addr = huge_alloc(size);
     else
         assert(0);
     return addr;
@@ -252,7 +372,7 @@ static void kfree(void *ptr) {
         page_ptr->head_free = (uintptr_t)ptr;
         assert(page_ptr->head_free != (uintptr_t)NULL);
     }
-    else { // in buddy
+    else if ((size_t)ptr < (size_t)huge_start) { // in buddy
         buddy_zone *zone_ptr = NULL;
         size_t i;
         for(i = 0; i < BUDDY_NUM; i++){
@@ -296,6 +416,61 @@ static void kfree(void *ptr) {
         zone_ptr->head_free = (uintptr_t)ptr;
         unlock(&(zone_ptr->buddy_lk));
     }
+    else {      // in huge
+        lock(&huge_lk);
+        // debug_dump_block_list();
+        huge_block *base = (huge_block *)huge_list_start;
+
+        huge_block *block = (huge_block *)huge_list_start;
+        // huge_block *base = (huge_block *)huge_list_start;
+        int block_cnt = 0;
+        while (block_cnt < huge_list_cnt) {
+            if((size_t)block->start == (size_t)ptr)
+                break;
+            block = block + 1;
+            block_cnt++;
+        }
+        if (block_cnt >= huge_list_cnt) {
+            unlock(&huge_lk);
+            assert(0);
+            // return; // 未找到合适块
+        }
+
+        assert(block->is_used == HUGE_USED);
+        block->is_used = HUGE_UNUSED;
+        // merge pre block
+
+        while(block_cnt > 0 && base[block_cnt-1].is_used ==HUGE_UNUSED) {
+            base[block_cnt-1].size += block->size;
+            base[block_cnt-1].end = block->end;
+
+            for (int i = block_cnt; i < (int)huge_list_cnt - 1; i++) {
+                base[i] = base[i+1];
+            }
+
+            base[huge_list_cnt - 1].is_used = 0;
+            huge_list_cnt --;
+
+            assert(huge_list_cnt >= 0);
+
+            block_cnt --;
+            block = &base[block_cnt];
+        }
+
+        while(block_cnt < (int)huge_list_cnt-1 && base[block_cnt + 1].is_used == HUGE_UNUSED) {
+            block->size += base[block_cnt+1].size;
+            block->end = base[block_cnt+1].end;
+            
+            for (int i = block_cnt+1; i < (int)huge_list_cnt - 1; i++) {
+                base[i] = base[i+1];
+            }
+            base[huge_list_cnt - 1].is_used = 0;
+            huge_list_cnt --;
+
+            assert(huge_list_cnt >= 0);
+        }
+        unlock(&huge_lk);
+    }
     return;
 }
 
@@ -315,8 +490,29 @@ static void pmm_init() {
     
 }
 
+static void *kalloc_irq(size_t size)
+{
+    int i = ienabled();
+    iset(false);
+    void *ret = kalloc(size);
+    if(i) iset(true);
+    return ret;
+}
+
+
+static void kfree_irq(void *ptr)
+{
+    int i = ienabled();
+    iset(false);
+    kfree(ptr);
+    if(i) iset(true);
+    return;
+}
+
 MODULE_DEF(pmm) = {
     .init  = pmm_init,
-    .alloc = kalloc,
-    .free  = kfree,
+    // .alloc = kalloc,
+    // .free  = kfree,
+    .alloc = kalloc_irq,
+    .free  = kfree_irq,
 };
