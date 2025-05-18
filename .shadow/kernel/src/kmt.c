@@ -55,48 +55,84 @@ void kmt_spin_unlock(spinlock_t *lk)
     return;
 }
 
-void kmt_sem_init(sem_t *sem, const char *name, int value)
+// void kmt_sem_init(sem_t *sem, const char *name, int value)
+// {
+//     sem->name = name;
+//     sem->value = value;
+//     sem->queue_cnt = 0;
+//     kmt->spin_init(&(sem->lk),name);
+//     return;
+// }
+
+// void kmt_sem_wait(sem_t *sem)
+// {
+//     kmt->spin_lock(&sem->lk); // 获得自旋锁
+//     sem->value--; // 自旋锁保证原子性
+//     if (sem->value < 0) {
+//         // 没有资源，需要等待
+//         sem->queue[sem->queue_cnt] = task_current[cpu_current()];
+//         task_current[cpu_current()]->status = BLOCKED;
+//         // mark_as_not_runnable(current); // 当前线程不能再执行
+//     }
+
+//     kmt->spin_unlock(&sem->lk);
+//     if (sem->value < 0) {    // 如果 P 失败，不能继续执行
+//                         // (注意此时可能有线程执行 V 操作)
+//         yield();        // 引发一次上下文切换
+//     }
+// }
+
+// void kmt_sem_signal(sem_t *sem)
+// {
+//     kmt->spin_lock(&(sem->lk));
+//     sem->value++;
+//     if(sem->queue_cnt > 0) { // have waited queue
+//         assert(sem->queue[0] != NULL);
+//         sem->queue[0]->status = RUNNABLE;
+//         size_t i = 0;
+//         for (; i < sem->queue_cnt - 1; i++) {
+//             sem->queue[i] = sem->queue[i+1];
+//         }
+//         sem->queue[i] = NULL;
+//         sem->queue_cnt--;
+//     }
+//     kmt->spin_unlock(&(sem->lk));
+// }
+
+static void kmt_sem_init(sem_t *sem, const char *name, int value)
 {
-    sem->name = name;
-    sem->value = value;
-    sem->queue_cnt = 0;
-    kmt->spin_init(&(sem->lk),name);
-    return;
+    kmt->spin_init(&(sem->lock),name);
+    sem->count = value;
+    sem->l = 0;
+    sem->r = 0;
+    strcpy(sem->name, name);
 }
 
 void kmt_sem_wait(sem_t *sem)
 {
-    kmt->spin_lock(&sem->lk); // 获得自旋锁
-    sem->value--; // 自旋锁保证原子性
-    if (sem->value < 0) {
-        // 没有资源，需要等待
-        sem->queue[sem->queue_cnt] = task_current[cpu_current()];
-        task_current[cpu_current()]->status = BLOCKED;
-        // mark_as_not_runnable(current); // 当前线程不能再执行
-    }
-
-    kmt->spin_unlock(&sem->lk);
-    if (sem->value < 0) {    // 如果 P 失败，不能继续执行
-                        // (注意此时可能有线程执行 V 操作)
-        yield();        // 引发一次上下文切换
-    }
+    assert(sem);
+    bool succ=false;
+    while(!succ)
+    {
+        kmt->spin_lock(&(sem->lock));
+        if(sem->count>0)
+        {
+            sem->count--;
+            succ=true;
+        }
+        kmt->spin_unlock(&(sem->lock));
+        if(!succ)
+		{
+            if(ienabled())
+                yield();
+        }
+  }
 }
-
 void kmt_sem_signal(sem_t *sem)
 {
-    kmt->spin_lock(&(sem->lk));
-    sem->value++;
-    if(sem->queue_cnt > 0) { // have waited queue
-        assert(sem->queue[0] != NULL);
-        sem->queue[0]->status = RUNNABLE;
-        size_t i = 0;
-        for (; i < sem->queue_cnt - 1; i++) {
-            sem->queue[i] = sem->queue[i+1];
-        }
-        sem->queue[i] = NULL;
-        sem->queue_cnt--;
-    }
-    kmt->spin_unlock(&(sem->lk));
+    kmt->spin_lock(&(sem->lock));
+    sem->count++;
+    kmt->spin_unlock(&(sem->lock));
 }
 
 
