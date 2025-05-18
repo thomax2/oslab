@@ -36,9 +36,9 @@ void kmt_spin_lock(spinlock_t *lk)
     while (atomic_xchg(&lk->status, 1))
     {
         x++;
-        // if(x == 10000000)
-        //     printf("lk->name::%s   %s\n",lk->name,task_current[cpu_current()]->name);
-        //     assert(x < 100000000);
+        if(x == 10000000)
+            printf("lk->name::%s   %s\n",lk->name,task_current[cpu_current()]->name);
+            assert(x < 100000000);
     }
     lk->cpu = cpu_current();
 
@@ -59,87 +59,87 @@ void kmt_spin_unlock(spinlock_t *lk)
 }
 
 
-void kmt_sem_init(sem_t *sem, const char *name, int value)
-{
-    sem->name = name;
-    sem->value = value;
-    sem->queue_cnt = 0;
-    kmt->spin_init(&(sem->lk),name);
-    return;
-}
-
-void kmt_sem_wait(sem_t *sem)
-{
-    kmt->spin_lock(&sem->lk); // 获得自旋锁
-    sem->value--; // 自旋锁保证原子性
-    printf("innnnn %d %s\n",sem->value,sem->name);
-    if (sem->value < 0) {
-        // printf("innnn\n");
-
-        task_t *curr = task_current[cpu_current()];
-        sem->queue[sem->queue_cnt++] = curr;
-        curr->status = BLOCKED;
-        kmt->spin_unlock(&sem->lk);
-        assert( ienabled() == true);
-        yield();  // 必须立即 yield，不能继续执行
-    } else {
-        kmt->spin_unlock(&sem->lk);
-    }
-}
-
-void kmt_sem_signal(sem_t *sem)
-{
-    kmt->spin_lock(&(sem->lk));
-    sem->value++;
-    if(sem->queue_cnt > 0) { // have waited queue
-        assert(sem->queue[0] != NULL);
-        assert(sem->queue[0]->status == BLOCKED);
-        sem->queue[0]->status = RUNNABLE;
-        size_t i = 0;
-        for (; i < sem->queue_cnt - 1; i++) {
-            sem->queue[i] = sem->queue[i+1];
-        }
-        sem->queue[i] = NULL;
-        sem->queue_cnt--;
-    }
-    kmt->spin_unlock(&(sem->lk));
-}
-
-// static void kmt_sem_init(sem_t *sem, const char *name, int value)
+// void kmt_sem_init(sem_t *sem, const char *name, int value)
 // {
-//     kmt->spin_init(&(sem->lock),name);
-//     sem->count = value;
-//     sem->l = 0;
-//     sem->r = 0;
-//     strcpy(sem->name, name);
+//     sem->name = name;
+//     sem->value = value;
+//     sem->queue_cnt = 0;
+//     kmt->spin_init(&(sem->lk),name);
+//     return;
 // }
 
 // void kmt_sem_wait(sem_t *sem)
 // {
-//     assert(sem);
-//     bool succ=false;
-//     while(!succ)
-//     {
-//         kmt->spin_lock(&(sem->lock));
-//         if(sem->count>0)
-//         {
-//             sem->count--;
-//             succ=true;
-//         }
-//         kmt->spin_unlock(&(sem->lock));
-//         if(!succ)
-// 		{
-//             if(ienabled())
-//                 yield();
-//         }
-//   }
+//     kmt->spin_lock(&sem->lk); // 获得自旋锁
+//     sem->value--; // 自旋锁保证原子性
+//     printf("innnnn %d %s\n",sem->value,sem->name);
+//     if (sem->value < 0) {
+//         // printf("innnn\n");
+
+//         task_t *curr = task_current[cpu_current()];
+//         sem->queue[sem->queue_cnt++] = curr;
+//         curr->status = BLOCKED;
+//         kmt->spin_unlock(&sem->lk);
+//         assert( ienabled() == true);
+//         yield();  // 必须立即 yield，不能继续执行
+//     } else {
+//         kmt->spin_unlock(&sem->lk);
+//     }
 // }
+
 // void kmt_sem_signal(sem_t *sem)
 // {
-//     kmt->spin_lock(&(sem->lock));
-//     sem->count++;
-//     kmt->spin_unlock(&(sem->lock));
+//     kmt->spin_lock(&(sem->lk));
+//     sem->value++;
+//     if(sem->queue_cnt > 0) { // have waited queue
+//         assert(sem->queue[0] != NULL);
+//         assert(sem->queue[0]->status == BLOCKED);
+//         sem->queue[0]->status = RUNNABLE;
+//         size_t i = 0;
+//         for (; i < sem->queue_cnt - 1; i++) {
+//             sem->queue[i] = sem->queue[i+1];
+//         }
+//         sem->queue[i] = NULL;
+//         sem->queue_cnt--;
+//     }
+//     kmt->spin_unlock(&(sem->lk));
 // }
+
+static void kmt_sem_init(sem_t *sem, const char *name, int value)
+{
+    kmt->spin_init(&(sem->lock),name);
+    sem->count = value;
+    sem->l = 0;
+    sem->r = 0;
+    strcpy(sem->name, name);
+}
+
+void kmt_sem_wait(sem_t *sem)
+{
+    assert(sem);
+    bool succ=false;
+    while(!succ)
+    {
+        kmt->spin_lock(&(sem->lock));
+        if(sem->count>0)
+        {
+            sem->count--;
+            succ=true;
+        }
+        kmt->spin_unlock(&(sem->lock));
+        if(!succ)
+		{
+            if(ienabled())
+                yield();
+        }
+  }
+}
+void kmt_sem_signal(sem_t *sem)
+{
+    kmt->spin_lock(&(sem->lock));
+    sem->count++;
+    kmt->spin_unlock(&(sem->lock));
+}
 
 
 static Context *kmt_context_save(Event ev, Context *ctx)
