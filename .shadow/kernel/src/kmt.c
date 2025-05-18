@@ -268,17 +268,17 @@ void idle_clean_func(void *arg)
             }
         }
         kmt->spin_unlock(&task_lk);
-        // yield();
+        yield();
     }
 }
 
-void idle_func(void *arg)
-{
-    while (1)
-    {
+// void idle_func(void *arg)
+// {
+//     while (1)
+//     {
         
-    }
-}
+//     }
+// }
 
 static void kmt_init(void)
 {
@@ -304,9 +304,9 @@ static void kmt_init(void)
         }
         task_t *t = pmm->alloc(sizeof(task_t));
         assert(t != NULL);
-        kmt->create(t,"_",idle_func,(void *)i);
+        kmt->create(t,"_",NULL,(void *)i);
         task_current[i] = t;
-        t->status = RUNNABLE;
+        t->status = RUNNING;
     }
 
     os->on_irq(INT_MIN, EVENT_NULL, kmt_context_save);
