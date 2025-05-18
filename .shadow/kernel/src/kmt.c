@@ -35,7 +35,12 @@ void kmt_spin_lock(spinlock_t *lk)
     while (atomic_xchg(&lk->status, 1))
     {
         x++;
-        assert(x < 100000000);
+        if( x >= 100000000)
+        {
+            printf("%s\n",lk->name);
+            assert(0);
+        }
+        // assert(x < 100000000);
     }
     lk->cpu = cpu_current();
 
@@ -181,13 +186,13 @@ static void kmt_init(void)
     {
         if(i == 0 ) {
             task_current[i] = &idle_task;
-            (&idle_task)->status = RUNNABLE;
+            (&idle_task)->status = RUNNING;
             continue;
         }
         task_t *t = pmm->alloc(sizeof(task_t));
         kmt->create(t,"_",NULL,NULL);
         task_current[i] = t;
-        t->status = RUNNABLE;
+        t->status = RUNNING;
     }
 
     os->on_irq(INT_MIN, EVENT_NULL, kmt_context_save);
