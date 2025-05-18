@@ -71,7 +71,7 @@ void kmt_sem_wait(sem_t *sem)
     sem->value--; // 自旋锁保证原子性
     if (sem->value < 0) {
         // printf("innnn\n");
-        printf("innnnn %d %d\n",sem->value,cpu_current());
+        // printf("innnnn %d %d\n",sem->value,cpu_current());
         task_t *curr = task_current[cpu_current()];
         sem->queue[sem->queue_cnt++] = curr;
         curr->status = BLOCKED;
