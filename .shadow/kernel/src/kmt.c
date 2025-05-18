@@ -12,29 +12,61 @@ task_t *task_current[CPU_NUM_MAX];
 spinlock_t task_lk;
 spinlock_t trap_lk;
 
-void kmt_spin_init(spinlock_t *lk, const char *name)
+typedef struct CPU
 {
-    lk->name = name;
-    lk->status = 0;
-    return;
+    int intena; //中断信息
+    int noff;   //递归深度
+} CPU;
+CPU cpus[4];
+static void push_off()
+{
+    int i = ienabled();
+    iset(false);
+    int c = cpu_current();
+    if (cpus[c].noff == 0)
+        cpus[c].intena = i;
+    cpus[c].noff++;
 }
-
-void kmt_spin_lock(spinlock_t *lk)
+static void pop_off()
 {
-    size_t x= 0;
-    while (atomic_xchg(&lk->status, 1))
+    int c = cpu_current();
+    assert(cpus[c].noff >= 1);
+    cpus[c].noff--;
+    if (cpus[c].noff == 0 && cpus[c].intena == true)
     {
-        x++;
-        assert(x < 100000000);
+        iset(true);
     }
-    return;
 }
-
-void kmt_spin_unlock(spinlock_t *lk)
+static void spin_init(spinlock_t *lk, const char *name)
 {
-    assert(lk->status == 1);
-    atomic_xchg(&lk->status,0);
-    return;
+    lk->lock = 0;
+    lk->cpu = -1;
+    strcpy(lk->name, name);
+}
+static void spin_lock(spinlock_t *lk)
+{
+    while (atomic_xchg(&lk->lock, 1) != 0)
+    {
+        if(ienabled())
+            yield();
+    }
+    for(volatile int i=0;i<10000;++i);
+    push_off(); // disable interrupts to avoid deadlock.
+    #ifdef delock
+    //printf("thread %s : %s , cpu's intena:%d  \n",_current->name ,lk->name,cpus[cpu_current()].intena);
+    //printf("thread %s : %s \n",_current->name ,lk->name);
+    #endif
+    lk->cpu = cpu_current();
+}
+static void spin_unlock(spinlock_t *lk)
+{
+    assert(lk->cpu == cpu_current());
+    atomic_xchg(&lk->lock, 0);
+    lk->cpu=-1;
+    #ifdef delock
+    //printf("%s  unlock\n", lk->name);
+    #endif
+    pop_off();
 }
 
 void kmt_sem_init(sem_t *sem, const char *name, int value)
@@ -48,7 +80,7 @@ void kmt_sem_init(sem_t *sem, const char *name, int value)
 
 void kmt_sem_wait(sem_t *sem)
 {
-    kmt_spin_lock(&sem->lk); // 获得自旋锁
+    spin_lock(&sem->lk); // 获得自旋锁
     sem->value--; // 自旋锁保证原子性
     if (sem->value < 0) {
         // 没有资源，需要等待
@@ -57,7 +89,7 @@ void kmt_sem_wait(sem_t *sem)
         // mark_as_not_runnable(current); // 当前线程不能再执行
     }
 
-    kmt_spin_unlock(&sem->lk);
+    spin_unlock(&sem->lk);
     if (sem->value < 0) {    // 如果 P 失败，不能继续执行
                         // (注意此时可能有线程执行 V 操作)
         yield();        // 引发一次上下文切换
@@ -66,7 +98,7 @@ void kmt_sem_wait(sem_t *sem)
 
 void kmt_sem_signal(sem_t *sem)
 {
-    kmt_spin_lock(&(sem->lk));
+    spin_lock(&(sem->lk));
     sem->value++;
     if(sem->queue_cnt > 0) { // have waited queue
         assert(sem->queue[0] != NULL);
@@ -78,7 +110,7 @@ void kmt_sem_signal(sem_t *sem)
         sem->queue[i] = NULL;
         sem->queue_cnt--;
     }
-    kmt_spin_unlock(&(sem->lk));
+    spin_unlock(&(sem->lk));
 }
 
 
@@ -227,9 +259,9 @@ MODULE_DEF(kmt) = {
     .init = kmt_init,
     .create  = kmt_create,
     .teardown  = kmt_teardown,
-    .spin_init  = kmt_spin_init,
-    .spin_lock  = kmt_spin_lock,
-    .spin_unlock  = kmt_spin_unlock,
+    .spin_init  = spin_init,
+    .spin_lock  = spin_lock,
+    .spin_unlock  = spin_unlock,
     .sem_init  = kmt_sem_init,
     .sem_wait  = kmt_sem_wait,
     .sem_signal  = kmt_sem_signal,
