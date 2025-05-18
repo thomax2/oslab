@@ -82,6 +82,11 @@ static Context *os_trap(Event ev, Context *context)
     irq_handler_list *list = &irq_table;
     int cnt = list->cnt;
     printf("GP Fault: cause=0x%x, ref=0x%x, msg=%s\n", ev.cause, ev.ref, ev.msg);
+    for (size_t i = 0; i < cnt; i++)
+    {
+        printf("list->handlers[i].seq::%s\n",list->handlers[i].seq);
+    }
+    
     // only one handler return a context
     for (int i = 0; i < cnt; i++) {
         irq_handler h = list->handlers[i];
@@ -120,6 +125,7 @@ static void os_on_irq(int seq, int event, handler_t handler)
     list->handlers[i+1].handler = handler;
     list->handlers[i+1].event = event;
     list->cnt ++;
+    return;
 }
 
 MODULE_DEF(os) = {
