@@ -34,7 +34,7 @@ struct task
     const char  *name;
     task_status status;
     Context     context;
-    uint8_t     stack[4096];
+    uint8_t     stack[4096*2];
 };
 
 struct spinlock

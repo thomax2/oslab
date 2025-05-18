@@ -57,7 +57,7 @@ static void os_run() {
     iset(true);
     while (1)
     {
-        yield();
+        // yield();
         // printf("?\n");
     }
     
@@ -85,6 +85,7 @@ static Context *os_trap(Event ev, Context *context)
     // only one handler return a context
     for (int i = 0; i < cnt; i++) {
         irq_handler h = list->handlers[i];
+        // printf("")
         if(h.event == EVENT_NULL || h.event == ev.event) {
             Context *r = h.handler(ev, context);
             panic_on(r && ret_ctx, "return to multiple contexts");
