@@ -26,6 +26,7 @@ void kmt_spin_init(spinlock_t *lk, const char *name)
 
 void kmt_spin_lock(spinlock_t *lk)
 {
+    assert(lk->cpu != cpu_current());
     if(irq_dis_depth[cpu_current()] == 0) {
         irq_enble[cpu_current()] = ienabled();
         iset(false);
