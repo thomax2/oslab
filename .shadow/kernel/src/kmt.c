@@ -147,6 +147,7 @@ task_t idle_task;
 void idle_clean_func(void *arg)
 {
     while (1) {
+        printf("idle\n");
         kmt->spin_lock(&task_lk);
         int task_cnt = 0;
         for (size_t i = 0; task_cnt < tid_cnt; i++) {
