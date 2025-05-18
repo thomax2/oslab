@@ -37,34 +37,34 @@ struct task
     uint8_t     stack[4096*2];
 };
 
-struct spinlock
-{
-    int lock;
-    int cpu;
-    char name[20];
-};
-
 // struct spinlock
 // {
-//     int status;
+//     int lock;
 //     int cpu;
-//     const char *name;
+//     char name[20];
 // };
 
-// typedef struct semaphore
-// {
-//     int count;
-//     char name[20];
-//     struct spinlock lock;
-//     // task_t* pool[64];//等待队列线程池
-//     int l;//等待队列头
-//     int r;//等待队列尾
-// }semaphore;
-
-struct semaphore {
+struct spinlock
+{
+    int status;
+    int cpu;
     const char *name;
-    int value;
-    int queue_cnt;
-    struct spinlock lk;
-    struct task *queue[SEM_QUEUE_MAX];
 };
+
+typedef struct semaphore
+{
+    int count;
+    char name[20];
+    struct spinlock lock;
+    // task_t* pool[64];//等待队列线程池
+    int l;//等待队列头
+    int r;//等待队列尾
+}semaphore;
+
+// struct semaphore {
+//     const char *name;
+//     int value;
+//     int queue_cnt;
+//     struct spinlock lk;
+//     struct task *queue[SEM_QUEUE_MAX];
+// };

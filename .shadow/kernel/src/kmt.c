@@ -13,197 +13,197 @@ spinlock_t task_curr_lk[CPU_NUM_MAX];
 spinlock_t task_lk;
 spinlock_t trap_lk;
 
-// int irq_dis_depth[CPU_NUM_MAX];
-// bool irq_enble[CPU_NUM_MAX];
+int irq_dis_depth[CPU_NUM_MAX];
+bool irq_enble[CPU_NUM_MAX];
 
-// void kmt_spin_init(spinlock_t *lk, const char *name)
-// {
-//     lk->cpu = -1;
-//     lk->name = name;
-//     lk->status = 0;
-//     return;
-// }
-
-// void kmt_spin_lock(spinlock_t *lk)
-// {
-//     // assert(lk->cpu != cpu_current());
-//     if(irq_dis_depth[cpu_current()] == 0) {
-//         irq_enble[cpu_current()] = ienabled();
-//         iset(false);
-//     }
-//     irq_dis_depth[cpu_current()] ++;
-
-//     size_t x= 0;
-//     while (atomic_xchg(&lk->status, 1))
-//     {
-//         x++;
-//         if(x == 10000000)
-//         printf("lk->name::%s try by %s, held by CPU %d, task %s\n",
-//             lk->name,
-//             task_current[cpu_current()] ? task_current[cpu_current()]->name : "(null)",
-//             lk->cpu,
-//             task_current[lk->cpu] ? task_current[lk->cpu]->name : "(null)");
- 
-//         assert(x < 100000000);
-//     }
-//     lk->cpu = cpu_current();
-
-//     return;
-// }
-
-// void kmt_spin_unlock(spinlock_t *lk)
-// {
-//     assert(lk->status == 1);
-//     assert(lk->cpu == cpu_current());
-//     atomic_xchg(&lk->status,0);
-//     irq_dis_depth[cpu_current()] --;
-//     if(irq_dis_depth[cpu_current()] == 0 && irq_enble[cpu_current()]) {
-//         iset(true);
-//     }
-
-//     return;
-// }
-
-
-typedef struct CPU
+void kmt_spin_init(spinlock_t *lk, const char *name)
 {
-    int intena; //中断信息
-    int noff;   //递归深度
-} CPU;
-CPU cpus[4];
-static void push_off()
-{
-    int i = ienabled();
-    iset(false);
-    int c = cpu_current();
-    if (cpus[c].noff == 0)
-        cpus[c].intena = i;
-    cpus[c].noff++;
-}
-static void pop_off()
-{
-    int c = cpu_current();
-    assert(cpus[c].noff >= 1);
-    cpus[c].noff--;
-    if (cpus[c].noff == 0 && cpus[c].intena == true)
-    {
-        iset(true);
-    }
-}
-static void kmt_spin_init(spinlock_t *lk, const char *name)
-{
-    lk->lock = 0;
     lk->cpu = -1;
-    strcpy(lk->name, name);
-}
-static void kmt_spin_lock(spinlock_t *lk)
-{
-    while (atomic_xchg(&lk->lock, 1) != 0)
-    {
-        if(ienabled())
-            yield();
-    }
-    for(volatile int i=0;i<10000;++i);
-    push_off(); // disable interrupts to avoid deadlock.
-    #ifdef delock
-    //printf("thread %s : %s , cpu's intena:%d  \n",_current->name ,lk->name,cpus[cpu_current()].intena);
-    //printf("thread %s : %s \n",_current->name ,lk->name);
-    #endif
-    lk->cpu = cpu_current();
-}
-static void kmt_spin_unlock(spinlock_t *lk)
-{
-    assert(lk->cpu == cpu_current());
-    atomic_xchg(&lk->lock, 0);
-    lk->cpu=-1;
-    #ifdef delock
-    //printf("%s  unlock\n", lk->name);
-    #endif
-    pop_off();
-}
-
-
-void kmt_sem_init(sem_t *sem, const char *name, int value)
-{
-    sem->name = name;
-    sem->value = value;
-    sem->queue_cnt = 0;
-    kmt->spin_init(&(sem->lk),name);
+    lk->name = name;
+    lk->status = 0;
     return;
 }
 
-void kmt_sem_wait(sem_t *sem)
+void kmt_spin_lock(spinlock_t *lk)
 {
-    kmt->spin_lock(&sem->lk); // 获得自旋锁
-    sem->value--; // 自旋锁保证原子性
-    // printf("innnnn %d %s\n",sem->value,sem->name);
-    if (sem->value < 0) {
-        // printf("innnn\n");
-
-        task_t *curr = task_current[cpu_current()];
-        sem->queue[sem->queue_cnt++] = curr;
-        curr->status = BLOCKED;
-        kmt->spin_unlock(&sem->lk);
-        assert( ienabled() == true);
-        yield();  // 必须立即 yield，不能继续执行
-    } else {
-        kmt->spin_unlock(&sem->lk);
+    // assert(lk->cpu != cpu_current());
+    if(irq_dis_depth[cpu_current()] == 0) {
+        irq_enble[cpu_current()] = ienabled();
+        iset(false);
     }
+    irq_dis_depth[cpu_current()] ++;
+
+    size_t x= 0;
+    while (atomic_xchg(&lk->status, 1))
+    {
+        x++;
+        if(x == 10000000)
+        printf("lk->name::%s try by %s, held by CPU %d, task %s\n",
+            lk->name,
+            task_current[cpu_current()] ? task_current[cpu_current()]->name : "(null)",
+            lk->cpu,
+            task_current[lk->cpu] ? task_current[lk->cpu]->name : "(null)");
+ 
+        assert(x < 100000000);
+    }
+    lk->cpu = cpu_current();
+
+    return;
 }
 
-void kmt_sem_signal(sem_t *sem)
+void kmt_spin_unlock(spinlock_t *lk)
 {
-    kmt->spin_lock(&(sem->lk));
-    sem->value++;
-    if(sem->queue_cnt > 0) { // have waited queue
-        assert(sem->queue[0] != NULL);
-        assert(sem->queue[0]->status == BLOCKED);
-        sem->queue[0]->status = RUNNABLE;
-        size_t i = 0;
-        for (; i < sem->queue_cnt - 1; i++) {
-            sem->queue[i] = sem->queue[i+1];
-        }
-        sem->queue[i] = NULL;
-        sem->queue_cnt--;
+    assert(lk->status == 1);
+    assert(lk->cpu == cpu_current());
+    atomic_xchg(&lk->status,0);
+    irq_dis_depth[cpu_current()] --;
+    if(irq_dis_depth[cpu_current()] == 0 && irq_enble[cpu_current()]) {
+        iset(true);
     }
-    kmt->spin_unlock(&(sem->lk));
+
+    return;
 }
 
-// static void kmt_sem_init(sem_t *sem, const char *name, int value)
+
+// typedef struct CPU
 // {
-//     kmt->spin_init(&(sem->lock),name);
-//     sem->count = value;
-//     sem->l = 0;
-//     sem->r = 0;
-//     strcpy(sem->name, name);
+//     int intena; //中断信息
+//     int noff;   //递归深度
+// } CPU;
+// CPU cpus[4];
+// static void push_off()
+// {
+//     int i = ienabled();
+//     iset(false);
+//     int c = cpu_current();
+//     if (cpus[c].noff == 0)
+//         cpus[c].intena = i;
+//     cpus[c].noff++;
+// }
+// static void pop_off()
+// {
+//     int c = cpu_current();
+//     assert(cpus[c].noff >= 1);
+//     cpus[c].noff--;
+//     if (cpus[c].noff == 0 && cpus[c].intena == true)
+//     {
+//         iset(true);
+//     }
+// }
+// static void kmt_spin_init(spinlock_t *lk, const char *name)
+// {
+//     lk->lock = 0;
+//     lk->cpu = -1;
+//     strcpy(lk->name, name);
+// }
+// static void kmt_spin_lock(spinlock_t *lk)
+// {
+//     while (atomic_xchg(&lk->lock, 1) != 0)
+//     {
+//         if(ienabled())
+//             yield();
+//     }
+//     for(volatile int i=0;i<10000;++i);
+//     push_off(); // disable interrupts to avoid deadlock.
+//     #ifdef delock
+//     //printf("thread %s : %s , cpu's intena:%d  \n",_current->name ,lk->name,cpus[cpu_current()].intena);
+//     //printf("thread %s : %s \n",_current->name ,lk->name);
+//     #endif
+//     lk->cpu = cpu_current();
+// }
+// static void kmt_spin_unlock(spinlock_t *lk)
+// {
+//     assert(lk->cpu == cpu_current());
+//     atomic_xchg(&lk->lock, 0);
+//     lk->cpu=-1;
+//     #ifdef delock
+//     //printf("%s  unlock\n", lk->name);
+//     #endif
+//     pop_off();
+// }
+
+
+// void kmt_sem_init(sem_t *sem, const char *name, int value)
+// {
+//     sem->name = name;
+//     sem->value = value;
+//     sem->queue_cnt = 0;
+//     kmt->spin_init(&(sem->lk),name);
+//     return;
 // }
 
 // void kmt_sem_wait(sem_t *sem)
 // {
-//     assert(sem);
-//     bool succ=false;
-//     while(!succ)
-//     {
-//         kmt->spin_lock(&(sem->lock));
-//         if(sem->count>0)
-//         {
-//             sem->count--;
-//             succ=true;
-//         }
-//         kmt->spin_unlock(&(sem->lock));
-//         if(!succ)
-// 		{
-//             if(ienabled())
-//                 yield();
-//         }
-//   }
+//     kmt->spin_lock(&sem->lk); // 获得自旋锁
+//     sem->value--; // 自旋锁保证原子性
+//     // printf("innnnn %d %s\n",sem->value,sem->name);
+//     if (sem->value < 0) {
+//         // printf("innnn\n");
+
+//         task_t *curr = task_current[cpu_current()];
+//         sem->queue[sem->queue_cnt++] = curr;
+//         curr->status = BLOCKED;
+//         kmt->spin_unlock(&sem->lk);
+//         assert( ienabled() == true);
+//         yield();  // 必须立即 yield，不能继续执行
+//     } else {
+//         kmt->spin_unlock(&sem->lk);
+//     }
 // }
+
 // void kmt_sem_signal(sem_t *sem)
 // {
-//     kmt->spin_lock(&(sem->lock));
-//     sem->count++;
-//     kmt->spin_unlock(&(sem->lock));
+//     kmt->spin_lock(&(sem->lk));
+//     sem->value++;
+//     if(sem->queue_cnt > 0) { // have waited queue
+//         assert(sem->queue[0] != NULL);
+//         assert(sem->queue[0]->status == BLOCKED);
+//         sem->queue[0]->status = RUNNABLE;
+//         size_t i = 0;
+//         for (; i < sem->queue_cnt - 1; i++) {
+//             sem->queue[i] = sem->queue[i+1];
+//         }
+//         sem->queue[i] = NULL;
+//         sem->queue_cnt--;
+//     }
+//     kmt->spin_unlock(&(sem->lk));
 // }
+
+static void kmt_sem_init(sem_t *sem, const char *name, int value)
+{
+    kmt->spin_init(&(sem->lock),name);
+    sem->count = value;
+    sem->l = 0;
+    sem->r = 0;
+    strcpy(sem->name, name);
+}
+
+void kmt_sem_wait(sem_t *sem)
+{
+    assert(sem);
+    bool succ=false;
+    while(!succ)
+    {
+        kmt->spin_lock(&(sem->lock));
+        if(sem->count>0)
+        {
+            sem->count--;
+            succ=true;
+        }
+        kmt->spin_unlock(&(sem->lock));
+        if(!succ)
+		{
+            if(ienabled())
+                yield();
+        }
+  }
+}
+void kmt_sem_signal(sem_t *sem)
+{
+    kmt->spin_lock(&(sem->lock));
+    sem->count++;
+    kmt->spin_unlock(&(sem->lock));
+}
 
 
 static Context *kmt_context_save(Event ev, Context *ctx)
