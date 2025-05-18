@@ -262,14 +262,10 @@ void *huge_alloc(size_t size) {
     
     lock(&huge_lk);
     huge_block *base = (huge_block *)huge_list_start;
-    size_t block_cnt = 0;
+    int block_cnt = 0;
     huge_block *block_ptr = base;
-    // printf("ddddddd:%d\n",size);
-    // printf("ddddddd:%d\n",block_ptr->size);
     while (block_cnt < huge_list_cnt)
     {
-        // printf("ggggggggg:%d\n",block_ptr->is_used);
-        // printf("ggd%p\n",block_ptr);
         if(block_ptr->is_used == HUGE_UNUSED && block_ptr->size >= size)
         {
             // printf("wh%d\n",cpu_current());
@@ -308,7 +304,7 @@ void *huge_alloc(size_t size) {
 
     // printf("huge_l?ist_cnt%d\n",huge_list_cnt);
     size_t oldsize = block_ptr->size;
-    if( (int)oldsize - (int)size > 1*1024*1024) {
+    if( (int)oldsize - (int)size > 1*1024*1024 ) {
 
         for (int i = (int)huge_list_cnt - 1; i >= (int)block_cnt; i--) {
             base[i + 1] = base[i];
@@ -330,11 +326,6 @@ void *huge_alloc(size_t size) {
         block_ptr->is_used = HUGE_USED;
     }
 
-
-    // printf("block_ptr%p\n",block_ptr);
-    // printf("new_block%p\n",new_block);
-    // assert(new_block->is_used == HUGE_UNUSED);
-    // printf("hugecnt4%d  \n",huge_list_cnt);
     
     unlock(&huge_lk);
     // printf("[get] request=%p block=%p block->start=%p is_used=%d\n", 
