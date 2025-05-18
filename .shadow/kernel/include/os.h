@@ -11,7 +11,7 @@
 #include <klib.h>
 #include <klib-macros.h>
 
-#define TASK_NUM_MAX 20
+#define TASK_NUM_MAX 40
 #define CPU_NUM_MAX 4
 
 #define MAX_HANDLERS_PER_EVENT  256
