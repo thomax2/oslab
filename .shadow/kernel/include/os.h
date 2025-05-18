@@ -39,9 +39,9 @@ struct task
 
 struct spinlock
 {
-    int status;
+    int lock;
     int cpu;
-    const char *name;
+    char name[20];
     // int irq_dis_depth;      // disable int cnt
     // bool irq_enble;          // origin int is enable?
 };
