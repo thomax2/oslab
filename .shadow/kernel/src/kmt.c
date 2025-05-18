@@ -140,19 +140,19 @@ void kmt_sem_wait(sem_t *sem)
 
 void kmt_sem_signal(sem_t *sem)
 {
-    kmt->spin_lock(&(sem->lk));
+    kmt->spin_lock(&sem->lk);
     sem->value++;
-    if(sem->queue_cnt > 0) { // have waited queue
-        assert(sem->queue[0] != NULL);
-        sem->queue[0]->status = RUNNABLE;
-        size_t i = 0;
-        for (; i < sem->queue_cnt - 1; i++) {
+    if (sem->queue_cnt > 0) {
+        task_t *t = sem->queue[0];
+        assert(t != NULL);
+        t->status = RUNNABLE;
+        for (size_t i = 0; i < sem->queue_cnt - 1; i++) {
             sem->queue[i] = sem->queue[i+1];
         }
-        sem->queue[i] = NULL;
-        sem->queue_cnt--;
+        sem->queue[--sem->queue_cnt] = NULL;
     }
-    kmt->spin_unlock(&(sem->lk));
+    kmt->spin_unlock(&sem->lk);
+
 }
 
 // static void kmt_sem_init(sem_t *sem, const char *name, int value)
