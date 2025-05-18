@@ -36,6 +36,8 @@ void kmt_spin_lock(spinlock_t *lk)
     while (atomic_xchg(&lk->status, 1))
     {
         x++;
+        if(x == 10000000)
+            printf("lk->name::%s\n",lk->name);
         assert(x < 100000000);
     }
     lk->cpu = cpu_current();
