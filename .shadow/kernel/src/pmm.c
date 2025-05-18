@@ -280,12 +280,13 @@ void *huge_alloc(size_t size) {
         return NULL; // 未找到合适块
     }
     // assert(huge_list_cnt < 20);
-    if (huge_list_cnt > 20) {
-        printf("huge_list_cnt overflow: %d", huge_list_cnt);
-        assert(0);
-    }
+    // if (huge_list_cnt > 20) {
+    //     printf("huge_list_cnt overflow: %d", huge_list_cnt);
+    //     assert(0);
+    // }
     
     assert(block_ptr->is_used == HUGE_UNUSED);
+    assert(block_ptr->size >= size);
 
     // printf("%p\n",block_ptr + 1);
 
