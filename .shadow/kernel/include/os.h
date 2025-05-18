@@ -11,7 +11,7 @@
 #include <klib.h>
 #include <klib-macros.h>
 
-#define TASK_NUM_MAX 40
+#define TASK_NUM_MAX 20
 #define CPU_NUM_MAX 4
 
 #define MAX_HANDLERS_PER_EVENT  256
@@ -46,12 +46,11 @@ struct spinlock
     // bool irq_enble;          // origin int is enable?
 };
 
-typedef struct semaphore
+struct semaphore
 {
-    int count;
-    char name[20];
-    struct spinlock lock;
-    // task_t* pool[64];//等待队列线程池
-    int l;//等待队列头
-    int r;//等待队列尾
-}semaphore;
+    const char* name;
+    int value;
+    struct spinlock lk;
+    struct task *queue[SEM_QUEUE_MAX];
+    int queue_cnt;
+};
