@@ -74,7 +74,19 @@ void kmt_sem_wait(sem_t *sem)
         // printf("innnn\n");
 
         task_t *curr = task_current[cpu_current()];
-        sem->queue[sem->queue_cnt++] = curr;
+        // sem->queue[sem->queue_cnt++] = curr;
+
+        bool already_waiting = false;
+        for (int i = 0; i < sem->queue_cnt; i++) {
+            if (sem->queue[i] == curr) {
+                already_waiting = true;
+                break;
+            }
+        }
+        if (!already_waiting) {
+            sem->queue[sem->queue_cnt++] = curr;
+        }
+
         curr->status = BLOCKED;
         kmt->spin_unlock(&sem->lk);
         assert( ienabled() == true);
