@@ -239,14 +239,14 @@ static void kmt_init(void)
     {
         if(i == 0 ) {
             task_current[i] = &idle_task;
-            (&idle_task)->status = RUNNING;
+            (&idle_task)->status = RUNNABLE;
             continue;
         }
         task_t *t = pmm->alloc(sizeof(task_t));
         assert(t != NULL);
         kmt->create(t,"_",idle_func,(void *)i);
         task_current[i] = t;
-        t->status = RUNNING;
+        t->status = RUNNABLE;
     }
 
     os->on_irq(INT_MIN, EVENT_NULL, kmt_context_save);
