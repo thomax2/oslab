@@ -41,7 +41,7 @@ struct spinlock
 {
     int status;
     int cpu;
-    char name[20];
+    const char *name;
     // int irq_dis_depth;      // disable int cnt
     // bool irq_enble;          // origin int is enable?
 };
