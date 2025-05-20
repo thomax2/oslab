@@ -77,7 +77,7 @@ static void os_run() {
 
 static Context *os_trap(Event ev, Context *context)
 {
-    // kmt->spin_lock(&trap_lk);
+    kmt->spin_lock(&trap_lk);
     Context *ret_ctx = NULL;    
     irq_handler_list *list = &irq_table;
     int cnt = list->cnt;
@@ -104,7 +104,7 @@ static Context *os_trap(Event ev, Context *context)
         }
     }
     panic_on(!ret_ctx, "return to NULL context");
-    // kmt->spin_unlock(&trap_lk);
+    kmt->spin_unlock(&trap_lk);
     return ret_ctx;
 }
 
