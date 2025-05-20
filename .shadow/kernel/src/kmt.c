@@ -32,6 +32,7 @@ void kmt_spin_lock(spinlock_t *lk)
         iset(false);
     }
     irq_dis_depth[cpu_current()] ++;
+    printf("LOCK: cpu=%d, irq_dis_depth=%d\n", cpu_current(), irq_dis_depth[cpu_current()]);
 
     size_t x= 0;
     while (atomic_xchg(&lk->status, 1))
