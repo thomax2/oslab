@@ -191,7 +191,7 @@ void kmt_sem_signal(sem_t *sem)
         printf("ssign::%s ",sem->queue[0]->name);
         // size_t i = 0;
         for (size_t i = 0; i < sem->queue_cnt - 1; i++) {
-            printf("sign::%s ",sem->queue[i+1]->name);
+            printf("sign::%s %s",sem->queue[i+1]->name,sem->name);
 
             sem->queue[i] = sem->queue[i + 1];
         }
