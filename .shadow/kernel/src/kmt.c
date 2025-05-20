@@ -120,8 +120,8 @@ static void kmt_spin_lock(spinlock_t *lk)
 
     for(volatile int i=0;i<10000;++i);
     push_off(); // disable interrupts to avoid deadlock.
-    // printf("[LOCK ] Trying to acquire lock '%s' on CPU #%d (irq_dis_depth=%d) %d\n",
-    //     lk->name, cpu_current(), cpus[cpu_current()].noff,ienabled());
+    printf("[LOCK ] Trying to acquire lock '%s' on CPU #%d (irq_dis_depth=%d) %d\n",
+        lk->name, cpu_current(), cpus[cpu_current()].noff,ienabled());
 
     #ifdef delock
     //printf("thread %s : %s , cpu's intena:%d  \n",_current->name ,lk->name,cpus[cpu_current()].intena);
@@ -139,8 +139,8 @@ static void kmt_spin_unlock(spinlock_t *lk)
     //printf("%s  unlock\n", lk->name);
     #endif
     pop_off();
-    // printf("[UNLCK] Released lock '%s' on CPU #%d (irq_dis_depth=%d) %d\n",
-    //     lk->name, cpu_current(), cpus[cpu_current()].noff,ienabled());
+    printf("[UNLCK] Released lock '%s' on CPU #%d (irq_dis_depth=%d) %d\n",
+        lk->name, cpu_current(), cpus[cpu_current()].noff,ienabled());
 
 }
 
