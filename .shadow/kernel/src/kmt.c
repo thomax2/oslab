@@ -315,6 +315,7 @@ void idle_clean_func(void *arg)
         // }
         // kmt->spin_unlock(&task_lk);
         yield();
+        asm volatile("pause"); 
     }
 }
 
