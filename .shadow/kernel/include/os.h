@@ -37,19 +37,19 @@ struct task
     uint8_t     stack[4096*2];
 };
 
-struct spinlock
-{
-    int lock;
-    int cpu;
-    char name[20];
-};
-
 // struct spinlock
 // {
-//     int status;
+//     int lock;
 //     int cpu;
-//     const char *name;
+//     char name[20];
 // };
+
+struct spinlock
+{
+    int status;
+    int cpu;
+    const char *name;
+};
 
 typedef struct semaphore
 {
