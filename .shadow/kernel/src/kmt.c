@@ -348,7 +348,7 @@ static void kmt_init(void)
     
 
     // idle task
-    kmt->create(&idle_task, "idle", idle_clean_func, NULL);
+    kmt->create(&idle_task, "idle", NULL, NULL);
 
 
     for (size_t i = 0; i < cpu_count(); i++)
