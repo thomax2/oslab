@@ -120,8 +120,8 @@ static void kmt_spin_lock(spinlock_t *lk)
 
     for(volatile int i=0;i<10000;++i);
     push_off(); // disable interrupts to avoid deadlock.
-    printf("[LOCK ] Trying to acquire lock '%s' on CPU #%d (irq_dis_depth=%d)\n",
-        lk->name, cpu_current(), cpus[cpu_current()].noff);
+    // printf("[LOCK ] Trying to acquire lock '%s' on CPU #%d (irq_dis_depth=%d)\n",
+    //     lk->name, cpu_current(), cpus[cpu_current()].noff);
 
     #ifdef delock
     //printf("thread %s : %s , cpu's intena:%d  \n",_current->name ,lk->name,cpus[cpu_current()].intena);
@@ -139,8 +139,8 @@ static void kmt_spin_unlock(spinlock_t *lk)
     //printf("%s  unlock\n", lk->name);
     #endif
     pop_off();
-    printf("[UNLCK] Released lock '%s' on CPU #%d (irq_dis_depth=%d)\n",
-        lk->name, cpu_current(), cpus[cpu_current()].noff);
+    // printf("[UNLCK] Released lock '%s' on CPU #%d (irq_dis_depth=%d)\n",
+    //     lk->name, cpu_current(), cpus[cpu_current()].noff);
 
 }
 
@@ -248,10 +248,10 @@ static Context *kmt_schedule(Event ev, Context *ctx)
     int runnable_cnt = 0;
 
     for (size_t i = 0; i < TASK_NUM_MAX; i++) {
-        printf("[TASK ] tid=%d name=%s status=%d\n",
-            task_lib[i]->tid,
-            task_lib[i]->name ? task_lib[i]->name : "(null)",
-            task_lib[i]->status);
+        // printf("[TASK ] tid=%d name=%s status=%d\n",
+        //     task_lib[i]->tid,
+        //     task_lib[i]->name ? task_lib[i]->name : "(null)",
+        //     task_lib[i]->status);
 
         if (task_lib[i] != NULL && task_lib[i]->status == RUNNABLE) {
             runnable_tasks[runnable_cnt++] = task_lib[i];
