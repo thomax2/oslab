@@ -202,8 +202,8 @@ void kmt_sem_wait(sem_t *sem)
         kmt->spin_unlock(&(sem->lock));
         if(!succ)
 		{
-            if(ienabled())
-                yield();
+            // if(ienabled())
+            //     yield();
         }
   }
 }
