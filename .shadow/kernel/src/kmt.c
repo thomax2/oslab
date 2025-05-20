@@ -98,7 +98,7 @@ static void pop_off()
     int c = cpu_current();
     assert(cpus[c].noff >= 1);
     cpus[c].noff--;
-    if (cpus[c].noff == 0 && cpus[c].intena == true)
+    if (cpus[c].noff == 0)
     {
         iset(true);
     }
@@ -313,9 +313,6 @@ void idle_clean_func(void *arg)
 
 static void kmt_init(void)
 {
-    os->on_irq(INT_MIN, EVENT_NULL, kmt_context_save);
-    os->on_irq(INT_MAX, EVENT_NULL, kmt_schedule);
-
     kmt->spin_init(&task_lk, "task_lk");
     kmt->spin_init(&trap_lk, "trap_lk");
 
@@ -323,7 +320,6 @@ static void kmt_init(void)
         
     // }
     
-    iset(true);
 
     // idle task
     kmt->create(&idle_task, "idle", idle_clean_func, NULL);
@@ -349,6 +345,8 @@ static void kmt_init(void)
     }
     
 
+    os->on_irq(INT_MIN, EVENT_NULL, kmt_context_save);
+    os->on_irq(INT_MAX, EVENT_NULL, kmt_schedule);
     return;
 }
 
