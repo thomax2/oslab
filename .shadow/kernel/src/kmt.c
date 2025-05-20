@@ -31,6 +31,7 @@ void kmt_spin_lock(spinlock_t *lk)
         irq_enble[cpu_current()] = ienabled();
         iset(false);
     }
+    iset(false);
     irq_dis_depth[cpu_current()] ++;
 
     printf("[LOCK ] Trying to acquire lock '%s' on CPU #%d (irq_dis_depth=%d)\n",
