@@ -31,6 +31,7 @@ void kmt_spin_lock(spinlock_t *lk)
         irq_enble[cpu_current()] = ienabled();
         iset(false);
     }
+    iset(false);
     irq_dis_depth[cpu_current()] ++;
 
     size_t x= 0;
@@ -49,8 +50,8 @@ void kmt_spin_lock(spinlock_t *lk)
         // assert(x < 100000000);
         // task_current[cpu_current()]->status = BLOCKED;
     }
-    printf("[LOCK ] Trying to acquire lock '%s' on CPU #%d (irq_dis_depth=%d)  %d\n",
-        lk->name, cpu_current(), irq_dis_depth[cpu_current()],ienabled());
+    printf("[LOCK ] Trying to acquire lock '%s' on CPU #%d (irq_dis_depth=%d)\n",
+        lk->name, cpu_current(), irq_dis_depth[cpu_current()]);
 
     lk->cpu = cpu_current();
 
@@ -61,13 +62,13 @@ void kmt_spin_unlock(spinlock_t *lk)
 {
     assert(lk->status == 1);
     // assert(lk->cpu == cpu_current());
+    printf("[UNLCK] Released lock '%s' on CPU #%d (irq_dis_depth=%d)\n",
+        lk->name, cpu_current(), irq_dis_depth[cpu_current()]);
+
     lk->cpu = -1;
     atomic_xchg(&lk->status,0);
     irq_dis_depth[cpu_current()] --;
-    printf("[UNLCK] Released lock '%s' on CPU #%d (irq_dis_depth=%d)  %d\n",
-        lk->name, cpu_current(), irq_dis_depth[cpu_current()],ienabled());
-
-
+ 
         // task_current[cpu_current()]->status = BLOCKED;
     if(irq_dis_depth[cpu_current()] == 0 && irq_enble[cpu_current()]) {
         iset(true);
