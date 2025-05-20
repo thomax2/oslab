@@ -50,7 +50,7 @@ void kmt_spin_lock(spinlock_t *lk)
         //     task_current[lk->cpu] ? task_current[lk->cpu]->name : "(null)");
  
         // assert(x < 100000000);
-        task_current[cpu_current()]->status = BLOCKED;
+        // task_current[cpu_current()]->status = BLOCKED;
     }
     lk->cpu = cpu_current();
 
@@ -66,7 +66,7 @@ void kmt_spin_unlock(spinlock_t *lk)
  
     // printf("[UNLCK] Released lock '%s' on CPU #%d (irq_dis_depth=%d)\n",
         // lk->name, cpu_current(), irq_dis_depth[cpu_current()]);
-
+        // task_current[cpu_current()]->status = BLOCKED;
     if(irq_dis_depth[cpu_current()] == 0 && irq_enble[cpu_current()]) {
         iset(true);
     }
