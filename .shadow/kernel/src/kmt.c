@@ -313,7 +313,7 @@ void idle_clean_func(void *arg)
 
 static void kmt_init(void)
 {
-
+    iset(true);
     kmt->spin_init(&task_lk, "task_lk");
     kmt->spin_init(&trap_lk, "trap_lk");
 
