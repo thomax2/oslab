@@ -131,7 +131,7 @@ static void kmt_spin_lock(spinlock_t *lk)
 }
 static void kmt_spin_unlock(spinlock_t *lk)
 {
-    // assert(lk->cpu == cpu_current());
+    assert(lk->cpu == cpu_current());
 
     atomic_xchg(&lk->lock, 0);
     lk->cpu=-1;
