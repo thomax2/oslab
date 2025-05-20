@@ -188,10 +188,14 @@ void kmt_sem_signal(sem_t *sem)
         assert(sem->queue[0] != NULL);
         assert(sem->queue[0]->status == BLOCKED);
         sem->queue[0]->status = RUNNABLE;
+        printf("ssign::%s ",sem->queue[0]->name);
         // size_t i = 0;
         for (size_t i = 0; i < sem->queue_cnt - 1; i++) {
+            printf("sign::%s ",sem->queue[i+1]->name);
+
             sem->queue[i] = sem->queue[i + 1];
         }
+        printf("\n");
         sem->queue[sem->queue_cnt - 1] = NULL; // 明确清空末尾
         sem->queue_cnt--;
     }
@@ -277,10 +281,10 @@ static Context *kmt_schedule(Event ev, Context *ctx)
     task_t *next = runnable_tasks[idx];
     next->status = RUNNING;
     task_current[cpu_current()] = next;
-    for (int i = 0; i < runnable_cnt; i++) {
-        printf("%s ", runnable_tasks[i]->name);
-    }
-    printf("\nSelected: %s\n", next->name);
+    // for (int i = 0; i < runnable_cnt; i++) {
+    //     printf("%s ", runnable_tasks[i]->name);
+    // }
+    // printf("\nSelected: %s\n", next->name);
     
     kmt->spin_unlock(&task_lk);
     return &next->context;
