@@ -159,6 +159,8 @@ void kmt_sem_wait(sem_t *sem)
 {
     bool need_block = false;
     kmt->spin_lock(&sem->lk); // 获得自旋锁
+    assert(!ienabled()); // 禁止中断调用
+
     sem->value--; // 自旋锁保证原子性
     // printf("innnnn %d %s\n",sem->value,sem->name);
     if (sem->value < 0) {
