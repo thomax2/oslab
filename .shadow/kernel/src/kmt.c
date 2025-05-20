@@ -215,8 +215,8 @@ void kmt_sem_wait(sem_t *sem)
         kmt->spin_unlock(&(sem->lock));
         if(!succ)
 		{
-            // if(ienabled())
-            //     yield();
+            if(ienabled())
+                yield();
         }
   }
 }
@@ -231,7 +231,7 @@ void kmt_sem_signal(sem_t *sem)
 static Context *kmt_context_save(Event ev, Context *ctx)
 {
     task_current[cpu_current()]->context = *ctx;
-    // if(task_current[cpu_current()]->status == RUNNING)
+    if(task_current[cpu_current()]->status == RUNNING)
         task_current[cpu_current()]->status = RUNNABLE;
     return NULL;
 }
