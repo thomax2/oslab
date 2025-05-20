@@ -157,20 +157,21 @@ void kmt_sem_init(sem_t *sem, const char *name, int value)
 
 void kmt_sem_wait(sem_t *sem)
 {
+    bool need_block = false;
     kmt->spin_lock(&sem->lk); // 获得自旋锁
     sem->value--; // 自旋锁保证原子性
     // printf("innnnn %d %s\n",sem->value,sem->name);
     if (sem->value < 0) {
-        // printf("innnn\n");
-
         task_t *curr = task_current[cpu_current()];
         sem->queue[sem->queue_cnt++] = curr;
         curr->status = BLOCKED;
-        kmt->spin_unlock(&sem->lk);
+        // yield();  // 必须立即 yield，不能继续执行
+        need_block = true;
+    }
+    kmt->spin_unlock(&sem->lk);
+    if(need_block) {
         assert( ienabled() == true);
-        yield();  // 必须立即 yield，不能继续执行
-    } else {
-        kmt->spin_unlock(&sem->lk);
+        yield();
     }
 }
 
@@ -249,10 +250,10 @@ static Context *kmt_schedule(Event ev, Context *ctx)
     int runnable_cnt = 0;
 
     for (size_t i = 0; i < TASK_NUM_MAX; i++) {
-        printf("[TASK ] tid=%d name=%s status=%d\n",
-            task_lib[i]->tid,
-            task_lib[i]->name ? task_lib[i]->name : "(null)",
-            task_lib[i]->status);
+        // printf("[TASK ] tid=%d name=%s status=%d\n",
+        //     task_lib[i]->tid,
+        //     task_lib[i]->name ? task_lib[i]->name : "(null)",
+        //     task_lib[i]->status);
 
         if (task_lib[i] != NULL && task_lib[i]->status == RUNNABLE) {
             runnable_tasks[runnable_cnt++] = task_lib[i];
