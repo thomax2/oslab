@@ -62,8 +62,6 @@ void kmt_spin_unlock(spinlock_t *lk)
     assert(lk->cpu == cpu_current());
     atomic_xchg(&lk->status,0);
     irq_dis_depth[cpu_current()] --;
-    printf("LOCK status:%d cpu:%d curr:%d name:%s\n", 
-        lk->status, lk->cpu, cpu_current(), lk->name);
  
     printf("[UNLCK] Released lock '%s' on CPU #%d (irq_dis_depth=%d)\n",
         lk->name, cpu_current(), irq_dis_depth[cpu_current()]);
