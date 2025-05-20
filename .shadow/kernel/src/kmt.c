@@ -98,7 +98,7 @@ static void pop_off()
     int c = cpu_current();
     assert(cpus[c].noff >= 1);
     cpus[c].noff--;
-    if (cpus[c].noff == 0 && cpus[c].intena == true)
+    if (cpus[c].noff == 0)
     {
         iset(true);
     }
