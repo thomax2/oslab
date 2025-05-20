@@ -19,7 +19,7 @@
 #define INT_MIN -1
 #define INT_MAX MAX_HANDLERS_PER_EVENT
 
-#define SEM_QUEUE_MAX 10
+#define SEM_QUEUE_MAX 20
 
 typedef enum {
     RUNNING=0,

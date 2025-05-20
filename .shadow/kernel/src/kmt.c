@@ -163,6 +163,9 @@ void kmt_sem_wait(sem_t *sem)
     // printf("innnnn %d %s\n",sem->value,sem->name);
     if (sem->value < 0) {
         task_t *curr = task_current[cpu_current()];
+        if (sem->queue_cnt >= SEM_QUEUE_MAX) {
+            panic("Semaphore queue overflow!");
+        }
         sem->queue[sem->queue_cnt++] = curr;
         curr->status = BLOCKED;
         // yield();  // 必须立即 yield，不能继续执行
@@ -183,12 +186,11 @@ void kmt_sem_signal(sem_t *sem)
         assert(sem->queue[0] != NULL);
         assert(sem->queue[0]->status == BLOCKED);
         sem->queue[0]->status = RUNNABLE;
-        size_t i = 0;
-        for (; i < sem->queue_cnt - 1; i++) {
-            assert(sem->queue[i] != NULL);
-            sem->queue[i] = sem->queue[i+1];
+        // size_t i = 0;
+        for (size_t i = 0; i < sem->queue_cnt - 1; i++) {
+            sem->queue[i] = sem->queue[i + 1];
         }
-        sem->queue[i] = NULL;
+        sem->queue[sem->queue_cnt - 1] = NULL; // 明确清空末尾
         sem->queue_cnt--;
     }
     kmt->spin_unlock(&(sem->lk));    
