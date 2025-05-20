@@ -229,8 +229,7 @@ static Context *kmt_schedule(Event ev, Context *ctx)
                 able_cnt++;
         }
     }
-    // printf("task_cnt::%d\n",task_cnt);
-    // printf("able_cnt::%d\n",able_cnt);
+
     assert(able_cnt != 0);
     int c = rand()%able_cnt + 1;
     // printf("chose%d\n", c);
