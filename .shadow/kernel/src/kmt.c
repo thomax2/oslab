@@ -113,8 +113,8 @@ static void kmt_spin_lock(spinlock_t *lk)
 {
     while (atomic_xchg(&lk->lock, 1) != 0)
     {
-        if(ienabled())
-            yield();
+        // if(ienabled())
+        //     yield();
     }
 
 
