@@ -313,6 +313,9 @@ void idle_clean_func(void *arg)
 
 static void kmt_init(void)
 {
+    os->on_irq(INT_MIN, EVENT_NULL, kmt_context_save);
+    os->on_irq(INT_MAX, EVENT_NULL, kmt_schedule);
+
     kmt->spin_init(&task_lk, "task_lk");
     kmt->spin_init(&trap_lk, "trap_lk");
 
@@ -346,8 +349,6 @@ static void kmt_init(void)
     }
     
 
-    os->on_irq(INT_MIN, EVENT_NULL, kmt_context_save);
-    os->on_irq(INT_MAX, EVENT_NULL, kmt_schedule);
     return;
 }
 
