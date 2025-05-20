@@ -62,6 +62,7 @@ void kmt_spin_unlock(spinlock_t *lk)
 {
     assert(lk->status == 1);
     assert(lk->cpu == cpu_current());
+    lk->cpu = -1;
     atomic_xchg(&lk->status,0);
     irq_dis_depth[cpu_current()] --;
  
