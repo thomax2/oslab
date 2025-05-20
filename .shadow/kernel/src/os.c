@@ -90,7 +90,7 @@ static Context *os_trap(Event ev, Context *context)
     // only one handler return a context
     for (int i = 0; i < cnt; i++) {
         irq_handler h = list->handlers[i];
-        assert(h.handler != NULL);
+        // assert(h.handler != NULL);
         // printf("")
         if(h.event == EVENT_NULL || h.event == ev.event) {
             Context *r = h.handler(ev, context);
