@@ -98,8 +98,9 @@ static void pop_off()
     int c = cpu_current();
     assert(cpus[c].noff >= 1);
     cpus[c].noff--;
-    if (cpus[c].noff == 0)
+    if (cpus[c].noff == 0 && cpus[c].intena == true)
     {
+        printf("ineddddd\n");
         iset(true);
     }
 }
