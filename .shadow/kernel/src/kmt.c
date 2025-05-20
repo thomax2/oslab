@@ -314,7 +314,17 @@ void idle_clean_func(void *arg)
 
 static void kmt_init(void)
 {
-
+    for (size_t i = 0; i < 4; i++)
+    {
+        task_current[i] = NULL;
+        cpus[i].noff = 0;
+        cpus[i].intena = 0;
+    }
+    for (size_t i = 0; i < TASK_NUM_MAX; i++)
+    {
+        task_lib[i] = NULL;
+    }
+    
     kmt->spin_init(&task_lk, "task_lk");
     kmt->spin_init(&trap_lk, "trap_lk");
 
