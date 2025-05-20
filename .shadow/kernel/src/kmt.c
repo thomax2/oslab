@@ -98,7 +98,7 @@ static void pop_off()
     int c = cpu_current();
     assert(cpus[c].noff >= 1);
     cpus[c].noff--;
-    if (cpus[c].noff == 0)
+    if (cpus[c].noff == 0 && cpus[c].intena == true)
     {
         iset(true);
     }
@@ -313,6 +313,7 @@ void idle_clean_func(void *arg)
 
 static void kmt_init(void)
 {
+
     kmt->spin_init(&task_lk, "task_lk");
     kmt->spin_init(&trap_lk, "trap_lk");
 
