@@ -79,6 +79,7 @@ static void os_run() {
 
 static Context *os_trap(Event ev, Context *context)
 {
+    iset(false);
     kmt->spin_lock(&trap_lk);
     Context *ret_ctx = NULL;    
     irq_handler_list *list = &irq_table;
@@ -110,6 +111,7 @@ static Context *os_trap(Event ev, Context *context)
     }
     panic_on(!ret_ctx, "return to NULL context");
     kmt->spin_unlock(&trap_lk);
+    iset(true);
     return ret_ctx;
 }
 
