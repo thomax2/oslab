@@ -167,6 +167,11 @@ void kmt_sem_signal(sem_t *sem)
         sem->queue_cnt--;
     }
     kmt->spin_unlock(&(sem->lk));
+    if (ienabled() == true)
+    {
+        yield();
+    }
+    
 }
 
 // static void kmt_sem_init(sem_t *sem, const char *name, int value)
