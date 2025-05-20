@@ -116,12 +116,13 @@ static void kmt_spin_lock(spinlock_t *lk)
         if(ienabled())
             yield();
     }
-        printf("[LOCK ] Trying to acquire lock '%s' on CPU #%d (irq_dis_depth=%d)\n",
-        lk->name, cpu_current(), cpus[cpu_current()].noff);
 
 
     for(volatile int i=0;i<10000;++i);
     push_off(); // disable interrupts to avoid deadlock.
+    printf("[LOCK ] Trying to acquire lock '%s' on CPU #%d (irq_dis_depth=%d)\n",
+        lk->name, cpu_current(), cpus[cpu_current()].noff);
+
     #ifdef delock
     //printf("thread %s : %s , cpu's intena:%d  \n",_current->name ,lk->name,cpus[cpu_current()].intena);
     //printf("thread %s : %s \n",_current->name ,lk->name);
@@ -131,8 +132,6 @@ static void kmt_spin_lock(spinlock_t *lk)
 static void kmt_spin_unlock(spinlock_t *lk)
 {
     assert(lk->cpu == cpu_current());
-        printf("[UNLCK] Released lock '%s' on CPU #%d (irq_dis_depth=%d)\n",
-        lk->name, cpu_current(), cpus[cpu_current()].noff);
 
     atomic_xchg(&lk->lock, 0);
     lk->cpu=-1;
@@ -140,6 +139,9 @@ static void kmt_spin_unlock(spinlock_t *lk)
     //printf("%s  unlock\n", lk->name);
     #endif
     pop_off();
+    printf("[UNLCK] Released lock '%s' on CPU #%d (irq_dis_depth=%d)\n",
+        lk->name, cpu_current(), cpus[cpu_current()].noff);
+
 }
 
 
