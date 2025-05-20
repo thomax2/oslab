@@ -228,29 +228,38 @@ static Context *kmt_context_save(Event ev, Context *ctx)
 // no choose blocked
 static Context *kmt_schedule(Event ev, Context *ctx)
 {
-    // printf("sec\n");
     kmt->spin_lock(&task_lk);
-
-    // 构建一个 RUNNABLE 任务列表
-    task_t *runnable_tasks[TASK_NUM_MAX];
-    int runnable_cnt = 0;
-
-    for (size_t i = 0; i < TASK_NUM_MAX; i++) {
-        if (task_lib[i] != NULL && task_lib[i]->status == RUNNABLE) {
-            runnable_tasks[runnable_cnt++] = task_lib[i];
+    int task_cnt = 0;
+    int able_cnt = 0;
+    for (size_t i = 0; i < TASK_NUM_MAX && task_cnt < tid_cnt; i++) {
+        if(task_lib[i] != NULL) {
+            task_cnt ++;
+            if(task_lib[i]->status == RUNNABLE)
+                able_cnt++;
         }
     }
+    // printf("task_cnt::%d\n",task_cnt);
+    // printf("able_cnt::%d\n",able_cnt);
+    assert(able_cnt != 0);
+    int c = rand()%able_cnt + 1;
+    // printf("chose%d\n", c);
+    for (size_t i = 0; i < TASK_NUM_MAX; i++) {
+        if(task_lib[i] != NULL) {
+            if(task_lib[i]->status == RUNNABLE) {
+                c--;
+                if(c == 0) {
+                    // printf("name:%s\n",task_lib[i]->name);
+                    task_lib[i]->status = RUNNING;
+                    task_current[cpu_current()] = task_lib[i];
+                    kmt->spin_unlock(&task_lk);
+                    return &(task_lib[i]->context);
+                }
+            }
+        }
+    }
+    assert(0);
+    return NULL;
 
-    assert(runnable_cnt > 0); // 至少应有一个可运行任务
-
-    // 随机选择一个 RUNNABLE 任务
-    int idx = rand() % runnable_cnt;
-    task_t *next = runnable_tasks[idx];
-    next->status = RUNNING;
-    task_current[cpu_current()] = next;
-
-    kmt->spin_unlock(&task_lk);
-    return &next->context;
 
 }
 
