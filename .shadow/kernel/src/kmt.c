@@ -62,13 +62,13 @@ void kmt_spin_unlock(spinlock_t *lk)
 {
     assert(lk->status == 1);
     // assert(lk->cpu == cpu_current());
-    printf("[UNLCK] Released lock '%s' on CPU #%d (irq_dis_depth=%d)  %d\n",
-        lk->name, cpu_current(), irq_dis_depth[cpu_current()],ienabled());
-
     lk->cpu = -1;
     atomic_xchg(&lk->status,0);
     irq_dis_depth[cpu_current()] --;
- 
+    printf("[UNLCK] Released lock '%s' on CPU #%d (irq_dis_depth=%d)  %d\n",
+        lk->name, cpu_current(), irq_dis_depth[cpu_current()],ienabled());
+
+
         // task_current[cpu_current()]->status = BLOCKED;
     if(irq_dis_depth[cpu_current()] == 0 && irq_enble[cpu_current()]) {
         iset(true);
