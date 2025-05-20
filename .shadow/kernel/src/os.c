@@ -113,6 +113,7 @@ static Context *os_trap(Event ev, Context *context)
 static void os_on_irq(int seq, int event, handler_t handler)
 {
     assert(seq != 2);
+    assert(handler != NULL);
     irq_handler_list *list = &irq_table;
     
     assert(list->cnt <  MAX_HANDLERS_PER_EVENT);
