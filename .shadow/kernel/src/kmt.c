@@ -31,7 +31,6 @@ void kmt_spin_lock(spinlock_t *lk)
         irq_enble[cpu_current()] = ienabled();
         iset(false);
     }
-    iset(false);
     irq_dis_depth[cpu_current()] ++;
 
     size_t x= 0;
