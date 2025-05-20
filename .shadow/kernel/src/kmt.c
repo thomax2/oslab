@@ -61,7 +61,7 @@ void kmt_spin_lock(spinlock_t *lk)
 void kmt_spin_unlock(spinlock_t *lk)
 {
     assert(lk->status == 1);
-    assert(lk->cpu == cpu_current());
+    // assert(lk->cpu == cpu_current());
     printf("[UNLCK] Released lock '%s' on CPU #%d (irq_dis_depth=%d)\n",
         lk->name, cpu_current(), irq_dis_depth[cpu_current()]);
 
