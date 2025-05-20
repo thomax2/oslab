@@ -40,6 +40,8 @@ static inline task_t *task_alloc() {
 }
 
 static void os_init() {
+    irq_table.cnt = 0;
+    memset(irq_table.handlers, 0, sizeof(irq_table.handlers));
     pmm->init();
     kmt->init();    
     // printf("kmt init success\n");
@@ -91,8 +93,8 @@ static Context *os_trap(Event ev, Context *context)
     for (int i = 0; i < cnt; i++) {
         irq_handler h = list->handlers[i];
         // assert(h.handler != NULL);
-        if(h.handler == NULL)
-            printf("waaaaaaa %d %d\n",cnt,h.seq);
+        // if(h.handler == NULL)
+        //     printf("waaaaaaa %d %d\n",cnt,h.seq);
         // printf("jjjjjjjj%d\n",h.seq);
         if(h.event == EVENT_NULL || h.event == ev.event) {
             Context *r = h.handler(ev, context);
