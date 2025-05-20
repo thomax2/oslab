@@ -277,10 +277,10 @@ static Context *kmt_schedule(Event ev, Context *ctx)
     task_t *next = runnable_tasks[idx];
     next->status = RUNNING;
     task_current[cpu_current()] = next;
-    // for (int i = 0; i < runnable_cnt; i++) {
-    //     printf("%s ", runnable_tasks[i]->name);
-    // }
-    // printf("\nSelected: %s\n", next->name);
+    for (int i = 0; i < runnable_cnt; i++) {
+        printf("%s ", runnable_tasks[i]->name);
+    }
+    printf("\nSelected: %s\n", next->name);
     
     kmt->spin_unlock(&task_lk);
     return &next->context;
