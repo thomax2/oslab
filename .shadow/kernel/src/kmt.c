@@ -100,7 +100,6 @@ static void pop_off()
     cpus[c].noff--;
     if (cpus[c].noff == 0 && cpus[c].intena == true)
     {
-        printf("ineddddd\n");
         iset(true);
     }
 }
