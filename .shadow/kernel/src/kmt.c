@@ -185,6 +185,7 @@ void kmt_sem_signal(sem_t *sem)
         sem->queue[0]->status = RUNNABLE;
         size_t i = 0;
         for (; i < sem->queue_cnt - 1; i++) {
+            assert(sem->queue[i] != NULL);
             sem->queue[i] = sem->queue[i+1];
         }
         sem->queue[i] = NULL;
