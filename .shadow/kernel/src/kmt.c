@@ -38,8 +38,8 @@ void kmt_spin_lock(spinlock_t *lk)
     size_t x= 0;
     while (atomic_xchg(&lk->status, 1))
     {
-        if(ienabled())
-            yield();
+        // if(ienabled())
+        //     yield();
         x++;
         // if(x == 10000000)
         // printf("lk->name::%s try by %s, held by CPU %d, task %s\n",
