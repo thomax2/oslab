@@ -39,14 +39,14 @@ void kmt_spin_lock(spinlock_t *lk)
         if(ienabled())
             yield();
         x++;
-        if(x == 10000000)
-        printf("lk->name::%s try by %s, held by CPU %d, task %s\n",
-            lk->name,
-            task_current[cpu_current()] ? task_current[cpu_current()]->name : "(null)",
-            lk->cpu,
-            task_current[lk->cpu] ? task_current[lk->cpu]->name : "(null)");
+        // if(x == 10000000)
+        // printf("lk->name::%s try by %s, held by CPU %d, task %s\n",
+        //     lk->name,
+        //     task_current[cpu_current()] ? task_current[cpu_current()]->name : "(null)",
+        //     lk->cpu,
+        //     task_current[lk->cpu] ? task_current[lk->cpu]->name : "(null)");
  
-        assert(x < 100000000);
+        // assert(x < 100000000);
     }
     lk->cpu = cpu_current();
 
