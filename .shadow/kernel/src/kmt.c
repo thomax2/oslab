@@ -314,7 +314,7 @@ void idle_clean_func(void *arg)
         //     }
         // }
         // kmt->spin_unlock(&task_lk);
-        // yield();
+        yield();
     }
 }
 
@@ -348,7 +348,7 @@ static void kmt_init(void)
     
 
     // idle task
-    kmt->create(&idle_task, "idle", NULL, NULL);
+    kmt->create(&idle_task, "idle", idle_clean_func, NULL);
 
 
     for (size_t i = 0; i < cpu_count(); i++)
