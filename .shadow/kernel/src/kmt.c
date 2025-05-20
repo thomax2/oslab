@@ -247,27 +247,32 @@ static Context *kmt_context_save(Event ev, Context *ctx)
 // no choose blocked
 static Context *kmt_schedule(Event ev, Context *ctx)
 {
-    // printf("sec\n");
     kmt->spin_lock(&task_lk);
+    
+    task_t *curr = task_current[cpu_current()];
+    if (curr != NULL && curr->status == RUNNING) {
+        curr->status = RUNNABLE;  // 确保当前任务状态更新
+    }
 
-    // 构建一个 RUNNABLE 任务列表
+    // 构建 RUNNABLE 任务列表（排除当前任务）
     task_t *runnable_tasks[TASK_NUM_MAX];
     int runnable_cnt = 0;
-
     for (size_t i = 0; i < TASK_NUM_MAX; i++) {
-        // printf("[TASK ] tid=%d name=%s status=%d\n",
-        //     task_lib[i]->tid,
-        //     task_lib[i]->name ? task_lib[i]->name : "(null)",
-        //     task_lib[i]->status);
-
-        if (task_lib[i] != NULL && task_lib[i]->status == RUNNABLE) {
+        if (task_lib[i] != NULL && 
+            task_lib[i]->status == RUNNABLE && 
+            task_lib[i] != curr) {  // 排除当前任务
             runnable_tasks[runnable_cnt++] = task_lib[i];
         }
     }
 
-    assert(runnable_cnt > 0); // 至少应有一个可运行任务
+    // 若没有其他任务，允许继续运行当前任务（如果有）
+    if (runnable_cnt == 0 && curr != NULL && curr->status == RUNNABLE) {
+        runnable_tasks[runnable_cnt++] = curr;
+    }
 
-    // 随机选择一个 RUNNABLE 任务
+    assert(runnable_cnt > 0);
+
+    // 随机选择下一个任务
     int idx = rand() % runnable_cnt;
     task_t *next = runnable_tasks[idx];
     next->status = RUNNING;
@@ -275,7 +280,6 @@ static Context *kmt_schedule(Event ev, Context *ctx)
 
     kmt->spin_unlock(&task_lk);
     return &next->context;
-
 }
 
 task_t idle_task;
