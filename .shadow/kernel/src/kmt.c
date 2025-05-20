@@ -50,8 +50,8 @@ void kmt_spin_lock(spinlock_t *lk)
         // assert(x < 100000000);
         // task_current[cpu_current()]->status = BLOCKED;
     }
-    printf("[LOCK ] Trying to acquire lock '%s' on CPU #%d (irq_dis_depth=%d)\n",
-        lk->name, cpu_current(), irq_dis_depth[cpu_current()]);
+    printf("[LOCK ] Trying to acquire lock '%s' on CPU #%d (irq_dis_depth=%d)  %d\n",
+        lk->name, cpu_current(), irq_dis_depth[cpu_current()],ienabled());
 
     lk->cpu = cpu_current();
 
@@ -62,8 +62,8 @@ void kmt_spin_unlock(spinlock_t *lk)
 {
     assert(lk->status == 1);
     // assert(lk->cpu == cpu_current());
-    printf("[UNLCK] Released lock '%s' on CPU #%d (irq_dis_depth=%d)\n",
-        lk->name, cpu_current(), irq_dis_depth[cpu_current()]);
+    printf("[UNLCK] Released lock '%s' on CPU #%d (irq_dis_depth=%d)  %d\n",
+        lk->name, cpu_current(), irq_dis_depth[cpu_current()],ienabled());
 
     lk->cpu = -1;
     atomic_xchg(&lk->status,0);
@@ -159,22 +159,18 @@ void kmt_sem_wait(sem_t *sem)
     kmt->spin_lock(&sem->lk); // 获得自旋锁
     sem->value--; // 自旋锁保证原子性
     // printf("innnnn %d %s\n",sem->value,sem->name);
-    while (sem->value < 0)
-    {
+    if (sem->value < 0) {
+        // printf("innnn\n");
+
         task_t *curr = task_current[cpu_current()];
         sem->queue[sem->queue_cnt++] = curr;
         curr->status = BLOCKED;
         kmt->spin_unlock(&sem->lk);
-        // if( ienabled() == true)
-        //     yield();  // 必须立即 yield，不能继续执行
+        assert( ienabled() == true);
+        yield();  // 必须立即 yield，不能继续执行
+    } else {
+        kmt->spin_unlock(&sem->lk);
     }
-    // if (sem->value < 0) {
-    //     // printf("innnn\n");
-
-    // } else {
-    //     kmt->spin_unlock(&sem->lk);
-    // }
-    kmt->spin_unlock(&sem->lk);
 }
 
 void kmt_sem_signal(sem_t *sem)
