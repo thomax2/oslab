@@ -262,6 +262,9 @@ static Context *kmt_schedule(Event ev, Context *ctx)
     task_t *runnable_tasks[TASK_NUM_MAX];
     int runnable_cnt = 0;
     for (size_t i = 0; i < TASK_NUM_MAX; i++) {
+        if (task_lib[i]) {
+            printf("Task %s: status=%d\n", task_lib[i]->name, task_lib[i]->status);
+        }
         if (task_lib[i] != NULL && 
             task_lib[i]->status == RUNNABLE && 
             task_lib[i] != curr) {  // 排除当前任务
