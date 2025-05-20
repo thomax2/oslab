@@ -165,8 +165,8 @@ void kmt_sem_wait(sem_t *sem)
         sem->queue[sem->queue_cnt++] = curr;
         curr->status = BLOCKED;
         kmt->spin_unlock(&sem->lk);
-        // if( ienabled() == true)
-        //     yield();  // 必须立即 yield，不能继续执行
+        if( ienabled() == true)
+            yield();  // 必须立即 yield，不能继续执行
     }
     // if (sem->value < 0) {
     //     // printf("innnn\n");
