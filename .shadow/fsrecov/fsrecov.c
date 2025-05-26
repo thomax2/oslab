@@ -97,6 +97,9 @@ int main(int argc, char *argv[]) {
     size_t clus_num = data_size / (hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec);
 
     printf("%d\n",(FirstDataSector + 1 * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec);
+    printf("SecPerClus : %d\n", hdr->BPB_SecPerClus);
+    printf("BytePerSec : %d\n", hdr->BPB_BytsPerSec);
+    printf("BytePerClus : %d\n", hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec);
 
     printf("%d\n", 0x3fB7 * hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec );
     // for (size_t i = 0; i < clus_num; i++) {
