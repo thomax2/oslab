@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
     // physical addr
     // (u8 *)hdr + FirstSectorofCluster*(hdr->BPB_BytsPerSec);
 
-    size_t data_size = (size_t)size - (FirstDataSector) * hdr->BPB_BytsPerSec + 1;
+    size_t data_size = (size_t)size - (FirstDataSector) * hdr->BPB_BytsPerSec;
 
     int clus_num = data_size / (hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec);
 
@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
     printf("BytePerSec : %d\n", hdr->BPB_BytsPerSec);
     printf("BytePerClus : %d\n", hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec);
     printf("clus_num: %d\n",clus_num);
-
+    printf("data_size: %d\n", data_size);
     // printf("%d\n", 0x3fB7 * hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec );
     printf("%d\n",(FirstDataSector + 0x3FDA * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec);
     // for (size_t i = 0; i < clus_num; i++) {
