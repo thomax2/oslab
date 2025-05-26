@@ -101,7 +101,8 @@ int main(int argc, char *argv[]) {
     printf("BytePerSec : %d\n", hdr->BPB_BytsPerSec);
     printf("BytePerClus : %d\n", hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec);
 
-    printf("%d\n", 0x3fB7 * hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec );
+    // printf("%d\n", 0x3fB7 * hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec );
+    printf("%d\n",(FirstDataSector + 0x63 * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec);
     // for (size_t i = 0; i < clus_num; i++) {
     //     u8 *addr = (u8 *)hdr + (FirstDataSector + i * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
     //     int type = cluster_classify(addr, hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec);
