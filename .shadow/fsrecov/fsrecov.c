@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
     printf("SecPerClus : %d\n", hdr->BPB_SecPerClus);
     printf("BytePerSec : %d\n", hdr->BPB_BytsPerSec);
     printf("BytePerClus : %d\n", hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec);
-    printf("clus_num: %ld\n",clus_num);
+    printf("clus_num: %d\n",clus_num);
 
     // printf("%d\n", 0x3fB7 * hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec );
     printf("%d\n",(FirstDataSector + 0x3FB6 * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec);
