@@ -27,7 +27,7 @@
     
 
 
-//     if(data[0] == 0x42 && data[1] == 0x4d && \
+//     if(data[0] == 0x42 && data[1] == 0x4d && 
 //          data[6] == 0 && data[7] == 0 && data[8] == 0 && data[9] == 0) { // head byte BM
 //         uint32_t bmp_size = *((uint32_t *)(data + 2));
 //         // one cluster not enough
