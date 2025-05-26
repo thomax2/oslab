@@ -8,42 +8,42 @@
 
 #define CLUS_EMPTY_SIZE 10
 
-int cluster_classify(u8 *data, size_t size)
-{
-    // dirct
-    // BMP head
-    // BMP body, one cluster not enough use more cluster
-    // cluster not use
-    u8 *clus_offset = data;
-    size_t i = 0;
-    for (; i < CLUS_EMPTY_SIZE; i++) {
-        uint32_t value = *((uint32_t *)(clus_offset));
-        if( value != 0 )
-            break;
-        clus_offset += 4;
-    }
-    if(i == CLUS_EMPTY_SIZE)
-        return 3;
+// int cluster_classify(u8 *data, size_t size)
+// {
+//     // dirct
+//     // BMP head
+//     // BMP body, one cluster not enough use more cluster
+//     // cluster not use
+//     u8 *clus_offset = data;
+//     size_t i = 0;
+//     for (; i < CLUS_EMPTY_SIZE; i++) {
+//         uint32_t value = *((uint32_t *)(clus_offset));
+//         if( value != 0 )
+//             break;
+//         clus_offset += 4;
+//     }
+//     if(i == CLUS_EMPTY_SIZE)
+//         return 3;
     
 
 
-    if(data[0] == 0x42 && data[1] == 0x4d && \
-         data[6] == 0 && data[7] == 0 && data[8] == 0 && data[9] == 0) { // head byte BM
-        uint32_t bmp_size = *((uint32_t *)(data + 2));
-        // one cluster not enough
-        if( bmp_size > size )
-            return 4;
-        return 1;
-    }
+//     if(data[0] == 0x42 && data[1] == 0x4d && \
+//          data[6] == 0 && data[7] == 0 && data[8] == 0 && data[9] == 0) { // head byte BM
+//         uint32_t bmp_size = *((uint32_t *)(data + 2));
+//         // one cluster not enough
+//         if( bmp_size > size )
+//             return 4;
+//         return 1;
+//     }
 
-    int bmp_count=0;
-    for(int i = 0; i < size; i += 32) {
-        struct fat32dent *dir_entry = (struct fat32dent *)(data + i);
+//     int bmp_count=0;
+//     for(int i = 0; i < size; i += 32) {
+//         struct fat32dent *dir_entry = (struct fat32dent *)(data + i);
 
-    }
+//     }
 
 
-}
+// }
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
