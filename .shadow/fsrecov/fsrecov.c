@@ -5,8 +5,10 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include "fat32.h"
+#include "lgraph.h"
 
 #define CLUS_EMPTY_SIZE 10
+
 
 // int cluster_classify(u8 *data, size_t size)
 // {
@@ -39,7 +41,20 @@
 //     int bmp_count=0;
 //     for(int i = 0; i < size; i += 32) {
 //         struct fat32dent *dir_entry = (struct fat32dent *)(data + i);
+//         if (dir_entry->DIR_Name[0] == 0x00 ||
+//             dir_entry->DIR_Name[0] == 0xe5 ||
+//             dir_entry->DIR_Attr & ATTR_HIDDEN)
+//             continue;
+//         if ( (dir_entry->DIR_Name[0] && 0x40 ) && dir_entry->DIR_Attr == 0x0F) { // is long name file
+//             int long_name_num = dir_entry->DIR_Name[0] & 0x0F;
+//             // struct fat32dent *long_dir_entry = dir_entry;
 
+//             for (int i = long_name_num-1; i >= 0; i--) {
+//                 struct fat32ldent *long_dir_entry = dir_entry + i;
+                
+//             }
+
+//         }
 //     }
 
 
@@ -100,6 +115,7 @@ int main(int argc, char *argv[]) {
     printf("SecPerClus : %d\n", hdr->BPB_SecPerClus);
     printf("BytePerSec : %d\n", hdr->BPB_BytsPerSec);
     printf("BytePerClus : %d\n", hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec);
+    printf("clus_num: %d\n",clus_num);
 
     // printf("%d\n", 0x3fB7 * hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec );
     printf("%d\n",(FirstDataSector + 0x3FB6 * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec);
