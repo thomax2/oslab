@@ -12,6 +12,7 @@ typedef uint32_t u32;
 typedef struct ClusterNode {
     u32 cluster_id;
     u8  type;
+    char name[25];
 }ClusterNode;
 
 

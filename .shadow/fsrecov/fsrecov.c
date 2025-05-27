@@ -9,6 +9,35 @@
 
 #define CLUS_EMPTY_SIZE 10
 
+// ClusterGraph *create_graph(int num)
+// {
+//     ClusterGraph *graph = (ClusterGraph *)malloc(sizeof(ClusterGraph));
+//     graph->cluster_num = num;
+//     ClusterNode *clusters = (ClusterNode *)malloc(sizeof(ClusterNode) * num);
+//     graph->clusters = clusters;
+//     memset(graph->clusters, 0, sizeof(ClusterNode) * num);
+//     for (int i = 0; i < num; i++) {
+//         graph->clusters->cluster_id = i + 1;
+//     }
+    
+
+//     ClusterEdge **adj_list = (ClusterEdge **)malloc(sizeof(ClusterEdge *) * num);
+//     for (int i = 0; i < num; i++) {
+//         adj_list[i] = NULL;
+//     }
+//     graph->adj_list = adj_list;
+//     return graph;
+// }
+
+// void add_edge(ClusterGraph *graph, u32 source, u32 target, double prob)
+// {
+//     ClusterEdge *newEdge = (ClusterEdge *)malloc(sizeof(ClusterEdge));
+//     newEdge->adj_id = target;
+//     newEdge->probability = prob;
+//     newEdge->next = graph->adj_list[source];  // head insert 
+//     graph->adj_list[source]->next = newEdge;
+//     return;
+// }
 
 // int cluster_classify(u8 *data, size_t size)
 // {
@@ -56,7 +85,6 @@
 
 //         }
 //     }
-
 
 // }
 
@@ -119,14 +147,15 @@ int main(int argc, char *argv[]) {
     printf("data_size: %d\n", data_size);
     printf("FirstDataSector: %d\n", FirstDataSector);
     // printf("%d\n", 0x3fB7 * hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec );
-    printf("%d\n",(FirstDataSector + 0x3FDA * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec);
+    printf("%d\n",(FirstDataSector + 0x3FB6 * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec);
     // for (size_t i = 0; i < clus_num; i++) {
     //     u8 *addr = (u8 *)hdr + (FirstDataSector + i * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
     //     int type = cluster_classify(addr, hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec);
     // }
     
-    // ClusterGraph *graph;
+    ClusterGraph *graph = create_graph(clus_num);
     // graph->cluster_num = clus_num;
+    
 
 
 }
