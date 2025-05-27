@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
     printf("data_size: %d\n", data_size);
     printf("FirstDataSector: %d\n", FirstDataSector);
     // printf("%d\n", 0x3fB7 * hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec );
-    printf("%d\n",(FirstDataSector + 0x3FB6 * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec);
+    printf("%d\n",(FirstDataSector + 0x3FDA * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec);
     // for (size_t i = 0; i < clus_num; i++) {
     //     u8 *addr = (u8 *)hdr + (FirstDataSector + i * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
     //     int type = cluster_classify(addr, hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec);
