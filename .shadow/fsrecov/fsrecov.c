@@ -153,7 +153,7 @@ int main(int argc, char *argv[]) {
     //     int type = cluster_classify(addr, hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec);
     // }
     
-    ClusterGraph *graph = create_graph(clus_num);
+    // ClusterGraph *graph = create_graph(clus_num);
     // graph->cluster_num = clus_num;
     
 
