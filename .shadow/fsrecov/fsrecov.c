@@ -4,20 +4,24 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <assert.h>
+#include <stdbool.h>
 #include "fat32.h"
 #include "lgraph.h"
 
 #define CLUS_EMPTY_SIZE 10
 
+// ClusterGraph *graph;
+
 // ClusterGraph *create_graph(int num)
 // {
-//     ClusterGraph *graph = (ClusterGraph *)malloc(sizeof(ClusterGraph));
-//     graph->cluster_num = num;
+//     ClusterGraph *new_graph = (ClusterGraph *)malloc(sizeof(ClusterGraph));
+//     new_graph->cluster_num = num;
 //     ClusterNode *clusters = (ClusterNode *)malloc(sizeof(ClusterNode) * num);
-//     graph->clusters = clusters;
-//     memset(graph->clusters, 0, sizeof(ClusterNode) * num);
+//     new_graph->clusters = clusters;
+//     memset(new_graph->clusters, 0, sizeof(ClusterNode) * num);
 //     for (int i = 0; i < num; i++) {
-//         graph->clusters->cluster_id = i + 1;
+//         new_graph->clusters[i].cluster_id = i + 2;
 //     }
     
 
@@ -25,11 +29,11 @@
 //     for (int i = 0; i < num; i++) {
 //         adj_list[i] = NULL;
 //     }
-//     graph->adj_list = adj_list;
-//     return graph;
+//     new_graph->adj_list = adj_list;
+//     return new_graph;
 // }
 
-// void add_edge(ClusterGraph *graph, u32 source, u32 target, double prob)
+// void add_edge(u32 source, u32 target, double prob)
 // {
 //     ClusterEdge *newEdge = (ClusterEdge *)malloc(sizeof(ClusterEdge));
 //     newEdge->adj_id = target;
@@ -39,11 +43,13 @@
 //     return;
 // }
 
-// int cluster_classify(u8 *data, size_t size)
+// int cluster_classify(u8 *data, size_t size, u32 cluster_num)
 // {
-//     // dirct
-//     // BMP head
+//     /*0. unknown    1. dict     2. BMP head one cluster enough     3. BMP head one cluster not enough
+//       4. BMP body   5. cluster not use*/
+
 //     // BMP body, one cluster not enough use more cluster
+    
 //     // cluster not use
 //     u8 *clus_offset = data;
 //     size_t i = 0;
@@ -54,19 +60,29 @@
 //         clus_offset += 4;
 //     }
 //     if(i == CLUS_EMPTY_SIZE)
-//         return 3;
+//     {
+//         graph->clusters[cluster_num].type = 5;
+//         return 5;
+//     }
     
 
-
+//     // BMP head
 //     if(data[0] == 0x42 && data[1] == 0x4d && 
 //          data[6] == 0 && data[7] == 0 && data[8] == 0 && data[9] == 0) { // head byte BM
 //         uint32_t bmp_size = *((uint32_t *)(data + 2));
 //         // one cluster not enough
 //         if( bmp_size > size )
-//             return 4;
-//         return 1;
+//         {
+//             graph->clusters[cluster_num].type = 3;
+//             return 3;
+//         }
+        
+//         graph->clusters[cluster_num].type = 2;
+//         return 2;
 //     }
 
+
+//     // dirct
 //     int bmp_count=0;
 //     for(int i = 0; i < size; i += 32) {
 //         struct fat32dent *dir_entry = (struct fat32dent *)(data + i);
@@ -76,14 +92,30 @@
 //             continue;
 //         if ( (dir_entry->DIR_Name[0] && 0x40 ) && dir_entry->DIR_Attr == 0x0F) { // is long name file
 //             int long_name_num = dir_entry->DIR_Name[0] & 0x0F;
+//             struct fat32dent *short_dir_entry = dir_entry + long_name_num;
+//             int bmp_num = short_dir_entry->DIR_FstClusLO - 2;
 //             // struct fat32dent *long_dir_entry = dir_entry;
-
-//             for (int i = long_name_num-1; i >= 0; i--) {
+//             int len = 0;
+//             bool flag = false;
+//             for (int i = long_name_num-1; i > 0; i--) {
 //                 struct fat32ldent *long_dir_entry = dir_entry + i;
-                
+//                 for (int j = 0; j < 5; j++) {
+//                     if (long_dir_entry->LDIR_Name1[j] == 0x0000) goto parse_end;
+//                     graph->clusters[bmp_num].name[len++] = (u8)long_dir_entry->LDIR_Name1[j];
+//                 }
+//                 for (int j = 0; j < 6; j++) {
+//                     if (long_dir_entry->LDIR_Name2[j] == 0x0000) goto parse_end;
+//                     graph->clusters[bmp_num].name[len++] = (u8)long_dir_entry->LDIR_Name2[j];
+//                 }
+//                 for (int j = 0; j < 2; j++) {
+//                     if (long_dir_entry->LDIR_Name3[j] == 0x0000) goto parse_end;
+//                     graph->clusters[bmp_num].name[len++] = (u8)long_dir_entry->LDIR_Name3[j];
+//                 }
 //             }
-
+//         parse_end:
+//             assert( len < 25 );
 //         }
+
 //     }
 
 // }
@@ -147,13 +179,13 @@ int main(int argc, char *argv[]) {
     printf("data_size: %d\n", data_size);
     printf("FirstDataSector: %d\n", FirstDataSector);
     // printf("%d\n", 0x3fB7 * hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec );
-    printf("%d\n",(FirstDataSector + 0x3FDA * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec);
+    printf("%d\n",(FirstDataSector + 0x61 * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec);
     // for (size_t i = 0; i < clus_num; i++) {
     //     u8 *addr = (u8 *)hdr + (FirstDataSector + i * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
-    //     int type = cluster_classify(addr, hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec);
+    //     int type = cluster_classify(addr, hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec, i+2);
     // }
     
-    // ClusterGraph *graph = create_graph(clus_num);
+    // graph = create_graph(clus_num);
     // graph->cluster_num = clus_num;
     
 
