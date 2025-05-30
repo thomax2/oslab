@@ -9,7 +9,10 @@ typedef uint32_t u32;
 
 typedef struct BmpInfo {
     char name[50];
-    u32 file_size;
+    u32 size;
+    u32 width;
+    u32 height;
+    u32 offset;
 }BmpInfo;
 
 // node 
