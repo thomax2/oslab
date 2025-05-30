@@ -242,8 +242,8 @@ int main(int argc, char *argv[]) {
             fclose(fp);
         }
         if(graph->clusters[i].type == 3) {
-            u8 *addr = (u8 *)hdr + (FirstDataSector + i * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
-            printf("clusterid: %d size: %d  name: %s  addr: %c\n",i, graph->clusters[i].bmp_info.file_size, graph->clusters[i-2].bmp_info.name,addr[0]);
+            u8 *addr = (u8 *)hdr + (FirstDataSector + (i-2) * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
+            printf("clusterid: %d size: %d  name: %s  addr: %c\n",i, graph->clusters[i].bmp_info.file_size, graph->clusters[i].bmp_info.name,addr[0]);
         }
     }
     
