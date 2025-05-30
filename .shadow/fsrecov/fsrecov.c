@@ -83,7 +83,6 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
         return 2;
     }
 
-    printf("hhh\n");
 
 
     // dirct
@@ -141,6 +140,8 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
         if( i > 512 && bmp_count == 0) // not dirct
             break;
     }
+    printf("hhh\n");
+
     if(bmp_count>0) {
         graph->clusters[cluster_num].type = 1;
         return 1;
