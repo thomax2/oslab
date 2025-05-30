@@ -102,7 +102,7 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
             int len = 0;
             bool flag = false;
             for (int i = long_name_num-1; i >= 0; i--) {
-                struct fat32ldent *long_dir_entry = dir_entry + i;
+                struct fat32ldent *long_dir_entry = (struct fat32ldent *)dir_entry + i;
                 for (int j = 0; j < 5; j++) {
                     if (long_dir_entry->LDIR_Name1[j] == 0x0000) goto parse_end;
                     graph->clusters[bmp_num].bmp_info.name[len++] = (u8)long_dir_entry->LDIR_Name1[j];
