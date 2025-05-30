@@ -97,7 +97,6 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
             dir_entry->DIR_Attr & ATTR_HIDDEN)
             {
                 continue;
-                printf("hhh\n");
 
             }
         if ( ((dir_entry->DIR_Name[0] & 0xF0 ) == 0x40) && (dir_entry->DIR_Attr == 0x0F)) { // is long name file
@@ -144,6 +143,8 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
             graph->clusters[bmp_num].bmp_info.name[len] = '\0';
             graph->clusters[bmp_num].bmp_info.file_size = dir_entry->DIR_FileSize;
         }
+        printf("hhh\n");
+
         if( i > 512 && bmp_count == 0) // not dirct
             break;
     }
