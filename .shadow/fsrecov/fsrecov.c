@@ -91,6 +91,7 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
 
         struct fat32dent *dir_entry = (struct fat32dent *)(data + i);
         printf("dir_entry:%x\n",dir_entry->DIR_Name[0]);
+        printf("ggg %x\n",dir_entry->DIR_Name[0] & 0xF0);
         if (dir_entry->DIR_Name[0] == 0x00 ||
             dir_entry->DIR_Name[0] == 0xe5 ||
             dir_entry->DIR_Attr & ATTR_HIDDEN)
