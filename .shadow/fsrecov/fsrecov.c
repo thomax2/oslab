@@ -72,7 +72,7 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
     if(data[0] == 0x42 && data[1] == 0x4d && 
          data[6] == 0 && data[7] == 0 && data[8] == 0 && data[9] == 0) { // head byte BM
         uint32_t bmp_size = *((uint32_t *)(data + 2));
-        // printf("bmp_size: %d\n", bmp_size);
+        printf("bmp_size: %d\n", bmp_size);
         graph->clusters[cluster_num].bmp_info.file_size = bmp_size;
         // one cluster not enough
         if( bmp_size > size )
