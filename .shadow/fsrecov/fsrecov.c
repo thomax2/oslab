@@ -52,6 +52,7 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
     // BMP body, one cluster not enough use more cluster
     
     // cluster not use
+    printf("cluster_num %d\n",cluster_num);
     u8 *clus_offset = data;
     size_t i = 0;
     for (; i < CLUS_EMPTY_SIZE; i++) {
@@ -227,7 +228,7 @@ int main(int argc, char *argv[]) {
             }
             u8 *addr = (u8 *)hdr + (FirstDataSector + i * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
             fwrite(addr, 1, graph->clusters[i].bmp_info.file_size, fp);
-            fclose(fp);        
+            fclose(fp);
         }
     }
     
