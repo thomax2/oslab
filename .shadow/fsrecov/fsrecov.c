@@ -72,8 +72,15 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
     if(data[0] == 0x42 && data[1] == 0x4d && 
          data[6] == 0 && data[7] == 0 && data[8] == 0 && data[9] == 0) { // head byte BM
         uint32_t bmp_size = *((uint32_t *)(data + 2));
-        // printf("bmp_size: %d\n", bmp_size);
-        graph->clusters[cluster_num].bmp_info.file_size = bmp_size;
+        uint32_t offset = *((uint32_t *)(data + 0x0A));
+        uint32_t width  = *((uint32_t *)(data + 0x12));
+        uint32_t height = *((uint32_t *)(data + 0x16));
+    
+        graph->clusters[cluster_num].bmp_info.size = bmp_size;
+        graph->clusters[cluster_num].bmp_info.offset = offset;
+        graph->clusters[cluster_num].bmp_info.width = width;
+        graph->clusters[cluster_num].bmp_info.height = height;
+
         // one cluster not enough
         if( bmp_size > size )
         {
@@ -105,7 +112,7 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
             // cluster_id - 2
             int bmp_num = short_dir_entry->DIR_FstClusLO - 2;
             // printf("bmp_num: %d\n",bmp_num);
-            // graph->clusters[bmp_num].bmp_info.file_size = short_dir_entry->DIR_FileSize;
+            // graph->clusters[bmp_num].bmp_info.size = short_dir_entry->DIR_FileSize;
             // struct fat32dent *long_dir_entry = dir_entry;
             int len = 0;
             bool flag = false;
@@ -142,7 +149,7 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
                 }
             }
             graph->clusters[bmp_num].bmp_info.name[len] = '\0';
-            // graph->clusters[bmp_num].bmp_info.file_size = dir_entry->DIR_FileSize;
+            // graph->clusters[bmp_num].bmp_info.size = dir_entry->DIR_FileSize;
         }
         // printf("77777\n");
         if( i > 32*4 && bmp_count == 0) // not dirct
@@ -229,23 +236,15 @@ int main(int argc, char *argv[]) {
     }
     
     for (int i = 0; i < clus_num; i++) {
-        if(graph->clusters[i].type == 2) {
-            char output_filename[256];
-            snprintf(output_filename,sizeof(output_filename), "./recovpic/%s",graph->clusters[i].bmp_info.name);
-            FILE *fp = fopen(output_filename, "wb");
-            if (!fp) {
-                perror("Failed to open file");
-                exit(1);
-            }
-            u8 *addr = (u8 *)hdr + (FirstDataSector + i * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
-            fwrite(addr, 1, graph->clusters[i].bmp_info.file_size, fp);
-            fclose(fp);
-        }
         if(graph->clusters[i].type == 3) {
             u8 *addr = (u8 *)hdr + (FirstDataSector + (i) * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
-            printf("clusterid: %d size: %d  name: %s  addr: %c\n",i, graph->clusters[i].bmp_info.file_size, graph->clusters[i].bmp_info.name,addr[0]);
+            printf("clusterid: %d size: %d  name: %s    width: %d   height: %d  offset: %d\n", i
+                , graph->clusters[i].bmp_info.size, graph->clusters[i].bmp_info.name, 
+                graph->clusters[i].bmp_info.width, graph->clusters[i].bmp_info.height, graph->clusters[i].bmp_info.offset);
         }
     }
+
+
     
     return 0;
 
