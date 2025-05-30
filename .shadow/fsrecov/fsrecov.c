@@ -52,7 +52,7 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
     // BMP body, one cluster not enough use more cluster
     
     // cluster not use
-    // printf("cluster_num %d\n",cluster_num);
+    printf("cluster_num %d\n",cluster_num);
     u8 *clus_offset = data;
     size_t i = 0;
     for (; i < CLUS_EMPTY_SIZE; i++) {
