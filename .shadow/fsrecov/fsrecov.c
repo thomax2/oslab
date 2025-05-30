@@ -83,7 +83,7 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
         return 2;
     }
 
-
+    
 
     // dirct
     int bmp_count=0;
@@ -140,6 +140,7 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
             graph->clusters[bmp_num].bmp_info.name[len] = '\0';
             graph->clusters[bmp_num].bmp_info.file_size = dir_entry->DIR_FileSize;
         }
+        printf("77777\n");
         if( i > 512 && bmp_count == 0) // not dirct
             break;
     }
