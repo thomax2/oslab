@@ -52,7 +52,7 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
     // BMP body, one cluster not enough use more cluster
     
     // cluster not use
-    printf("cluster_num %d\n",cluster_num);
+    // printf("cluster_num %d\n",cluster_num);
     u8 *clus_offset = data;
     size_t i = 0;
     for (; i < CLUS_EMPTY_SIZE; i++) {
@@ -93,7 +93,7 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
             dir_entry->DIR_Name[0] == 0xe5 ||
             dir_entry->DIR_Attr & ATTR_HIDDEN)
             continue;
-        if ( (dir_entry->DIR_Name[0] && 0x40 ) && dir_entry->DIR_Attr == 0x0F) { // is long name file
+        if ( (dir_entry->DIR_Name[0] & 0xF0 ) == 0x40 && dir_entry->DIR_Attr == 0x0F) { // is long name file
             bmp_count ++;
             int long_name_num = dir_entry->DIR_Name[0] & 0x0F;
             i += long_name_num * 32;
@@ -140,7 +140,6 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
         if( i > 512 && bmp_count == 0) // not dirct
             break;
     }
-    printf("hhh\n");
 
     if(bmp_count>0) {
         graph->clusters[cluster_num].type = 1;
