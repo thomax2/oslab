@@ -95,9 +95,12 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
         if (dir_entry->DIR_Name[0] == 0x00 ||
             dir_entry->DIR_Name[0] == 0xe5 ||
             dir_entry->DIR_Attr & ATTR_HIDDEN)
-            continue;
+            {
+                continue;
+                printf("hhh\n");
+
+            }
         if ( ((dir_entry->DIR_Name[0] & 0xF0 ) == 0x40) && (dir_entry->DIR_Attr == 0x0F)) { // is long name file
-            printf("hhh\n");
             bmp_count ++;
             int long_name_num = dir_entry->DIR_Name[0] & 0x0F;
             i += long_name_num * 32;
@@ -127,7 +130,7 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
             assert( len < 50 );
             graph->clusters[bmp_num].bmp_info.name[len] = '\0';
         }
-        if( dir_entry->DIR_Attr == 0x20 ) {  // is short name file
+        else if( dir_entry->DIR_Attr == 0x20 ) {  // is short name file
             bmp_count ++;
             int bmp_num = (dir_entry->DIR_FstClusHI << 16) | dir_entry->DIR_FstClusLO;
             int len = 0;
