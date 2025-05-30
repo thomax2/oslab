@@ -67,7 +67,6 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
         return 5;
     }
     
-    printf("hhh\n");
 
     // BMP head
     if(data[0] == 0x42 && data[1] == 0x4d && 
@@ -83,6 +82,9 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
         graph->clusters[cluster_num].type = 2;
         return 2;
     }
+
+    printf("hhh\n");
+
 
     // dirct
     int bmp_count=0;
