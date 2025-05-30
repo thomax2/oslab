@@ -81,7 +81,6 @@
 //         return 2;
 //     }
 
-
 //     // dirct
 //     int bmp_count=0;
 //     for(int i = 0; i < size; i += 32) {
@@ -91,33 +90,59 @@
 //             dir_entry->DIR_Attr & ATTR_HIDDEN)
 //             continue;
 //         if ( (dir_entry->DIR_Name[0] && 0x40 ) && dir_entry->DIR_Attr == 0x0F) { // is long name file
+//             bmp_count ++;
 //             int long_name_num = dir_entry->DIR_Name[0] & 0x0F;
+//             i += long_name_num * 32;
 //             struct fat32dent *short_dir_entry = dir_entry + long_name_num;
+//             // cluster_id - 2
 //             int bmp_num = short_dir_entry->DIR_FstClusLO - 2;
+//             graph->clusters[bmp_num].bmp_info.file_size = short_dir_entry->DIR_FileSize;
 //             // struct fat32dent *long_dir_entry = dir_entry;
 //             int len = 0;
 //             bool flag = false;
-//             for (int i = long_name_num-1; i > 0; i--) {
+//             for (int i = long_name_num-1; i >= 0; i--) {
 //                 struct fat32ldent *long_dir_entry = dir_entry + i;
 //                 for (int j = 0; j < 5; j++) {
 //                     if (long_dir_entry->LDIR_Name1[j] == 0x0000) goto parse_end;
-//                     graph->clusters[bmp_num].name[len++] = (u8)long_dir_entry->LDIR_Name1[j];
+//                     graph->clusters[bmp_num].bmp_info.name[len++] = (u8)long_dir_entry->LDIR_Name1[j];
 //                 }
 //                 for (int j = 0; j < 6; j++) {
 //                     if (long_dir_entry->LDIR_Name2[j] == 0x0000) goto parse_end;
-//                     graph->clusters[bmp_num].name[len++] = (u8)long_dir_entry->LDIR_Name2[j];
+//                     graph->clusters[bmp_num].bmp_info.name[len++] = (u8)long_dir_entry->LDIR_Name2[j];
 //                 }
 //                 for (int j = 0; j < 2; j++) {
 //                     if (long_dir_entry->LDIR_Name3[j] == 0x0000) goto parse_end;
-//                     graph->clusters[bmp_num].name[len++] = (u8)long_dir_entry->LDIR_Name3[j];
+//                     graph->clusters[bmp_num].bmp_info.name[len++] = (u8)long_dir_entry->LDIR_Name3[j];
 //                 }
 //             }
 //         parse_end:
-//             assert( len < 25 );
+//             assert( len < 50 );
+//             graph->clusters[bmp_num].bmp_info.name[len] = '\0';
 //         }
-
+//         else if( dir_entry->DIR_Attr == 0x20 ) {  // is short name file
+//             bmp_count ++;
+//             int bmp_num = (dir_entry->DIR_FstClusHI << 16) | dir_entry->DIR_FstClusLO;
+//             int len = 0;
+//             for (int i = 0; i<sizeof(dir_entry->DIR_Name); i++) {
+//                 if( dir_entry->DIR_Name[i] != ' ' ) {
+//                     if(i == 8)
+//                         graph->clusters[bmp_num].bmp_info.name[len++] = '.';
+//                     graph->clusters[bmp_num].bmp_info.name[len++] = dir_entry->DIR_Name[i];    
+//                 }
+//             }
+//             graph->clusters[bmp_num].bmp_info.name[len] = '\0';
+//             graph->clusters[bmp_num].bmp_info.file_size = dir_entry->DIR_FileSize;
+//         }
+//         if( i > 512 && bmp_count == 0) // not dirct
+//             break;
+//     }
+//     if(bmp_count>0) {
+//         graph->clusters[cluster_num].type = 1;
+//         return 1;
 //     }
 
+//     graph->clusters[cluster_num].type = 4;
+//     return 4;
 // }
 
 int main(int argc, char *argv[]) {
@@ -180,13 +205,16 @@ int main(int argc, char *argv[]) {
     printf("FirstDataSector: %d\n", FirstDataSector);
     // printf("%d\n", 0x3fB7 * hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec );
     printf("%d\n",(FirstDataSector + 0x61 * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec);
+
+
+    // graph = create_graph(clus_num);
+    // graph->cluster_num = clus_num;
+
     // for (size_t i = 0; i < clus_num; i++) {
     //     u8 *addr = (u8 *)hdr + (FirstDataSector + i * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
     //     int type = cluster_classify(addr, hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec, i+2);
     // }
     
-    // graph = create_graph(clus_num);
-    // graph->cluster_num = clus_num;
     
 
 
