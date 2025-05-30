@@ -217,13 +217,13 @@ int main(int argc, char *argv[]) {
     }
     
     for (int i = 0; i < clus_num; i++) {
-        if(graph->clusters[i].type = 2) {
+        if(graph->clusters[i].type == 2) {
             char output_filename[256];
             snprintf(output_filename,sizeof(output_filename), "./recovpic/%s",graph->clusters[i].bmp_info.name);
             FILE *fp = fopen(output_filename, "wb");
             if (!fp) {
                 perror("Failed to open file");
-                return;
+                exit(1);
             }
             u8 *addr = (u8 *)hdr + (FirstDataSector + i * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
             fwrite(addr, 1, graph->clusters[i].bmp_info.file_size, fp);
