@@ -72,6 +72,7 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
     if(data[0] == 0x42 && data[1] == 0x4d && 
          data[6] == 0 && data[7] == 0 && data[8] == 0 && data[9] == 0) { // head byte BM
         uint32_t bmp_size = *((uint32_t *)(data + 2));
+        printf("bmp_size: %d\n", bmp_size);
         // one cluster not enough
         if( bmp_size > size )
         {
@@ -103,7 +104,7 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
             struct fat32dent *short_dir_entry = dir_entry + long_name_num;
             // cluster_id - 2
             int bmp_num = short_dir_entry->DIR_FstClusLO;
-            printf("bmp_num: %d\n",bmp_num);
+            // printf("bmp_num: %d\n",bmp_num);
             graph->clusters[bmp_num].bmp_info.file_size = short_dir_entry->DIR_FileSize;
             // struct fat32dent *long_dir_entry = dir_entry;
             int len = 0;
