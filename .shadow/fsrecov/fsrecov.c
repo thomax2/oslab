@@ -240,7 +240,7 @@ int main(int argc, char *argv[]) {
             fclose(fp);
         }
         if(graph->clusters[i].type == 3) {
-            printf("clusterid: %d size: %d  name: %s",i, graph->clusters[i].bmp_info.file_size, graph->clusters[i].bmp_info.name);
+            printf("clusterid: %d size: %d  name: %s\n",i, graph->clusters[i].bmp_info.file_size, graph->clusters[i].bmp_info.name);
         }
     }
     
