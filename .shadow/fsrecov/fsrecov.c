@@ -127,7 +127,7 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
             assert( len < 50 );
             graph->clusters[bmp_num].bmp_info.name[len] = '\0';
         }
-        else if( dir_entry->DIR_Attr == 0x20 ) {  // is short name file
+        if( dir_entry->DIR_Attr == 0x20 ) {  // is short name file
             bmp_count ++;
             int bmp_num = (dir_entry->DIR_FstClusHI << 16) | dir_entry->DIR_FstClusLO;
             int len = 0;
