@@ -103,12 +103,12 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
             struct fat32dent *short_dir_entry = dir_entry + long_name_num;
             // cluster_id - 2
             int bmp_num = short_dir_entry->DIR_FstClusLO - 2;
+            printf("bmp_num: %d\n",bmp_num);
             graph->clusters[bmp_num].bmp_info.file_size = short_dir_entry->DIR_FileSize;
             // struct fat32dent *long_dir_entry = dir_entry;
             int len = 0;
             bool flag = false;
             for (int i = long_name_num-1; i >= 0; i--) {
-                printf("youme\n");
                 struct fat32ldent *long_dir_entry = (struct fat32ldent *)dir_entry + i;
                 for (int j = 0; j < 5; j++) {
                     if (long_dir_entry->LDIR_Name1[j] == 0x0000) goto parse_end;
