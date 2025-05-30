@@ -90,8 +90,8 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
     for(int i = 0; i < size; i += 32) {
 
         struct fat32dent *dir_entry = (struct fat32dent *)(data + i);
-        // printf("dir_entry:%x DIR_Attr %x\n",dir_entry->DIR_Name[0],dir_entry->DIR_Attr);
-        // printf("ggg %x\n",dir_entry->DIR_Name[0] & 0xF0);
+        printf("dir_entry:%x DIR_Attr %x\n",dir_entry->DIR_Name[0],dir_entry->DIR_Attr);
+        printf("ggg %x\n",dir_entry->DIR_Name[0] & 0xF0);
         if (dir_entry->DIR_Name[0] == 0x00 ||
             dir_entry->DIR_Name[0] == 0xe5 ||
             dir_entry->DIR_Attr == ATTR_HIDDEN)
@@ -140,7 +140,7 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
             graph->clusters[bmp_num].bmp_info.name[len] = '\0';
             graph->clusters[bmp_num].bmp_info.file_size = dir_entry->DIR_FileSize;
         }
-        printf("77777\n");
+        // printf("77777\n");
         if( i > 512 && bmp_count == 0) // not dirct
             break;
     }
