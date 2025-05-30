@@ -105,7 +105,7 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
             // cluster_id - 2
             int bmp_num = short_dir_entry->DIR_FstClusLO;
             // printf("bmp_num: %d\n",bmp_num);
-            graph->clusters[bmp_num].bmp_info.file_size = short_dir_entry->DIR_FileSize;
+            // graph->clusters[bmp_num].bmp_info.file_size = short_dir_entry->DIR_FileSize;
             // struct fat32dent *long_dir_entry = dir_entry;
             int len = 0;
             bool flag = false;
@@ -142,7 +142,7 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
                 }
             }
             graph->clusters[bmp_num].bmp_info.name[len] = '\0';
-            graph->clusters[bmp_num].bmp_info.file_size = dir_entry->DIR_FileSize;
+            // graph->clusters[bmp_num].bmp_info.file_size = dir_entry->DIR_FileSize;
         }
         // printf("77777\n");
         if( i > 32*4 && bmp_count == 0) // not dirct
