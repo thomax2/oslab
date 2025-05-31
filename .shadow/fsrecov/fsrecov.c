@@ -344,9 +344,9 @@ int main(int argc, char *argv[]) {
                 , graph->clusters[i].bmp_info.size, graph->clusters[i].bmp_info.name, 
                 graph->clusters[i].bmp_info.width, graph->clusters[i].bmp_info.height, graph->clusters[i].bmp_info.offset);
         }
-        if(graph->clusters[i].type == 4) {
-            printf("body:clusterid: %d\n", i);
-        }
+        // if(graph->clusters[i].type == 4) {
+        //     printf("body:clusterid: %d\n", i);
+        // }
     }
 
     // for (int i = 0; i < clus_num; i++) {
