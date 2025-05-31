@@ -177,6 +177,7 @@ double get_prob(u32 source_node, u32 target_node, u32 width) {
     u8 *source_addr = (u8 *)hdr + (FirstDataSector + source_node * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
     u8 *target_addr = (u8 *)hdr + (FirstDataSector + target_node * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
 
+    printf("%c\n", source_addr[0]);
     // at last width*3 byte in per cluster
     u8 *last_row = source_addr + ( BytePerClus - width*3 );
     u8 *first_row = target_addr;
