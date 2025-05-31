@@ -171,6 +171,89 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
 }
 
 
+void dp_recover_zone(u32 *zone_nodes, int valid_clusters, int head_id) {
+    
+    u32 size = graph->clusters[head_id].bmp_info.size;
+    u32 width = graph->clusters[head_id].bmp_info.width;
+    char *name = graph->clusters[head_id].bmp_info.name;
+    
+    u32 BytePerClus = hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec;
+    int cluster_cnt = size/(BytePerClus) + ((size % BytePerClus > 0) ? 1:0);
+
+    // double* dp_probs = malloc(valid_clusters * sizeof(double));
+    int* prev = malloc(cluster_cnt * sizeof(int));
+
+    prev[0] = head_id;
+    
+    for (int i = 1; i < cluster_cnt; i++) {
+        double max_prob = 0.0;
+        int best_j = -1;
+
+        for (int j = 0; j < valid_clusters; j++) {
+            if((zone_nodes[j] & 0x80000000) != 1) {
+                double prob = get_prob(prev[i-1], zone_nodes[j], width);
+                if( prob > max_prob) {
+                    max_prob = prob;
+                    prev[i] = zone_nodes[j];
+                    best_j = j;
+                }
+            }
+        }
+        assert(best_j == -1);
+
+        prev[i] = zone_nodes[best_j] & 0x7FFFFFFF;
+        zone_nodes[best_j] |= 0x80000000;
+    }
+    
+    char filename[256];
+    snprintf(filename, sizeof(filename), "./repic/%s",name);
+    FILE *fp = fopen(filename, "wb");
+    if (!fp) {
+        perror("fopen failed");
+        return;
+    }
+
+
+    u32 bytes_written = 0;
+    for (int i = 0; i < cluster_cnt; i++) {
+        u32 clus_id = prev[i];
+        u8* clus_data = (u8 *)hdr + (FirstDataSector + clus_id * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
+
+        u32 bytes_left = size - bytes_written;
+        u32 to_write = (bytes_left >= BytePerClus) ? BytePerClus : bytes_left;
+
+        fwrite(clus_data, 1, to_write, fp);
+        bytes_written += to_write;
+
+        if (bytes_written >= size) break;
+    }
+    fclose(fp);
+
+    free(prev);
+    return;
+}
+
+
+double get_prob(u32 source_node, u32 target_node, u32 width) {
+    u32 BytePerClus = hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec;
+
+    u8 *source_addr = (u8 *)hdr + (FirstDataSector + source_node * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
+    u8 *target_addr = (u8 *)hdr + (FirstDataSector + target_node * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
+
+    // at last width*3 byte in per cluster
+    u8 *last_row = source_addr + ( BytePerClus - width*3 );
+    u8 *first_row = target_addr;
+
+    double diff_sum = 0;
+
+    for(u32 i = 0; i<width * 3; i++) {
+        diff_sum += fabs((double)last_row[i] - (double)first_row[i]) / 255.0;
+    }
+
+    double avg_diff = diff_sum / (width * 3);
+    return exp(-10 * avg_diff);
+}
+
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         fprintf(stderr, "no fat file");
@@ -275,85 +358,3 @@ int main(int argc, char *argv[]) {
 
 }
 
-void dp_recover_zone(u32 *zone_nodes, int valid_clusters, int head_id) {
-    
-    u32 size = graph->clusters[head_id].bmp_info.size;
-    u32 width = graph->clusters[head_id].bmp_info.width;
-    char *name = graph->clusters[head_id].bmp_info.name;
-    
-    u32 BytePerClus = hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec;
-    int cluster_cnt = size/(BytePerClus) + ((size % BytePerClus > 0) ? 1:0);
-
-    // double* dp_probs = malloc(valid_clusters * sizeof(double));
-    int* prev = malloc(cluster_cnt * sizeof(int));
-
-    prev[0] = head_id;
-    
-    for (int i = 1; i < cluster_cnt; i++) {
-        double max_prob = 0.0;
-        int best_j = -1;
-
-        for (int j = 0; j < valid_clusters; j++) {
-            if((zone_nodes[j] & 0x80000000) != 1) {
-                double prob = get_prob(prev[i-1], zone_nodes[j], width);
-                if( prob > max_prob) {
-                    max_prob = prob;
-                    prev[i] = zone_nodes[j];
-                    best_j = j;
-                }
-            }
-        }
-        assert(best_j == -1);
-
-        prev[i] = zone_nodes[best_j] & 0x7FFFFFFF;
-        zone_nodes[best_j] |= 0x80000000;
-    }
-    
-    char filename[256];
-    snprintf(filename, sizeof(filename), "./repic/%s",name);
-    FILE *fp = fopen(filename, "wb");
-    if (!fp) {
-        perror("fopen failed");
-        return;
-    }
-
-
-    u32 bytes_written = 0;
-    for (int i = 0; i < cluster_cnt; i++) {
-        u32 clus_id = prev[i];
-        u8* clus_data = (u8 *)hdr + (FirstDataSector + clus_id * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
-
-        u32 bytes_left = size - bytes_written;
-        u32 to_write = (bytes_left >= BytePerClus) ? BytePerClus : bytes_left;
-
-        fwrite(clus_data, 1, to_write, fp);
-        bytes_written += to_write;
-
-        if (bytes_written >= size) break;
-    }
-    fclose(fp);
-
-    free(prev);
-    return;
-}
-
-
-double get_prob(u32 source_node, u32 target_node, u32 width) {
-    u32 BytePerClus = hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec;
-
-    u8 *source_addr = (u8 *)hdr + (FirstDataSector + source_node * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
-    u8 *target_addr = (u8 *)hdr + (FirstDataSector + target_node * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
-
-    // at last width*3 byte in per cluster
-    u8 *last_row = source_addr + ( BytePerClus - width*3 );
-    u8 *first_row = target_addr;
-
-    double diff_sum = 0;
-
-    for(u32 i = 0; i<width * 3; i++) {
-        diff_sum += fabs((double)last_row[i] - (double)first_row[i]) / 255.0;
-    }
-
-    double avg_diff = diff_sum / (width * 3);
-    return exp(-10 * avg_diff);
-}
