@@ -213,6 +213,7 @@ void dp_recover_zone(u32 *zone_nodes, int valid_clusters, int head_id) {
 
         for (int j = 0; j < valid_clusters; j++) {
             if((zone_nodes[j] & 0x80000000) == 0) {
+                printf("prev:%d     zone_nodes:%d\n",prev[i-1], zone_nodes[j]);
                 double prob = get_prob(prev[i-1], zone_nodes[j], width);
                 if( prob > max_prob) {
                     max_prob = prob;
