@@ -12,7 +12,7 @@
 #include "lgraph.h"
 
 #define CLUS_EMPTY_SIZE 10
-#define ZONE_SIZE 256
+#define ZONE_SIZE 1024
 #define ZONE_HALF ZONE_SIZE/2
 
 ClusterGraph *graph;
@@ -204,7 +204,8 @@ void dp_recover_zone(u32 *zone_nodes, int valid_clusters, int head_id) {
     u32 BytePerClus = hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec;
     int cluster_cnt = size/(BytePerClus) + ((size % BytePerClus > 0) ? 1:0);
 
-    assert(cluster_cnt < valid_clusters);
+    if(cluster_cnt < valid_clusters)
+        return;
 
     // double* dp_probs = malloc(valid_clusters * sizeof(double));
     int* prev = malloc(cluster_cnt * sizeof(int));
@@ -220,7 +221,7 @@ void dp_recover_zone(u32 *zone_nodes, int valid_clusters, int head_id) {
             if((zone_nodes[j] & 0x80000000) == 0) {
                 // printf("prev:%d     zone_nodes:%d\n",prev[i-1], zone_nodes[j]);
                 double prob = get_prob(prev[i-1], zone_nodes[j], width);
-                printf("prob:%f\n",prob);
+                // printf("prob:%f\n",prob);
                 if( prob > max_prob) {
                     max_prob = prob;
                     prev[i] = zone_nodes[j];
