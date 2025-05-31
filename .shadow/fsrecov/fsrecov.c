@@ -204,6 +204,8 @@ void dp_recover_zone(u32 *zone_nodes, int valid_clusters, int head_id) {
     u32 BytePerClus = hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec;
     int cluster_cnt = size/(BytePerClus) + ((size % BytePerClus > 0) ? 1:0);
 
+    assert(cluster_cnt < valid_clusters);
+
     // double* dp_probs = malloc(valid_clusters * sizeof(double));
     int* prev = malloc(cluster_cnt * sizeof(int));
 
