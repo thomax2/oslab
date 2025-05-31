@@ -205,7 +205,8 @@ void dp_recover_zone(u32 *zone_nodes, int valid_clusters, int head_id) {
     int* prev = malloc(cluster_cnt * sizeof(int));
 
     prev[0] = head_id;
-    
+
+    printf("name: %s\n",name);    
     for (int i = 1; i < cluster_cnt; i++) {
         double max_prob = 0.0;
         int best_j = -1;
