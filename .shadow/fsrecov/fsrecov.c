@@ -351,7 +351,7 @@ int main(int argc, char *argv[]) {
 
     for (int i = 0; i < clus_num; i++) {
         if(graph->clusters[i].type == 3) {
-            int start_num = (i - ZONE_HALF/4) > 0 ? (i - ZONE_HALF) : 0;
+            int start_num = (i - ZONE_HALF/4) > 0 ? (i - ZONE_HALF/4) : 0;
             u32 zone_nodes[ZONE_SIZE + 1];
             int valid_clusters = 0;
             
