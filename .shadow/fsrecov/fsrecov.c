@@ -337,36 +337,36 @@ int main(int argc, char *argv[]) {
         int type = cluster_classify(addr, hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec, i);
     }
     
-    // for (int i = 0; i < clus_num; i++) {
-    //     if(graph->clusters[i].type == 3) {
-    //         u8 *addr = (u8 *)hdr + (FirstDataSector + (i) * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
-    //         printf("clusterid: %d size: %d  name: %s    width: %d   height: %d  offset: %d\n", i
-    //             , graph->clusters[i].bmp_info.size, graph->clusters[i].bmp_info.name, 
-    //             graph->clusters[i].bmp_info.width, graph->clusters[i].bmp_info.height, graph->clusters[i].bmp_info.offset);
-    //     }
-    //     if(graph->clusters[i].type == 4) {
-    //         printf("body:clusterid: %d\n", i);
-    //     }
-    // }
-
     for (int i = 0; i < clus_num; i++) {
         if(graph->clusters[i].type == 3) {
-            int start_num = (i - ZONE_HALF) > 0 ? (i - ZONE_HALF) : 0;
-            u32 zone_nodes[ZONE_SIZE + 1];
-            int valid_clusters = 0;
-            
-            for (int j = start_num; j < start_num + ZONE_SIZE && j < clus_num; j++) {
-                if(graph->clusters[j].type == 4) {
-                    zone_nodes[valid_clusters++] = j;
-                }
-            }
-
-            if(valid_clusters > 0) {
-                dp_recover_zone(zone_nodes, valid_clusters, i);
-            }
+            u8 *addr = (u8 *)hdr + (FirstDataSector + (i) * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
+            printf("clusterid: %d size: %d  name: %s    width: %d   height: %d  offset: %d\n", i
+                , graph->clusters[i].bmp_info.size, graph->clusters[i].bmp_info.name, 
+                graph->clusters[i].bmp_info.width, graph->clusters[i].bmp_info.height, graph->clusters[i].bmp_info.offset);
+        }
+        if(graph->clusters[i].type == 4) {
+            printf("body:clusterid: %d\n", i);
         }
     }
-    return 0;
+
+    // for (int i = 0; i < clus_num; i++) {
+    //     if(graph->clusters[i].type == 3) {
+    //         int start_num = (i - ZONE_HALF) > 0 ? (i - ZONE_HALF) : 0;
+    //         u32 zone_nodes[ZONE_SIZE + 1];
+    //         int valid_clusters = 0;
+            
+    //         for (int j = start_num; j < start_num + ZONE_SIZE && j < clus_num; j++) {
+    //             if(graph->clusters[j].type == 4) {
+    //                 zone_nodes[valid_clusters++] = j;
+    //             }
+    //         }
+
+    //         if(valid_clusters > 0) {
+    //             dp_recover_zone(zone_nodes, valid_clusters, i);
+    //         }
+    //     }
+    // }
+    // return 0;
 
 }
 
