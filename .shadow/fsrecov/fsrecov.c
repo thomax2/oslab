@@ -186,6 +186,7 @@ double get_prob(u32 source_node, u32 target_node, u32 width) {
 
     for(u32 i = 0; i<width * 3; i++) {
         diff_sum += fabs((double)last_row[i] - (double)first_row[i]) / 255.0;
+
     }
 
     double avg_diff = diff_sum / (width * 3);
@@ -207,14 +208,14 @@ void dp_recover_zone(u32 *zone_nodes, int valid_clusters, int head_id) {
 
     prev[0] = head_id;
 
-    printf("name: %s\n",name);    
+    printf("name: %s width: %d\n",name, width);    
     for (int i = 1; i < cluster_cnt; i++) {
         double max_prob = 0.0;
         int best_j = -1;
 
         for (int j = 0; j < valid_clusters; j++) {
             if((zone_nodes[j] & 0x80000000) == 0) {
-                printf("prev:%d     zone_nodes:%d\n",prev[i-1], zone_nodes[j]);
+                // printf("prev:%d     zone_nodes:%d\n",prev[i-1], zone_nodes[j]);
                 double prob = get_prob(prev[i-1], zone_nodes[j], width);
                 if( prob > max_prob) {
                     max_prob = prob;
