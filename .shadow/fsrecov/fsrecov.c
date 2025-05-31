@@ -12,7 +12,7 @@
 #include "lgraph.h"
 
 #define CLUS_EMPTY_SIZE 10
-#define ZONE_SIZE 1024
+#define ZONE_SIZE 4096
 #define ZONE_HALF ZONE_SIZE/2
 
 ClusterGraph *graph;
@@ -173,25 +173,31 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
 
 double get_prob(u32 source_node, u32 target_node, u32 width) {
     u32 BytePerClus = hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec;
+    u32 row_size = width * 3;
 
     u8 *source_addr = (u8 *)hdr + (FirstDataSector + source_node * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
     u8 *target_addr = (u8 *)hdr + (FirstDataSector + target_node * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
 
-    // printf("%c\n", source_addr[0]);
-    // at last width*3 byte in per cluster
-    u8 *last_row = source_addr + ( BytePerClus - width*3 );
+    u8 *last_row = source_addr + (BytePerClus - row_size);
     u8 *first_row = target_addr;
+    u8 *second_row = target_addr + row_size;
 
-    double diff_sum = 0;
+    double edge_diff_sum = 0.0;
+    double internal_diff_sum = 0.0;
 
-    for(u32 i = 0; i<width * 3; i++) {
-        diff_sum += fabs((double)last_row[i] - (double)first_row[i]) / 255.0;
-
+    for (u32 i = 0; i < row_size; i++) {
+        edge_diff_sum += fabs((double)last_row[i] - (double)first_row[i]) / 255.0;
+        internal_diff_sum += fabs((double)first_row[i] - (double)second_row[i]) / 255.0;
     }
 
-    double avg_diff = diff_sum / (width * 3);
-    // printf("avg_diff:%f exp(-1 * avg_diff): %f\n",avg_diff, exp(-1.0 * avg_diff));
-    return exp(-10.0 * avg_diff);
+    double edge_avg = edge_diff_sum / row_size;
+    double internal_avg = internal_diff_sum / row_size;
+
+    // 可调权重
+    double w1 = 10.0;  // 跨簇边界重要性
+    double w2 = 5.0;   // 目标簇内部一致性
+
+    return exp(-(w1 * edge_avg + w2 * internal_avg));
 }
 
 
@@ -337,36 +343,36 @@ int main(int argc, char *argv[]) {
         int type = cluster_classify(addr, hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec, i);
     }
     
-    for (int i = 0; i < clus_num; i++) {
-        if(graph->clusters[i].type == 3) {
-            u8 *addr = (u8 *)hdr + (FirstDataSector + (i) * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
-            printf("clusterid: %d size: %d  name: %s    width: %d   height: %d  offset: %d\n", i
-                , graph->clusters[i].bmp_info.size, graph->clusters[i].bmp_info.name, 
-                graph->clusters[i].bmp_info.width, graph->clusters[i].bmp_info.height, graph->clusters[i].bmp_info.offset);
-        }
-        if(graph->clusters[i].type == 4) {
-            printf("body:clusterid: %d\n", i);
-        }
-    }
-
     // for (int i = 0; i < clus_num; i++) {
     //     if(graph->clusters[i].type == 3) {
-    //         int start_num = (i - ZONE_HALF/4) > 0 ? (i - ZONE_HALF/4) : 0;
-    //         u32 zone_nodes[ZONE_SIZE + 1];
-    //         int valid_clusters = 0;
-            
-    //         for (int j = start_num; j < start_num + ZONE_SIZE && j < clus_num; j++) {
-    //             if(graph->clusters[j].type == 4) {
-    //                 zone_nodes[valid_clusters++] = j;
-    //             }
-    //         }
-
-    //         if(valid_clusters > 0) {
-    //             dp_recover_zone(zone_nodes, valid_clusters, i);
-    //         }
+    //         u8 *addr = (u8 *)hdr + (FirstDataSector + (i) * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
+    //         printf("clusterid: %d size: %d  name: %s    width: %d   height: %d  offset: %d\n", i
+    //             , graph->clusters[i].bmp_info.size, graph->clusters[i].bmp_info.name, 
+    //             graph->clusters[i].bmp_info.width, graph->clusters[i].bmp_info.height, graph->clusters[i].bmp_info.offset);
+    //     }
+    //     if(graph->clusters[i].type == 4) {
+    //         printf("body:clusterid: %d\n", i);
     //     }
     // }
-    // return 0;
+
+    for (int i = 0; i < clus_num; i++) {
+        if(graph->clusters[i].type == 3) {
+            int start_num = (i - ZONE_HALF/4) > 0 ? (i - ZONE_HALF/4) : 0;
+            u32 zone_nodes[ZONE_SIZE + 1];
+            int valid_clusters = 0;
+            
+            for (int j = start_num; j < start_num + ZONE_SIZE && j < clus_num; j++) {
+                if(graph->clusters[j].type == 4) {
+                    zone_nodes[valid_clusters++] = j;
+                }
+            }
+
+            if(valid_clusters > 0) {
+                dp_recover_zone(zone_nodes, valid_clusters, i);
+            }
+        }
+    }
+    return 0;
 
 }
 
