@@ -12,7 +12,7 @@
 #include "lgraph.h"
 
 #define CLUS_EMPTY_SIZE 10
-#define ZONE_SIZE 4096
+#define ZONE_SIZE 4096*2
 #define ZONE_HALF ZONE_SIZE/2
 
 ClusterGraph *graph;
