@@ -171,6 +171,27 @@ int cluster_classify(u8 *data, size_t size, u32 cluster_num)
 }
 
 
+double get_prob(u32 source_node, u32 target_node, u32 width) {
+    u32 BytePerClus = hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec;
+
+    u8 *source_addr = (u8 *)hdr + (FirstDataSector + source_node * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
+    u8 *target_addr = (u8 *)hdr + (FirstDataSector + target_node * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
+
+    // at last width*3 byte in per cluster
+    u8 *last_row = source_addr + ( BytePerClus - width*3 );
+    u8 *first_row = target_addr;
+
+    double diff_sum = 0;
+
+    for(u32 i = 0; i<width * 3; i++) {
+        diff_sum += fabs((double)last_row[i] - (double)first_row[i]) / 255.0;
+    }
+
+    double avg_diff = diff_sum / (width * 3);
+    return exp(-10 * avg_diff);
+}
+
+
 void dp_recover_zone(u32 *zone_nodes, int valid_clusters, int head_id) {
     
     u32 size = graph->clusters[head_id].bmp_info.size;
@@ -234,25 +255,6 @@ void dp_recover_zone(u32 *zone_nodes, int valid_clusters, int head_id) {
 }
 
 
-double get_prob(u32 source_node, u32 target_node, u32 width) {
-    u32 BytePerClus = hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec;
-
-    u8 *source_addr = (u8 *)hdr + (FirstDataSector + source_node * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
-    u8 *target_addr = (u8 *)hdr + (FirstDataSector + target_node * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec;
-
-    // at last width*3 byte in per cluster
-    u8 *last_row = source_addr + ( BytePerClus - width*3 );
-    u8 *first_row = target_addr;
-
-    double diff_sum = 0;
-
-    for(u32 i = 0; i<width * 3; i++) {
-        diff_sum += fabs((double)last_row[i] - (double)first_row[i]) / 255.0;
-    }
-
-    double avg_diff = diff_sum / (width * 3);
-    return exp(-10 * avg_diff);
-}
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
