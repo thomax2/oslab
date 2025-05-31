@@ -190,7 +190,7 @@ double get_prob(u32 source_node, u32 target_node, u32 width) {
     }
 
     double avg_diff = diff_sum / (width * 3);
-    printf("avg_diff:%ld",avg_diff);
+    printf("avg_diff:%f",avg_diff);
     return exp(-0.01 * avg_diff);
 }
 
