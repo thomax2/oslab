@@ -11,6 +11,8 @@
 #include "lgraph.h"
 
 #define CLUS_EMPTY_SIZE 10
+#define ZONE_SIZE 256
+
 
 ClusterGraph *graph;
 
@@ -215,6 +217,7 @@ int main(int argc, char *argv[]) {
     int data_size = (size_t)size - (FirstDataSector) * hdr->BPB_BytsPerSec;
 
     int clus_num = data_size / (hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec);
+    int zone_num = clus_num/256 + (clus_num % 256 > 0 ? 1:0);
 
     printf("%d\n",(FirstDataSector + 1 * hdr->BPB_SecPerClus) * hdr->BPB_BytsPerSec);
     printf("SecPerClus : %d\n", hdr->BPB_SecPerClus);
@@ -242,9 +245,15 @@ int main(int argc, char *argv[]) {
                 , graph->clusters[i].bmp_info.size, graph->clusters[i].bmp_info.name, 
                 graph->clusters[i].bmp_info.width, graph->clusters[i].bmp_info.height, graph->clusters[i].bmp_info.offset);
         }
+        if(graph->clusters[i].type == 4) {
+            printf("body:clusterid: %d\n", i);
+        }
     }
 
-
+    for (int i = 0; i < zone_num; i++) {
+        
+    }
+    
     
     return 0;
 
